@@ -4,26 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- ▼▼▼ 設定済み: あなたのURLと認証コード ▼▼▼ -->
     <link rel="canonical" href="https://ioriiroikw-eng.github.io/bath-check/">
     <meta name="google-site-verification" content="yEVgbMoZqDxkxql3bO3llulxWiebh1FDnB4xKPgmrPQ" />
 
-    <!-- アプリ名設定 -->
     <title>フロハイッタ？｜B.A.T.H.診断＆入浴習慣アプリ</title>
     <meta name="application-name" content="フロハイッタ？">
     <meta name="apple-mobile-web-app-title" content="フロハイッタ？">
 
-    <!-- SEO対策 -->
-    <meta name="description" content="「フロハイッタ？」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。性格診断、天気連動HP、お風呂ガチャで楽しく清潔度をキープしよう！">
-    <meta name="keywords" content="お風呂,診断,入浴剤,健康,習慣化,アプリ,性格診断,サウナ,入浴,フロハイッタ">
+    <meta name="description" content="「フロハイッタ？」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。性格診断、天気連動HP、本格お風呂占いで楽しく清潔度をキープしよう！">
+    <meta name="keywords" content="お風呂,診断,入浴剤,健康,習慣化,アプリ,性格診断,サウナ,入浴,フロハイッタ,占い">
     <meta name="robots" content="index, follow">
     
-    <!-- PWA / モバイル設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#fdf2f8">
     
-    <!-- OGP: SNSシェア時の設定 -->
     <meta property="og:title" content="フロハイッタ？｜B.A.T.H.診断">
     <meta property="og:description" content="私のお風呂タイプは...？あなたの入浴性格を診断してみない？ #フロハイッタ">
     <meta property="og:type" content="website">
@@ -31,7 +26,6 @@
     <meta property="og:site_name" content="フロハイッタ？">
     <meta property="og:locale" content="ja_JP">
     
-    <!-- 構造化データ (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -45,7 +39,7 @@
         "price": "0",
         "priceCurrency": "JPY"
       },
-      "featureList": "B.A.T.H.タイプ診断, お風呂ログ, 天気連動HP減少, お風呂ガチャ"
+      "featureList": "B.A.T.H.タイプ診断, お風呂ログ, 天気連動HP減少, 本格お風呂占い"
     }
     </script>
     
@@ -86,14 +80,21 @@
         .slide-up { animation: slideUp 0.5s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* ガチャ演出用 */
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
-        .shake-anim { animation: shake 0.5s infinite; }
-        @keyframes reveal { 0% { transform: scale(0) rotate(-180deg); opacity: 0; } 60% { transform: scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
-        .reveal-anim { animation: reveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(200%) rotate(45deg); } }
-        .shine-effect { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-        .shine-effect::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); animation: shine 3s infinite; }
+        /* 占いカード演出 */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .card-front { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border: 4px solid white; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+        .card-back { background: white; transform: rotateY(180deg); border: 4px solid #fce7f3; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+
+        .star-rating { color: #fbbf24; }
+        .star-rating-gray { color: #e5e7eb; }
     </style>
 </head>
 <body>
@@ -110,24 +111,104 @@
         const STORAGE_KEY_LOGS = 'hq_logs';
         const STORAGE_KEY_HISTORY = 'hq_history';
         const STORAGE_KEY_USER_TYPE = 'hq_user_type_v2'; 
-        const STORAGE_KEY_COLLECTION = 'hq_collection_v1';
         const STORAGE_KEY_WEATHER = 'hq_weather_v1'; 
 
-        // ガチャアイテム定義
-        const GACHA_ITEMS = [
-            { id: 1, icon: "🐥", name: "アヒル隊長", rarity: "N", desc: "お風呂の定番。プカプカ。" },
-            { id: 2, icon: "🧼", name: "牛乳石鹸", rarity: "N", desc: "いい匂いがする気がする。" },
-            { id: 3, icon: "🧽", name: "スポンジ", rarity: "N", desc: "背中を洗うのは難しい。" },
-            { id: 4, icon: "🧴", name: "高級シャンプー", rarity: "R", desc: "ボトルがおしゃれ。" },
-            { id: 5, icon: "🕯️", name: "アロマキャンドル", rarity: "R", desc: "丁寧な暮らしの象徴。" },
-            { id: 6, icon: "🍺", name: "湯上がりビール", rarity: "R", desc: "これが一番うまい。" },
-            { id: 7, icon: "🍦", name: "ハーゲンダッツ", rarity: "SR", desc: "お風呂上がりの贅沢。" },
-            { id: 8, icon: "♨️", name: "温泉の素", rarity: "SR", desc: "自宅が草津になる。" },
-            { id: 9, icon: "🎮", name: "防水ゲーム機", rarity: "SR", desc: "長風呂の元凶。" },
-            { id: 10, icon: "👑", name: "伝説のバスタブ", rarity: "UR", desc: "王族しか入れない。" },
-            { id: 11, icon: "🪐", name: "宇宙の湯", rarity: "UR", desc: "無重力バスタイム。" },
-            { id: 12, icon: "🧚", name: "バスの妖精", rarity: "UR", desc: "見えたらラッキー。" }
+        // --- 占いデータ定数 ---
+        // 7段階のランク定義
+        const FORTUNE_RANKS = [
+            { id: 'kamiyu',   name: '神湯',   read:'かみゆ',   prob: 0.05, minStar: 4, color: 'text-purple-600', bg: 'bg-purple-50' }, // 5%
+            { id: 'appare',   name: '天晴',   read:'あっぱれ', prob: 0.15, minStar: 4, color: 'text-pink-500',   bg: 'bg-pink-50' },   // 15%
+            { id: 'gokuraku', name: '極楽',   read:'ごくらく', prob: 0.20, minStar: 3, color: 'text-orange-500', bg: 'bg-orange-50' }, // 20%
+            { id: 'yoiyu',    name: '良湯',   read:'よいゆ',   prob: 0.25, minStar: 3, color: 'text-blue-500',   bg: 'bg-blue-50' },   // 25%
+            { id: 'totonoyu', name: '整湯',   read:'ととのゆ', prob: 0.15, minStar: 2, color: 'text-green-500',  bg: 'bg-green-50' },  // 15%
+            { id: 'nurumayu', name: '微温',   read:'ぬるまゆ', prob: 0.10, minStar: 2, color: 'text-teal-600',   bg: 'bg-teal-50' },   // 10%
+            { id: 'haran',    name: '波乱',   read:'はらん',   prob: 0.10, minStar: 1, color: 'text-gray-500',   bg: 'bg-gray-100' },  // 10%
         ];
+
+        // ランクごとのメッセージ候補
+        const FORTUNE_MESSAGES = {
+            kamiyu: [
+                { title: "奇跡の浄化", desc: "古い角質と共に過去の厄まで洗い流されました。今日のあなたは無敵のオーラを放っています。" },
+                { title: "選ばれし者", desc: "湯の神に愛されています。入浴によって潜在能力が解放され、アイデアが無限に湧き出るでしょう。" }
+            ],
+            appare: [
+                { title: "最高に整う日", desc: "心身のバランスが完璧に整いました。このエネルギーを使えば、どんな困難も乗り越えられます。" },
+                { title: "視界良好", desc: "湯気のように悩みが晴れていきます。直感が冴え渡り、素晴らしい決断ができる日です。" }
+            ],
+            gokuraku: [
+                { title: "癒やしの波動", desc: "芯まで温まり、深いリラックス状態です。人にも優しくなれるので、対人運が上昇する予感。" },
+                { title: "極上の休息", desc: "まるで温泉旅行に来たかのような開放感。今日頑張った自分を、誰よりも褒めてあげてください。" }
+            ],
+            yoiyu: [
+                { title: "安定の温もり", desc: "いつものお風呂が、一番の幸せ。派手さはありませんが、確実な幸福があなたを包んでいます。" },
+                { title: "程よい湯加減", desc: "無理なく過ごせる良い日です。ぬるめのお湯にゆっくり浸かることで、運気が安定します。" }
+            ],
+            totonoyu: [
+                { title: "リセットの時", desc: "少し乱れていたリズムが戻りました。明日に向けての準備は万端。早めに寝るとさらに吉。" },
+                { title: "基本に忠実", desc: "丁寧に体を洗うことで運が開けます。基本を大切にすることで、物事がスムーズに進むでしょう。" }
+            ],
+            nurumayu: [
+                { title: "あと一歩", desc: "少し長湯しすぎたかも？水分補給をしっかりして、ダラダラしすぎないように気を引き締めて。" },
+                { title: "現状維持", desc: "良くも悪くも変化のない日。ぬるま湯に浸かるように、今の環境に甘えすぎないよう注意が必要です。" }
+            ],
+            haran: [
+                { title: "湯冷め注意報", desc: "心が急いていませんか？シャワーだけで済ませると運気が逃げます。5分でも湯船に浸かって回避を。" },
+                { title: "要浄化", desc: "邪気が溜まっています。お風呂掃除を入念に行い、清めることで運気を取り戻せるでしょう。" }
+            ]
+        };
+
+        // ラッキーアクション候補
+        const FORTUNE_ACTIONS = [
+            "お気に入りの音楽をかけて30分浸かる", "炭酸系の入浴剤を入れて深呼吸", "湯船の中で足首を10回回す",
+            "目を閉じて1分間無心になる", "上がった後に常温の水を飲む", "新しいスポンジをおろす",
+            "シャワーヘッドをピカピカに磨く", "お風呂上がりにストレッチをする", "柑橘系の香りを嗅ぐ",
+            "浴室の鏡を曇りなく磨く", "ヘアパックをして5分待つ", "足の指を一本ずつマッサージ",
+            "湯船で「ありがとう」と3回唱える", "バスソルトで発汗を促す", "お風呂上がりに保湿を徹底する",
+            "排水溝を掃除して運気を流す", "冷水を足にかけて引き締める", "キャンドル（なければ照明OFF）で瞑想",
+            "アヒルのおもちゃを浮かべて遊ぶ", "防水スマホケースで動画を見る", "大きな声で歌う（近所迷惑注意）",
+            "ボディスクラブで全身磨き", "頭皮マッサージを入念にする", "湯船の中でグーチョキパー運動",
+            "一番風呂を狙う", "入浴剤を混ぜてオリジナルの色を作る", "お風呂上がりにフルーツ牛乳を飲む",
+            "バスタオルをふかふかの物に変える", "お風呂上がりに窓を開けて換気", "湯船で深呼吸して悪い気を吐く"
+        ];
+
+        // 占い生成ロジック
+        const generateFortune = () => {
+            const rand = Math.random();
+            let cumulativeProb = 0;
+            let selectedRank = FORTUNE_RANKS[FORTUNE_RANKS.length - 1]; 
+            
+            for (const rank of FORTUNE_RANKS) {
+                cumulativeProb += rank.prob;
+                if (rand < cumulativeProb) {
+                    selectedRank = rank;
+                    break;
+                }
+            }
+
+            const messages = FORTUNE_MESSAGES[selectedRank.id];
+            const message = messages[Math.floor(Math.random() * messages.length)];
+
+            const getStar = (min) => Math.min(5, Math.max(1, min + Math.floor(Math.random() * 3))); 
+            
+            const love = getStar(selectedRank.minStar - 1); 
+            const money = getStar(selectedRank.minStar - 1);
+            const health = getStar(selectedRank.minStar); 
+
+            const action = FORTUNE_ACTIONS[Math.floor(Math.random() * FORTUNE_ACTIONS.length)];
+
+            return {
+                rank: selectedRank.name,
+                read: selectedRank.read,
+                title: message.title,
+                desc: message.desc,
+                color: selectedRank.color,
+                bg: selectedRank.bg,
+                love,
+                money,
+                health,
+                action
+            };
+        };
 
         const getLocalDateStr = (date) => {
             const year = date.getFullYear();
@@ -155,6 +236,8 @@
             Book: (p) => <Icon {...p} path={<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></>} />,
             Cloud: (p) => <Icon {...p} path={<><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M17.5 19h.5a4 4 0 0 0 1.5-7.75"/><path d="M6.5 19h-.5a4 4 0 0 1-1.5-7.75"/><path d="M16.5 10A5 5 0 0 0 7.5 10"/></>} />,
             Sun: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>} />,
+            Help: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></>} />,
+            Star: (p) => <Icon {...p} path={<><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></>} />,
         };
 
         // --- アプリ内ブラウザ警告コンポーネント ---
@@ -224,11 +307,63 @@
                     <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}>
                         <div className="text-5xl mb-4">🛁</div>
                         <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3>
-                        <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & ガチャが引けるよ！)</p>
+                        <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & 今日の占い！)</p>
                         <div className="flex gap-3">
                             <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button>
                             <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button>
                         </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ヘルプモーダル ---
+        const HelpModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button>
+                        <div className="text-center mb-6">
+                            <h2 className="text-lg font-black text-gray-800 mb-1 font-pop">使い方ガイド</h2>
+                            <p className="text-xs text-pink-500 font-bold">フロハイッタ？へようこそ！</p>
+                        </div>
+                        
+                        <div className="space-y-4 text-sm text-gray-600 font-bold">
+                            <div className="bg-pink-50 p-3 rounded-xl flex items-start gap-3">
+                                <div className="text-2xl">❤️</div>
+                                <div>
+                                    <h4 className="text-pink-600 font-black mb-1">HP（清潔度）を守れ！</h4>
+                                    <p className="text-xs leading-relaxed">時間が経つとHPが減っていきます。0%になるとゾンビになっちゃうかも…！？</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3">
+                                <div className="text-2xl">🛁</div>
+                                <div>
+                                    <h4 className="text-blue-600 font-black mb-1">お風呂でリセット</h4>
+                                    <p className="text-xs leading-relaxed">お風呂に入ったら一番下のボタンをタップ！HPが全回復して、今日の運勢が占えるよ✨</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-yellow-50 p-3 rounded-xl flex items-start gap-3">
+                                <div className="text-2xl">🌤️</div>
+                                <div>
+                                    <h4 className="text-yellow-600 font-black mb-1">天気と連動</h4>
+                                    <p className="text-xs leading-relaxed">暑い日は汗をかくからHPの減りが早くなるよ。「天気取得」ボタンでリアル連携しよう！</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-purple-50 p-3 rounded-xl flex items-start gap-3">
+                                <div className="text-2xl">🔮</div>
+                                <div>
+                                    <h4 className="text-purple-600 font-black mb-1">本格お風呂占い</h4>
+                                    <p className="text-xs leading-relaxed">リセット時に占いが発動！入浴で運気を上げて、ラッキーアクションを実行しよう！</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-6 active:scale-95">わかった！</button>
                     </div>
                 </div>
             );
@@ -322,97 +457,85 @@
             );
         };
 
-        // --- ガチャ演出モーダル ---
-        const GachaModal = ({ isOpen, onClose, onFinish, newItems }) => {
-            const [state, setState] = useState('ready'); // ready, shaking, revealed
+        // --- 占いモーダル（新規・本格版） ---
+        const FortuneModal = ({ isOpen, onClose, result }) => {
+            const [isFlipped, setIsFlipped] = useState(false);
             
             useEffect(() => {
-                if (isOpen) setState('ready');
+                if (isOpen) {
+                    setIsFlipped(false);
+                    // 1秒後に自動でめくる
+                    const timer = setTimeout(() => {
+                        setIsFlipped(true);
+                        if (navigator.vibrate) navigator.vibrate([50, 100]);
+                    }, 1000);
+                    return () => clearTimeout(timer);
+                }
             }, [isOpen]);
 
-            const startGacha = () => {
-                setState('shaking');
-                setTimeout(() => {
-                    setState('revealed');
-                    if (navigator.vibrate) navigator.vibrate([50, 100, 50, 100, 200]);
-                }, 2000);
-            };
+            if (!isOpen || !result) return null;
 
-            if (!isOpen) return null;
-
-            const item = newItems[0] || GACHA_ITEMS[0];
-            const getRarityColor = (r) => r === 'UR' ? 'text-purple-500' : r === 'SR' ? 'text-yellow-500' : r === 'R' ? 'text-blue-500' : 'text-gray-500';
-            const getRarityBg = (r) => r === 'UR' ? 'bg-purple-100' : r === 'SR' ? 'bg-yellow-100' : r === 'R' ? 'bg-blue-100' : 'bg-gray-100';
-
-            return (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={state === 'revealed' ? onClose : null}>
-                    <div className="w-full max-w-sm text-center" onClick={e => e.stopPropagation()}>
-                        
-                        {state !== 'revealed' ? (
-                            <div className="relative">
-                                <h2 className="text-white font-black text-2xl mb-8 font-pop animate-pulse">お風呂ガチャ！</h2>
-                                <div 
-                                    className={`text-9xl mb-8 cursor-pointer transition-transform active:scale-95 ${state === 'shaking' ? 'shake-anim' : 'purupuru'}`}
-                                    onClick={startGacha}
-                                >
-                                    🛁
-                                </div>
-                                {state === 'ready' && <p className="text-white font-bold animate-bounce">タップして開ける！</p>}
-                                {state === 'shaking' && <p className="text-pink-300 font-bold">シュワワワ...</p>}
-                            </div>
-                        ) : (
-                            <div className="bg-white rounded-3xl p-6 relative overflow-hidden reveal-anim shine-effect border-4 border-yellow-200">
-                                <div className="absolute top-0 left-0 bg-yellow-400 text-white text-xs font-bold px-4 py-1 rounded-br-2xl">GET!</div>
-                                <div className="py-4">
-                                    <div className={`text-sm font-black mb-2 ${getRarityColor(item.rarity)}`}>{item.rarity}</div>
-                                    <div className="text-8xl mb-4 drop-shadow-md">{item.icon}</div>
-                                    <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">{item.name}</h3>
-                                    <p className="text-sm text-gray-500 font-bold">{item.desc}</p>
-                                </div>
-                                <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-2">閉じる</button>
-                            </div>
-                        )}
-                    </div>
+            const StarRating = ({ count }) => (
+                <div className="flex text-sm">
+                    {[...Array(5)].map((_, i) => (
+                        <span key={i} className={i < count ? "star-rating" : "star-rating-gray"}>★</span>
+                    ))}
                 </div>
             );
-        };
-
-        // --- コレクションモーダル ---
-        const CollectionModal = ({ isOpen, onClose, collection }) => {
-            if (!isOpen) return null;
-            const myItems = new Set(collection);
-            const progress = Math.round((myItems.size / GACHA_ITEMS.length) * 100);
 
             return (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-800 font-pop">お風呂図鑑</h3>
-                            <button onClick={onClose} className="text-gray-400"><Icons.X /></button>
-                        </div>
-                        
-                        <div className="mb-4">
-                            <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
-                                <span>収集率</span>
-                                <span>{myItems.size} / {GACHA_ITEMS.length}</span>
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={isFlipped ? onClose : null}>
+                    <div className="w-full max-w-sm aspect-[3/4] perspective-1000" onClick={e => e.stopPropagation()}>
+                        <div className={`card-inner relative w-full h-full duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'flipped' : ''}`} onClick={() => !isFlipped && setIsFlipped(true)}>
+                            
+                            {/* カード裏面（最初に見える面） */}
+                            <div className="card-front">
+                                <div className="text-6xl animate-pulse">🔮</div>
+                                <p className="mt-4 text-pink-400 font-bold font-pop">湯の託宣</p>
+                                <p className="text-xs text-gray-400 mt-2">心を鎮めてタップ...</p>
                             </div>
-                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-pink-400 rounded-full transition-all duration-500" style={{width: `${progress}%`}}></div>
-                            </div>
-                        </div>
 
-                        <div className="flex-1 overflow-y-auto grid grid-cols-4 gap-2 content-start pb-4">
-                            {GACHA_ITEMS.map(item => {
-                                const has = myItems.has(item.id);
-                                return (
-                                    <div key={item.id} className={`aspect-square rounded-xl flex items-center justify-center text-2xl relative ${has ? 'bg-pink-50 border-2 border-pink-100' : 'bg-gray-100 grayscale opacity-50'}`}>
-                                        {item.icon}
-                                        {has && item.rarity === 'UR' && <span className="absolute -top-1 -right-1 text-[8px] bg-purple-500 text-white px-1 rounded-full">UR</span>}
+                            {/* カード表面（結果） */}
+                            <div className="card-back overflow-hidden relative">
+                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 to-purple-400"></div>
+                                <div className="p-6 flex flex-col h-full w-full">
+                                    <div className="text-center mb-4">
+                                        <p className="text-xs text-gray-400 font-bold mb-1">今日の入浴運勢</p>
+                                        <h2 className={`text-4xl font-black font-pop ${result.color} tracking-widest`}>{result.rank}</h2>
+                                        <p className="text-[10px] text-gray-400 font-bold mt-1 tracking-widest">- {result.read} -</p>
+                                        <h3 className="text-sm font-bold text-gray-700 mt-2">「{result.title}」</h3>
                                     </div>
-                                );
-                            })}
+
+                                    <div className="bg-gray-50 rounded-xl p-3 mb-4 text-xs font-bold text-gray-600 leading-relaxed text-center flex-grow flex items-center justify-center">
+                                        {result.desc}
+                                    </div>
+
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex justify-between items-center bg-pink-50 px-3 py-1.5 rounded-lg">
+                                            <span className="text-xs font-bold text-pink-500">恋愛運</span>
+                                            <StarRating count={result.love} />
+                                        </div>
+                                        <div className="flex justify-between items-center bg-yellow-50 px-3 py-1.5 rounded-lg">
+                                            <span className="text-xs font-bold text-yellow-600">金運</span>
+                                            <StarRating count={result.money} />
+                                        </div>
+                                        <div className="flex justify-between items-center bg-green-50 px-3 py-1.5 rounded-lg">
+                                            <span className="text-xs font-bold text-green-600">健康運</span>
+                                            <StarRating count={result.health} />
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-auto text-center">
+                                        <div className="text-[10px] text-purple-500 font-bold mb-1">✨ ラッキーバスアクション ✨</div>
+                                        <div className="bg-purple-100 text-purple-700 font-bold py-2 px-4 rounded-full text-xs inline-block shadow-sm">
+                                            {result.action}
+                                        </div>
+                                    </div>
+                                    
+                                    <button onClick={onClose} className="mt-4 text-xs text-gray-400 underline">閉じる</button>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-[10px] text-gray-400 text-center mt-2">お風呂に入るとランダムで手に入るよ！</p>
                     </div>
                 </div>
             );
@@ -496,8 +619,8 @@
                                 <div className="text-4xl animate-spin mb-4">🛁</div>
                                 <h3 className="font-bold text-pink-500 font-pop animate-pulse">分析中...</h3>
                             </div>
-                        ) : step === 'result' && resultData ? ( 
-                            <>
+                        ) : step === 'result' && resultData ? (
+                             <>
                                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button>
                                 <h3 className="text-sm font-bold text-gray-400 mb-1">B.A.T.H.診断結果</h3>
                                 <div className="text-3xl font-black text-pink-500 font-pop mb-4 tracking-widest">{resultData.code}型</div>
@@ -505,8 +628,8 @@
                                 <div className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-2xl p-6 mb-4 relative overflow-hidden">
                                     <div className="absolute -right-4 -top-4 text-8xl opacity-10">{resultData.icon}</div>
                                     <div className="text-6xl mb-2 relative z-10">{resultData.icon}</div>
-                                    <h2 className="text-xl font-black text-gray-800 mb-2 font-pop relative z-10">{resultData.name}</h2>
-                                    <p className="text-sm text-gray-600 font-bold leading-relaxed relative z-10">{resultData.desc}</p>
+                                    <h2 className="text-xl font-black text-gray-800 mb-2 font-pop relative z-10" style={{ textWrap: 'balance' }}>{resultData.name}</h2>
+                                    <p className="text-xs text-gray-600 font-bold leading-tight relative z-10">{resultData.desc}</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 mb-6 text-xs font-bold">
@@ -548,18 +671,17 @@
             const [logs, setLogs] = useState([]);
             const [bathHistory, setBathHistory] = useState([]);
             const [userType, setUserType] = useState(null); 
-            const [collection, setCollection] = useState([]); 
             const [weatherData, setWeatherData] = useState(null); 
 
             const [isCalendarOpen, setIsCalendarOpen] = useState(false);
             const [isTypeDiagOpen, setIsTypeDiagOpen] = useState(false);
-            const [isCollectionOpen, setIsCollectionOpen] = useState(false); 
-            const [isGachaOpen, setIsGachaOpen] = useState(false); 
-            const [gachaResult, setGachaResult] = useState([]); 
+            const [isFortuneOpen, setIsFortuneOpen] = useState(false); // 占いモーダル
+            const [isHelpOpen, setIsHelpOpen] = useState(false); 
+            const [fortuneResult, setFortuneResult] = useState(null); // 占い結果
             const [showWelcomeModal, setShowWelcomeModal] = useState(false);
             const [showInAppWarning, setShowInAppWarning] = useState(false);
             const [showInstallGuide, setShowInstallGuide] = useState(false);
-            const [showBathConfirmModal, setShowBathConfirmModal] = useState(false); // 新規: お風呂確認モーダル
+            const [showBathConfirmModal, setShowBathConfirmModal] = useState(false); 
             
             const [isGenerating, setIsGenerating] = useState(false);
             const [generatedImage, setGeneratedImage] = useState(null);
@@ -574,8 +696,7 @@
                 if (load(STORAGE_KEY_LOGS)) setLogs(JSON.parse(load(STORAGE_KEY_LOGS)));
                 if (load(STORAGE_KEY_HISTORY)) setBathHistory(JSON.parse(load(STORAGE_KEY_HISTORY)));
                 if (load(STORAGE_KEY_USER_TYPE)) setUserType(JSON.parse(load(STORAGE_KEY_USER_TYPE)));
-                if (load(STORAGE_KEY_COLLECTION)) setCollection(JSON.parse(load(STORAGE_KEY_COLLECTION))); 
-                if (load(STORAGE_KEY_WEATHER)) setWeatherData(JSON.parse(load(STORAGE_KEY_WEATHER))); 
+                if (load(STORAGE_KEY_WEATHER)) setWeatherData(JSON.parse(load(STORAGE_KEY_WEATHER)));
                 
                 // アプリ内ブラウザ判定
                 const ua = navigator.userAgent.toLowerCase();
@@ -607,9 +728,8 @@
                 localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
                 localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(bathHistory));
                 if (userType) localStorage.setItem(STORAGE_KEY_USER_TYPE, JSON.stringify(userType));
-                localStorage.setItem(STORAGE_KEY_COLLECTION, JSON.stringify(collection)); 
                 if (weatherData) localStorage.setItem(STORAGE_KEY_WEATHER, JSON.stringify(weatherData));
-            }, [hp, lastBathTime, eventDamageTotal, logs, bathHistory, userType, collection, weatherData]);
+            }, [hp, lastBathTime, eventDamageTotal, logs, bathHistory, userType, weatherData]);
 
             // 天気ダメージ倍率計算
             const getWeatherDamageRate = () => {
@@ -703,7 +823,7 @@
                         
                         const data = await res.json();
                         handleWeatherData(data.current_weather.temperature, false);
-                        
+                    
                     } catch(e) { 
                         // APIエラー時もフォールバック
                         fetchTokyoWeather();
@@ -725,23 +845,11 @@
                 const today = getLocalDateStr(new Date());
                 setBathHistory(prev => Array.from(new Set(prev).add(today)));
                 
-                // ガチャ実行
-                const roll = Math.random();
-                let rarity = 'N';
-                if (roll > 0.95) rarity = 'UR';
-                else if (roll > 0.8) rarity = 'SR';
-                else if (roll > 0.5) rarity = 'R';
+                // 占い実行 (動的生成)
+                const result = generateFortune();
+                setFortuneResult(result);
                 
-                const pool = GACHA_ITEMS.filter(i => i.rarity === rarity);
-                const item = pool[Math.floor(Math.random() * pool.length)];
-                
-                setGachaResult([item]);
-                setTimeout(() => setIsGachaOpen(true), 500); 
-                
-                // コレクション追加
-                if (!collection.includes(item.id)) {
-                    setCollection(prev => [...prev, item.id]);
-                }
+                setTimeout(() => setIsFortuneOpen(true), 500); 
 
                 if (navigator.vibrate) navigator.vibrate([0, 100, 50, 100]);
             };
@@ -765,17 +873,18 @@
                         try { await navigator.share({ title: 'フロハイッタ？', text: shareText, files: [file] }); } catch(e){}
                     }
                 } catch (e) { 
-                    alert('画像生成失敗💦'); 
-                    console.error(e);
+                     alert('画像生成失敗💦'); 
+                     console.error(e);
                 } 
                 finally { setIsGenerating(false); }
             };
 
+            // ▼▼▼ 修正箇所: 画像ファイルへの変更 ▼▼▼
             const getStatus = (hp) => {
-                if (hp >= 80) return { avatar: "👸", label: "大勝利", deco: "👑", shareMsg: "全人類見て✨", glow: "bg-pink-400" };
-                if (hp >= 50) return { avatar: "😐", label: "天使", deco: "✨", shareMsg: "まだ舞えるはず", glow: "bg-yellow-200" };
-                if (hp >= 20) return { avatar: "😰", label: "限界", deco: "💦", shareMsg: "半径2m接近禁止", glow: "bg-purple-300" };
-                return { avatar: "🧟‍♀️", label: "終了", deco: "💀", shareMsg: "社会的に死😇", glow: "bg-gray-500" };
+                if (hp >= 80) return { avatar: "./char_80.png", label: "大勝利", deco: "👑", shareMsg: "全人類見て✨", glow: "bg-pink-400" };
+                if (hp >= 50) return { avatar: "./char_50.png", label: "天使", deco: "✨", shareMsg: "まだ舞えるはず", glow: "bg-yellow-200" };
+                if (hp >= 20) return { avatar: "./char_20.png", label: "限界", deco: "💦", shareMsg: "半径2m接近禁止", glow: "bg-purple-300" };
+                return { avatar: "./char_00.png", label: "終了", deco: "💀", shareMsg: "社会的に死😇", glow: "bg-gray-500" };
             };
             
             const status = getStatus(hp);
@@ -802,15 +911,27 @@
                         onClose={() => setShowBathConfirmModal(false)} 
                         onConfirm={handleBath} 
                     />
+                    <HelpModal 
+                        isOpen={isHelpOpen} 
+                        onClose={() => setIsHelpOpen(false)} 
+                    />
+                    <FortuneModal
+                        isOpen={isFortuneOpen}
+                        onClose={() => setIsFortuneOpen(false)}
+                        result={fortuneResult}
+                    />
 
                     {/* Header */}
                     <div className="w-full flex justify-between items-center pt-safe mb-4 mt-2 relative z-20 px-2">
                         <div className="flex gap-2">
                             <button onClick={() => setIsCalendarOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Calendar size={24} /></button>
-                            <button onClick={() => setIsCollectionOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Book size={24} /></button>
                         </div>
-                        <h1 className="text-sm font-black text-pink-500 bg-white/90 px-4 py-1.5 rounded-full border-2 border-pink-200 shadow-sm font-pop">フロハイッタ？</h1>
+                        {/* アイコン画像に変更 */}
+                        <div className="bg-white p-1 rounded-xl shadow-sm border-2 border-pink-100">
+                            <img src="icon.png" alt="フロハイッタ？" className="w-8 h-8 rounded-lg object-cover" />
+                        </div>
                         <div className="flex gap-2">
+                            <button onClick={() => setIsHelpOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Help size={24} /></button>
                             <button onClick={() => generateShareImage('status')} disabled={isGenerating} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform disabled:opacity-50">{isGenerating ? <div className="animate-spin w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"></div> : <Icons.Share size={24} />}</button>
                         </div>
                     </div>
@@ -843,13 +964,14 @@
                         )}
                     </div>
 
-                    {/* Main Card */}
+                    {/* Main Card (画像版に変更) */}
                     <div className="w-full max-w-sm glass-card rounded-3xl p-6 mb-6 text-center relative overflow-visible">
                         <div className="absolute -top-6 -right-1 text-6xl animate-bounce z-20 filter drop-shadow-lg">{status.deco}</div>
                         <div className="absolute top-0 left-0 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-br-2xl rounded-tl-2xl shadow-sm z-10 font-pop">{status.label}</div>
                         <div className="w-40 h-40 mx-auto mt-8 mb-6 relative purupuru select-none flex items-center justify-center">
                             <div className={`absolute inset-0 rounded-full opacity-50 blur-xl ${status.glow}`}></div>
-                            <div className="relative z-10 text-8xl">{status.avatar}</div>
+                            {/* 画像に変更 */}
+                            <img src={status.avatar} alt={status.label} className="relative z-10 w-32 h-32 object-contain drop-shadow-md" />
                         </div>
                         <div className="relative pt-1 mb-2">
                             <div className="flex mb-2 items-center justify-between font-pop">
@@ -907,9 +1029,6 @@
                     </div>
 
                     <CalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} history={bathHistory} />
-                    <GachaModal isOpen={isGachaOpen} onClose={() => setIsGachaOpen(false)} newItems={gachaResult} />
-                    <CollectionModal isOpen={isCollectionOpen} onClose={() => setIsCollectionOpen(false)} collection={collection} />
-                    
                     <TypeDiagnosisModal 
                         isOpen={isTypeDiagOpen} 
                         onClose={() => setIsTypeDiagOpen(false)} 
@@ -931,11 +1050,15 @@
                     {/* --- 撮影用隠し要素 (2種類) --- */}
                     <div style={{ position: 'fixed', top: '-9999px', left: '-9999px' }}>
                         
-                        {/* 1. ステータス共有用 */}
+                        {/* 1. ステータス共有用 (画像版に変更) */}
                         <div id="share-target-status" className="w-[375px] h-[600px] bg-[#fdf2f8] p-8 flex flex-col items-center justify-center relative overflow-hidden text-center border-4 border-white">
                             <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(#fbcfe8 20%, transparent 20%)', backgroundSize: '20px 20px'}}></div>
                             <div className="bg-white/90 px-4 py-2 rounded-full border-2 border-pink-200 shadow-sm mb-4 z-10"><h1 className="text-xl font-black text-pink-500 font-pop">フロハイッタ？</h1></div>
-                            <div className="mb-4 relative z-10 scale-110"><div className="text-8xl filter drop-shadow-xl">{status.avatar}</div><div className="absolute -top-4 -right-4 text-5xl">{status.deco}</div></div>
+                            <div className="mb-4 relative z-10 scale-110">
+                                {/* 画像に変更 */}
+                                <img src={status.avatar} alt={status.label} className="w-40 h-40 object-contain filter drop-shadow-xl" />
+                                <div className="absolute -top-4 -right-4 text-5xl">{status.deco}</div>
+                            </div>
                             <div className="bg-white/60 p-4 rounded-xl border border-pink-100 mb-4 w-full z-10"><div className="text-xs font-bold text-pink-400 mb-1">お風呂に入らず...</div><div className="text-5xl font-black text-pink-600 font-pop leading-none">{hoursSince}<span className="text-lg ml-1">時間</span></div></div>
                             <div className="bg-white/80 rounded-2xl p-4 border-2 border-pink-100 shadow-md w-full z-10">
                                 <div className="flex justify-between items-end mb-2 border-b border-pink-100 pb-2"><span className="font-bold text-gray-500 text-sm">現在の清潔度</span><span className="font-black text-4xl text-pink-500 font-pop">{Math.floor(hp)}%</span></div>
@@ -953,10 +1076,10 @@
                             {userType ? (
                                 <>
                                     <div className="text-3xl font-black text-pink-500 font-pop mb-6 tracking-widest">{userType.code}型</div>
-                                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-3xl p-8 mb-6 relative overflow-hidden w-full shadow-lg">
-                                        <div className="text-9xl mb-4 relative z-10">{userType.icon}</div>
-                                        <h2 className="text-2xl font-black text-gray-800 mb-3 font-pop relative z-10">{userType.name}</h2>
-                                        <p className="text-sm text-gray-600 font-bold leading-relaxed relative z-10">{userType.desc}</p>
+                                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-3xl p-6 mb-4 relative overflow-hidden w-full shadow-lg"> {/* パディングをp-8からp-6に縮小 */}
+                                        <div className="text-8xl mb-4 relative z-10">{userType.icon}</div> {/* アイコンサイズを9xlから8xlに縮小 */}
+                                        <h2 className="text-xl font-black text-gray-800 mb-2 font-pop relative z-10" style={{ textWrap: 'balance' }}>{userType.name}</h2>
+                                        <p className="text-xs text-gray-600 font-bold leading-tight relative z-10">{userType.desc}</p> {/* 文字サイズをxsに、行間を詰める */}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 w-full text-xs font-bold mb-8">
                                         <div className="bg-blue-50 p-3 rounded-xl text-blue-600 border border-blue-100">相性◎<br/><span className="text-lg">{userType.friend}型</span></div>
