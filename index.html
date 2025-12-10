@@ -23,7 +23,7 @@
     <link rel="icon" href="icon.png">
 
     <style>
-        body { font-family: 'Zen Maru Gothic', sans-serif; background-color: #fdf2f8; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; background-image: radial-gradient(#fbcfe8 20%, transparent 20%), radial-gradient(#fbcfe8 20%, transparent 20%); background-position: 0 0, 10px 10px; background-size: 20px 20px; user-select: none; }
+        body { font-family: 'Zen Maru Gothic', sans-serif; background-color: #fdf2f8; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; background-image: radial-gradient(#fbcfe8 20%, transparent 20%), radial-gradient(#fbcfe8 20%, transparent 20%); background-position: 0 0, 10px 10px; background-size: 20px 20px; user-select: none; overflow-x: hidden; }
         .font-pop { font-family: 'Mochiy Pop One', sans-serif; }
         .font-hand { font-family: 'Yomogi', cursive; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
@@ -174,6 +174,24 @@
                         <div className="flex gap-3">
                             <button onClick={onYes} className="flex-1 bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">はい！(記録)</button>
                             <button onClick={onClose} className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl shadow-md active:scale-95">いいえ</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- お風呂確認モーダル（新規追加） ---
+        const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}>
+                        <div className="text-5xl mb-4">🛁</div>
+                        <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3>
+                        <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & ガチャが引けるよ！)</p>
+                        <div className="flex gap-3">
+                            <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button>
+                            <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button>
                         </div>
                     </div>
                 </div>
@@ -502,10 +520,10 @@
             const [isCollectionOpen, setIsCollectionOpen] = useState(false); 
             const [isGachaOpen, setIsGachaOpen] = useState(false); 
             const [gachaResult, setGachaResult] = useState([]); 
-            
             const [showWelcomeModal, setShowWelcomeModal] = useState(false);
             const [showInAppWarning, setShowInAppWarning] = useState(false);
             const [showInstallGuide, setShowInstallGuide] = useState(false);
+            const [showBathConfirmModal, setShowBathConfirmModal] = useState(false); // 新規: お風呂確認モーダル
             
             const [isGenerating, setIsGenerating] = useState(false);
             const [generatedImage, setGeneratedImage] = useState(null);
@@ -661,7 +679,9 @@
                 }, options);
             };
 
+            // お風呂リセット処理（確認後に呼ばれる）
             const handleBath = () => {
+                setShowBathConfirmModal(false); // モーダル閉じる
                 setLastBathTime(new Date());
                 setEventDamageTotal(0);
                 setHp(100);
@@ -741,6 +761,11 @@
                             setShowWelcomeModal(false);
                         }}
                     />
+                    <BathConfirmModal 
+                        isOpen={showBathConfirmModal} 
+                        onClose={() => setShowBathConfirmModal(false)} 
+                        onConfirm={handleBath} 
+                    />
 
                     {/* Header */}
                     <div className="w-full flex justify-between items-center pt-safe mb-4 mt-2 relative z-20 px-2">
@@ -784,11 +809,11 @@
 
                     {/* Main Card */}
                     <div className="w-full max-w-sm glass-card rounded-3xl p-6 mb-6 text-center relative overflow-visible">
-                        <div className="absolute -top-6 right-0 text-6xl animate-bounce z-20 filter drop-shadow-lg pr-4">{status.deco}</div>
+                        <div className="absolute -top-6 -right-1 text-6xl animate-bounce z-20 filter drop-shadow-lg">{status.deco}</div>
                         <div className="absolute top-0 left-0 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-br-2xl rounded-tl-2xl shadow-sm z-10 font-pop">{status.label}</div>
-                        <div className="w-48 h-48 mx-auto mt-6 mb-6 relative purupuru select-none flex items-center justify-center">
+                        <div className="w-40 h-40 mx-auto mt-8 mb-6 relative purupuru select-none flex items-center justify-center">
                             <div className={`absolute inset-0 rounded-full opacity-50 blur-xl ${status.glow}`}></div>
-                            <div className="relative z-10 text-9xl">{status.avatar}</div>
+                            <div className="relative z-10 text-8xl">{status.avatar}</div>
                         </div>
                         <div className="relative pt-1 mb-2">
                             <div className="flex mb-2 items-center justify-between font-pop">
@@ -812,7 +837,7 @@
                         <span className="text-xl">🛁</span> <span>{userType ? '診断結果を見る' : 'B.A.T.H.タイプ診断をする'}</span>
                     </button>
 
-                    <button onClick={handleBath} className="w-full max-w-sm bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-black py-4 rounded-full shadow-lg border-4 border-white active:scale-95 transition-all mb-8 flex items-center justify-center gap-2 text-lg font-pop relative overflow-hidden group">
+                    <button onClick={() => setShowBathConfirmModal(true)} className="w-full max-w-sm bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-black py-4 rounded-full shadow-lg border-4 border-white active:scale-95 transition-all mb-8 flex items-center justify-center gap-2 text-lg font-pop relative overflow-hidden group">
                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         <Icons.Bath size={24} /> <span>お風呂入ってリセット✨</span>
                     </button>
