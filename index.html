@@ -4,14 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- ▼▼▼ STEP 1 & 2: URLと認証コードを設定しました ▼▼▼ -->
+    <!-- ▼▼▼ 設定済み: あなたのURLと認証コード ▼▼▼ -->
     <link rel="canonical" href="https://ioriiroikw-eng.github.io/bath-check/">
     <meta name="google-site-verification" content="yEVgbMoZqDxkxql3bO3llulxWiebh1FDnB4xKPgmrPQ" />
 
-    <!-- SEO対策: 検索エンジン向けの設定 -->
-    <title>お風呂チェッカー｜B.A.T.H.診断＆入浴習慣アプリ</title>
-    <meta name="description" content="「お風呂チェッカー」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。B.A.T.H.診断で性格分析、天気連動ダメージ機能、お風呂ガチャで楽しく清潔度をキープしよう！">
-    <meta name="keywords" content="お風呂,診断,入浴剤,健康,習慣化,アプリ,性格診断,サウナ,入浴">
+    <!-- アプリ名設定 -->
+    <title>フロハイッタ？｜B.A.T.H.診断＆入浴習慣アプリ</title>
+    <meta name="application-name" content="フロハイッタ？">
+    <meta name="apple-mobile-web-app-title" content="フロハイッタ？">
+
+    <!-- SEO対策 -->
+    <meta name="description" content="「フロハイッタ？」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。性格診断、天気連動HP、お風呂ガチャで楽しく清潔度をキープしよう！">
+    <meta name="keywords" content="お風呂,診断,入浴剤,健康,習慣化,アプリ,性格診断,サウナ,入浴,フロハイッタ">
     <meta name="robots" content="index, follow">
     
     <!-- PWA / モバイル設定 -->
@@ -20,19 +24,19 @@
     <meta name="theme-color" content="#fdf2f8">
     
     <!-- OGP: SNSシェア時の設定 -->
-    <meta property="og:title" content="お風呂チェッカー｜B.A.T.H.診断">
-    <meta property="og:description" content="私のお風呂タイプは...？あなたの入浴性格を診断してみない？ #お風呂チェッカー">
+    <meta property="og:title" content="フロハイッタ？｜B.A.T.H.診断">
+    <meta property="og:description" content="私のお風呂タイプは...？あなたの入浴性格を診断してみない？ #フロハイッタ">
     <meta property="og:type" content="website">
     <meta property="og:image" content="icon.png">
-    <meta property="og:site_name" content="お風呂チェッカー">
+    <meta property="og:site_name" content="フロハイッタ？">
     <meta property="og:locale" content="ja_JP">
     
-    <!-- 構造化データ (JSON-LD): Googleにアプリであることを伝える -->
+    <!-- 構造化データ (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "お風呂チェッカー",
+      "name": "フロハイッタ？",
       "description": "お風呂タイプ診断と入浴習慣化をサポートするエンタメヘルスケアアプリ。",
       "applicationCategory": "LifestyleApplication",
       "operatingSystem": "All",
@@ -212,7 +216,7 @@
             );
         };
 
-        // --- お風呂確認モーダル（新規追加） ---
+        // --- お風呂確認モーダル ---
         const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => {
             if (!isOpen) return null;
             return (
@@ -756,9 +760,9 @@
                         const blob = await (await fetch(dataUrl)).blob();
                         const file = new File([blob], "checker.png", { type: "image/png" });
                         const shareText = mode === 'type' 
-                            ? `私の入浴タイプは【${userType?.code}型】！性格までバレるかも...？🛀 #お風呂チェッカー`
-                            : `清潔度${Math.floor(hp)}%！${getStatus(hp).shareMsg} #お風呂チェッカー`;
-                        try { await navigator.share({ title: 'お風呂チェッカー', text: shareText, files: [file] }); } catch(e){}
+                            ? `私の入浴タイプは【${userType?.code}型】！性格までバレるかも...？🛀 #フロハイッタ`
+                            : `清潔度${Math.floor(hp)}%！${getStatus(hp).shareMsg} #フロハイッタ`;
+                        try { await navigator.share({ title: 'フロハイッタ？', text: shareText, files: [file] }); } catch(e){}
                     }
                 } catch (e) { 
                     alert('画像生成失敗💦'); 
@@ -805,7 +809,7 @@
                             <button onClick={() => setIsCalendarOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Calendar size={24} /></button>
                             <button onClick={() => setIsCollectionOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Book size={24} /></button>
                         </div>
-                        <h1 className="text-sm font-black text-pink-500 bg-white/90 px-4 py-1.5 rounded-full border-2 border-pink-200 shadow-sm font-pop">お風呂チェッカー</h1>
+                        <h1 className="text-sm font-black text-pink-500 bg-white/90 px-4 py-1.5 rounded-full border-2 border-pink-200 shadow-sm font-pop">フロハイッタ？</h1>
                         <div className="flex gap-2">
                             <button onClick={() => generateShareImage('status')} disabled={isGenerating} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform disabled:opacity-50">{isGenerating ? <div className="animate-spin w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"></div> : <Icons.Share size={24} />}</button>
                         </div>
@@ -930,7 +934,7 @@
                         {/* 1. ステータス共有用 */}
                         <div id="share-target-status" className="w-[375px] h-[600px] bg-[#fdf2f8] p-8 flex flex-col items-center justify-center relative overflow-hidden text-center border-4 border-white">
                             <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(#fbcfe8 20%, transparent 20%)', backgroundSize: '20px 20px'}}></div>
-                            <div className="bg-white/90 px-4 py-2 rounded-full border-2 border-pink-200 shadow-sm mb-4 z-10"><h1 className="text-xl font-black text-pink-500 font-pop">お風呂チェッカー</h1></div>
+                            <div className="bg-white/90 px-4 py-2 rounded-full border-2 border-pink-200 shadow-sm mb-4 z-10"><h1 className="text-xl font-black text-pink-500 font-pop">フロハイッタ？</h1></div>
                             <div className="mb-4 relative z-10 scale-110"><div className="text-8xl filter drop-shadow-xl">{status.avatar}</div><div className="absolute -top-4 -right-4 text-5xl">{status.deco}</div></div>
                             <div className="bg-white/60 p-4 rounded-xl border border-pink-100 mb-4 w-full z-10"><div className="text-xs font-bold text-pink-400 mb-1">お風呂に入らず...</div><div className="text-5xl font-black text-pink-600 font-pop leading-none">{hoursSince}<span className="text-lg ml-1">時間</span></div></div>
                             <div className="bg-white/80 rounded-2xl p-4 border-2 border-pink-100 shadow-md w-full z-10">
