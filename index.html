@@ -10,15 +10,12 @@
     <title>フロハイッタ？｜B.A.T.H.診断＆入浴習慣アプリ</title>
     <meta name="application-name" content="フロハイッタ？">
     <meta name="apple-mobile-web-app-title" content="フロハイッタ？">
-
-    <meta name="description" content="「フロハイッタ？」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。性格診断、天気連動HP、本格お風呂占いで楽しく清潔度をキープしよう！">
+    <meta name="description" content="「フロハイッタ？」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。">
     <meta name="keywords" content="お風呂,診断,入浴剤,健康,習慣化,アプリ,性格診断,サウナ,入浴,フロハイッタ,占い">
     <meta name="robots" content="index, follow">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#fdf2f8">
-    
     <meta property="og:title" content="フロハイッタ？｜B.A.T.H.診断">
     <meta property="og:description" content="私のお風呂タイプは...？あなたの入浴性格を診断してみない？ #フロハイッタ">
     <meta property="og:type" content="website">
@@ -34,11 +31,7 @@
       "description": "お風呂タイプ診断と入浴習慣化をサポートするエンタメヘルスケアアプリ。",
       "applicationCategory": "LifestyleApplication",
       "operatingSystem": "All",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "JPY"
-      },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
       "featureList": "B.A.T.H.タイプ診断, お風呂ログ, 天気連動HP減少, 本格お風呂占い"
     }
     </script>
@@ -47,7 +40,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Yomogi&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" href="icon.png">
@@ -76,23 +69,17 @@
         .float-item { position: absolute; opacity: 0.3; animation: floatUp linear infinite; }
         @keyframes floatUp { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 100% { transform: translateY(-100px) rotate(360deg); opacity: 0; } }
         
-        /* スライドアップアニメーション */
         .slide-up { animation: slideUp 0.5s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        /* 占いカード演出 */
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-        
         .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
         .card-inner.flipped { transform: rotateY(180deg); }
-        
         .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .card-front { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border: 4px solid white; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
         .card-back { background: white; transform: rotateY(180deg); border: 4px solid #fce7f3; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
-
         .star-rating { color: #fbbf24; }
         .star-rating-gray { color: #e5e7eb; }
     </style>
@@ -114,556 +101,53 @@
         const STORAGE_KEY_WEATHER = 'hq_weather_v1'; 
 
         // --- 占いデータ定数 ---
-        // 7段階のランク定義
         const FORTUNE_RANKS = [
-            { id: 'kamiyu',   name: '神湯',   read:'かみゆ',   prob: 0.05, minStar: 4, color: 'text-purple-600', bg: 'bg-purple-50' }, // 5%
-            { id: 'appare',   name: '天晴',   read:'あっぱれ', prob: 0.15, minStar: 4, color: 'text-pink-500',   bg: 'bg-pink-50' },   // 15%
-            { id: 'gokuraku', name: '極楽',   read:'ごくらく', prob: 0.20, minStar: 3, color: 'text-orange-500', bg: 'bg-orange-50' }, // 20%
-            { id: 'yoiyu',    name: '良湯',   read:'よいゆ',   prob: 0.25, minStar: 3, color: 'text-blue-500',   bg: 'bg-blue-50' },   // 25%
-            { id: 'totonoyu', name: '整湯',   read:'ととのゆ', prob: 0.15, minStar: 2, color: 'text-green-500',  bg: 'bg-green-50' },  // 15%
-            { id: 'nurumayu', name: '微温',   read:'ぬるまゆ', prob: 0.10, minStar: 2, color: 'text-teal-600',   bg: 'bg-teal-50' },   // 10%
-            { id: 'haran',    name: '波乱',   read:'はらん',   prob: 0.10, minStar: 1, color: 'text-gray-500',   bg: 'bg-gray-100' },  // 10%
+            { id: 'kamiyu',   name: '神湯',   read:'かみゆ',   prob: 0.05, minStar: 4, color: 'text-purple-600', bg: 'bg-purple-50' },
+            { id: 'appare',   name: '天晴',   read:'あっぱれ', prob: 0.15, minStar: 4, color: 'text-pink-500',   bg: 'bg-pink-50' },
+            { id: 'gokuraku', name: '極楽',   read:'ごくらく', prob: 0.20, minStar: 3, color: 'text-orange-500', bg: 'bg-orange-50' },
+            { id: 'yoiyu',    name: '良湯',   read:'よいゆ',   prob: 0.25, minStar: 3, color: 'text-blue-500',   bg: 'bg-blue-50' },
+            { id: 'totonoyu', name: '整湯',   read:'ととのゆ', prob: 0.15, minStar: 2, color: 'text-green-500',  bg: 'bg-green-50' },
+            { id: 'nurumayu', name: '微温',   read:'ぬるまゆ', prob: 0.10, minStar: 2, color: 'text-teal-600',   bg: 'bg-teal-50' },
+            { id: 'haran',    name: '波乱',   read:'はらん',   prob: 0.10, minStar: 1, color: 'text-gray-500',   bg: 'bg-gray-100' },
         ];
-
-        // ランクごとのメッセージ候補
         const FORTUNE_MESSAGES = {
-            kamiyu: [
-                { title: "奇跡の浄化", desc: "古い角質と共に過去の厄まで洗い流されました。今日のあなたは無敵のオーラを放っています。" },
-                { title: "選ばれし者", desc: "湯の神に愛されています。入浴によって潜在能力が解放され、アイデアが無限に湧き出るでしょう。" }
-            ],
-            appare: [
-                { title: "最高に整う日", desc: "心身のバランスが完璧に整いました。このエネルギーを使えば、どんな困難も乗り越えられます。" },
-                { title: "視界良好", desc: "湯気のように悩みが晴れていきます。直感が冴え渡り、素晴らしい決断ができる日です。" }
-            ],
-            gokuraku: [
-                { title: "癒やしの波動", desc: "芯まで温まり、深いリラックス状態です。人にも優しくなれるので、対人運が上昇する予感。" },
-                { title: "極上の休息", desc: "まるで温泉旅行に来たかのような開放感。今日頑張った自分を、誰よりも褒めてあげてください。" }
-            ],
-            yoiyu: [
-                { title: "安定の温もり", desc: "いつものお風呂が、一番の幸せ。派手さはありませんが、確実な幸福があなたを包んでいます。" },
-                { title: "程よい湯加減", desc: "無理なく過ごせる良い日です。ぬるめのお湯にゆっくり浸かることで、運気が安定します。" }
-            ],
-            totonoyu: [
-                { title: "リセットの時", desc: "少し乱れていたリズムが戻りました。明日に向けての準備は万端。早めに寝るとさらに吉。" },
-                { title: "基本に忠実", desc: "丁寧に体を洗うことで運が開けます。基本を大切にすることで、物事がスムーズに進むでしょう。" }
-            ],
-            nurumayu: [
-                { title: "あと一歩", desc: "少し長湯しすぎたかも？水分補給をしっかりして、ダラダラしすぎないように気を引き締めて。" },
-                { title: "現状維持", desc: "良くも悪くも変化のない日。ぬるま湯に浸かるように、今の環境に甘えすぎないよう注意が必要です。" }
-            ],
-            haran: [
-                { title: "湯冷め注意報", desc: "心が急いていませんか？シャワーだけで済ませると運気が逃げます。5分でも湯船に浸かって回避を。" },
-                { title: "要浄化", desc: "邪気が溜まっています。お風呂掃除を入念に行い、清めることで運気を取り戻せるでしょう。" }
-            ]
+            kamiyu: [{ title: "奇跡の浄化", desc: "古い角質と共に過去の厄まで洗い流されました。今日のあなたは無敵のオーラを放っています。" }, { title: "選ばれし者", desc: "湯の神に愛されています。入浴によって潜在能力が解放され、アイデアが無限に湧き出るでしょう。" }],
+            appare: [{ title: "最高に整う日", desc: "心身のバランスが完璧に整いました。このエネルギーを使えば、どんな困難も乗り越えられます。" }, { title: "視界良好", desc: "湯気のように悩みが晴れていきます。直感が冴え渡り、素晴らしい決断ができる日です。" }],
+            gokuraku: [{ title: "癒やしの波動", desc: "芯まで温まり、深いリラックス状態です。人にも優しくなれるので、対人運が上昇する予感。" }, { title: "極上の休息", desc: "まるで温泉旅行に来たかのような開放感。今日頑張った自分を、誰よりも褒めてあげてください。" }],
+            yoiyu: [{ title: "安定の温もり", desc: "いつものお風呂が、一番の幸せ。派手さはありませんが、確実な幸福があなたを包んでいます。" }, { title: "程よい湯加減", desc: "無理なく過ごせる良い日です。ぬるめのお湯にゆっくり浸かることで、運気が安定します。" }],
+            totonoyu: [{ title: "リセットの時", desc: "少し乱れていたリズムが戻りました。明日に向けての準備は万端。早めに寝るとさらに吉。" }, { title: "基本に忠実", desc: "丁寧に体を洗うことで運が開けます。基本を大切にすることで、物事がスムーズに進むでしょう。" }],
+            nurumayu: [{ title: "あと一歩", desc: "少し長湯しすぎたかも？水分補給をしっかりして、ダラダラしすぎないように気を引き締めて。" }, { title: "現状維持", desc: "良くも悪くも変化のない日。ぬるま湯に浸かるように、今の環境に甘えすぎないよう注意が必要です。" }],
+            haran: [{ title: "湯冷め注意報", desc: "心が急いていませんか？シャワーだけで済ませると運気が逃げます。5分でも湯船に浸かって回避を。" }, { title: "要浄化", desc: "邪気が溜まっています。お風呂掃除を入念に行い、清めることで運気を取り戻せるでしょう。" }]
         };
+        const FORTUNE_ACTIONS = ["お気に入りの音楽をかけて30分浸かる", "炭酸系の入浴剤を入れて深呼吸", "湯船の中で足首を10回回す", "目を閉じて1分間無心になる", "上がった後に常温の水を飲む", "新しいスポンジをおろす", "シャワーヘッドをピカピカに磨く", "お風呂上がりにストレッチをする", "柑橘系の香りを嗅ぐ", "浴室の鏡を曇りなく磨く", "ヘアパックをして5分待つ", "足の指を一本ずつマッサージ", "湯船で「ありがとう」と3回唱える", "バスソルトで発汗を促す", "お風呂上がりに保湿を徹底する", "排水溝を掃除して運気を流す", "冷水を足にかけて引き締める", "キャンドル（なければ照明OFF）で瞑想", "アヒルのおもちゃを浮かべて遊ぶ", "防水スマホケースで動画を見る", "大きな声で歌う（近所迷惑注意）", "ボディスクラブで全身磨き", "頭皮マッサージを入念にする", "湯船の中でグーチョキパー運動", "一番風呂を狙う", "入浴剤を混ぜてオリジナルの色を作る", "お風呂上がりにフルーツ牛乳を飲む", "バスタオルをふかふかの物に変える", "お風呂上がりに窓を開けて換気", "湯船で深呼吸して悪い気を吐く"];
 
-        // ラッキーアクション候補
-        const FORTUNE_ACTIONS = [
-            "お気に入りの音楽をかけて30分浸かる", "炭酸系の入浴剤を入れて深呼吸", "湯船の中で足首を10回回す",
-            "目を閉じて1分間無心になる", "上がった後に常温の水を飲む", "新しいスポンジをおろす",
-            "シャワーヘッドをピカピカに磨く", "お風呂上がりにストレッチをする", "柑橘系の香りを嗅ぐ",
-            "浴室の鏡を曇りなく磨く", "ヘアパックをして5分待つ", "足の指を一本ずつマッサージ",
-            "湯船で「ありがとう」と3回唱える", "バスソルトで発汗を促す", "お風呂上がりに保湿を徹底する",
-            "排水溝を掃除して運気を流す", "冷水を足にかけて引き締める", "キャンドル（なければ照明OFF）で瞑想",
-            "アヒルのおもちゃを浮かべて遊ぶ", "防水スマホケースで動画を見る", "大きな声で歌う（近所迷惑注意）",
-            "ボディスクラブで全身磨き", "頭皮マッサージを入念にする", "湯船の中でグーチョキパー運動",
-            "一番風呂を狙う", "入浴剤を混ぜてオリジナルの色を作る", "お風呂上がりにフルーツ牛乳を飲む",
-            "バスタオルをふかふかの物に変える", "お風呂上がりに窓を開けて換気", "湯船で深呼吸して悪い気を吐く"
-        ];
-
-        // 占い生成ロジック
         const generateFortune = () => {
             const rand = Math.random();
             let cumulativeProb = 0;
             let selectedRank = FORTUNE_RANKS[FORTUNE_RANKS.length - 1]; 
-            
-            for (const rank of FORTUNE_RANKS) {
-                cumulativeProb += rank.prob;
-                if (rand < cumulativeProb) {
-                    selectedRank = rank;
-                    break;
-                }
-            }
-
+            for (const rank of FORTUNE_RANKS) { cumulativeProb += rank.prob; if (rand < cumulativeProb) { selectedRank = rank; break; } }
             const messages = FORTUNE_MESSAGES[selectedRank.id];
             const message = messages[Math.floor(Math.random() * messages.length)];
-
             const getStar = (min) => Math.min(5, Math.max(1, min + Math.floor(Math.random() * 3))); 
-            
-            const love = getStar(selectedRank.minStar - 1); 
-            const money = getStar(selectedRank.minStar - 1);
-            const health = getStar(selectedRank.minStar); 
-
-            const action = FORTUNE_ACTIONS[Math.floor(Math.random() * FORTUNE_ACTIONS.length)];
-
-            return {
-                rank: selectedRank.name,
-                read: selectedRank.read,
-                title: message.title,
-                desc: message.desc,
-                color: selectedRank.color,
-                bg: selectedRank.bg,
-                love,
-                money,
-                health,
-                action
-            };
+            return { rank: selectedRank.name, read: selectedRank.read, title: message.title, desc: message.desc, color: selectedRank.color, bg: selectedRank.bg, love: getStar(selectedRank.minStar - 1), money: getStar(selectedRank.minStar - 1), health: getStar(selectedRank.minStar), action: FORTUNE_ACTIONS[Math.floor(Math.random() * FORTUNE_ACTIONS.length)] };
         };
+        const getLocalDateStr = (date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
 
-        const getLocalDateStr = (date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        };
+        const Icon = ({ path, className, size = 24, onClick }) => ( <svg onClick={onClick} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{path}</svg> );
+        const Icons = { Bath: (p) => <Icon {...p} path={<><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-1.5C3.81 2 2.5 3.31 2.5 5.5c0 1.56 1.15 2.1 1.8 2.2"/><path d="M21 10c0-1.66-1.34-3-3-3-1.12 0-2.1.58-2.6 1.5L14 10"/><path d="M7 10h14L19.5 21h-11Z"/><path d="M7 10v4"/></>} />, Clock: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />, Calendar: (p) => <Icon {...p} path={<><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></>} />, X: (p) => <Icon {...p} path={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />, ChevronLeft: (p) => <Icon {...p} path={<><path d="m15 18-6-6 6-6"/></>} />, ChevronRight: (p) => <Icon {...p} path={<><path d="m9 18 6-6-6-6"/></>} />, Camera: (p) => <Icon {...p} path={<><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>} />, Share: (p) => <Icon {...p} path={<><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></>} />, Alert: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></>} />, Download: (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>} />, IosShare: (p) => <Icon {...p} path={<><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></>} />, Book: (p) => <Icon {...p} path={<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></>} />, Cloud: (p) => <Icon {...p} path={<><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M17.5 19h.5a4 4 0 0 0 1.5-7.75"/><path d="M6.5 19h-.5a4 4 0 0 1-1.5-7.75"/><path d="M16.5 10A5 5 0 0 0 7.5 10"/></>} />, Sun: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>} />, Help: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></>} />, Star: (p) => <Icon {...p} path={<><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></>} />, };
 
-        // --- アイコン ---
-        const Icon = ({ path, className, size = 24, onClick }) => (
-            <svg onClick={onClick} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{path}</svg>
-        );
-        const Icons = {
-            Bath: (p) => <Icon {...p} path={<><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-1.5C3.81 2 2.5 3.31 2.5 5.5c0 1.56 1.15 2.1 1.8 2.2"/><path d="M21 10c0-1.66-1.34-3-3-3-1.12 0-2.1.58-2.6 1.5L14 10"/><path d="M7 10h14L19.5 21h-11Z"/><path d="M7 10v4"/></>} />,
-            Clock: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />,
-            Calendar: (p) => <Icon {...p} path={<><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></>} />,
-            X: (p) => <Icon {...p} path={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />,
-            ChevronLeft: (p) => <Icon {...p} path={<><path d="m15 18-6-6 6-6"/></>} />,
-            ChevronRight: (p) => <Icon {...p} path={<><path d="m9 18 6-6-6-6"/></>} />,
-            Camera: (p) => <Icon {...p} path={<><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>} />,
-            Share: (p) => <Icon {...p} path={<><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></>} />,
-            Alert: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></>} />,
-            Download: (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>} />,
-            IosShare: (p) => <Icon {...p} path={<><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></>} />,
-            Book: (p) => <Icon {...p} path={<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></>} />,
-            Cloud: (p) => <Icon {...p} path={<><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M17.5 19h.5a4 4 0 0 0 1.5-7.75"/><path d="M6.5 19h-.5a4 4 0 0 1-1.5-7.75"/><path d="M16.5 10A5 5 0 0 0 7.5 10"/></>} />,
-            Sun: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>} />,
-            Help: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></>} />,
-            Star: (p) => <Icon {...p} path={<><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></>} />,
-        };
+        const InAppBrowserWarning = ({ onClose }) => ( <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6 modal-enter"> <div className="bg-white rounded-3xl p-6 w-full max-w-sm text-center relative border-4 border-pink-400"> <div className="text-pink-500 mb-2 flex justify-center"><Icons.Alert size={48} /></div> <h2 className="text-xl font-black text-gray-800 mb-2 font-pop">⚠️ データが消えちゃうかも！</h2> <p className="text-sm text-gray-600 mb-4 font-bold">アプリ内ブラウザ(LINEなど)では履歴が保存されません💦</p> <div className="bg-gray-100 p-4 rounded-xl text-left mb-4 text-sm text-gray-700"> <p className="mb-2 font-bold">👇 Safari/Chromeで開いてね！</p> <ol className="list-decimal list-inside space-y-1"> <li>右上の <span className="font-bold bg-white px-1 rounded border">︙</span> やシェアボタンを押す</li> <li><span className="font-bold text-blue-600">「ブラウザで開く」</span> を選ぶ</li> </ol> </div> <button onClick={onClose} className="text-xs text-gray-400 underline p-2">分かったけどこのまま使う</button> </div> </div> );
+        const InstallGuide = ({ onClose }) => { const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()); return ( <div className="fixed bottom-0 left-0 right-0 p-4 z-50 slide-up pb-safe"> <div className="bg-gray-800/95 backdrop-blur text-white rounded-2xl p-4 shadow-2xl relative border border-pink-400"> <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 p-2"><Icons.X size={18} /></button> <div className="flex items-start gap-4"> <div className="bg-pink-500 p-3 rounded-xl shrink-0"><Icons.Download size={24} /></div> <div> <h3 className="font-bold text-sm mb-1 font-pop">ホーム画面に追加しよう！</h3> <p className="text-xs text-gray-300 mb-2">アプリみたいに使えて、全画面で見やすくなるよ✨</p> <div className="text-xs font-bold text-pink-300 flex items-center gap-1 flex-wrap"> {isIOS ? <><span className="bg-gray-600 px-1 rounded inline-flex"><Icons.IosShare size={12}/></span> から「ホーム画面に追加」</> : <>メニュー <span className="bg-gray-600 px-1 rounded text-[10px]">︙</span> から「アプリをインストール」</>} </div> </div> </div> </div> </div> ); };
+        const WelcomeModal = ({ isOpen, onClose, onYes }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl" onClick={e => e.stopPropagation()}> <div className="text-5xl mb-4">🏠</div> <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">おかえりなさい！</h3> <p className="text-gray-600 font-bold mb-6 text-sm">学校・職場から帰宅した？<br/>移動ダメージを記録しますか？ (-30HP)</p> <div className="flex gap-3"> <button onClick={onYes} className="flex-1 bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">はい！(記録)</button> <button onClick={onClose} className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl shadow-md active:scale-95">いいえ</button> </div> </div> </div> ); };
+        const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}> <div className="text-5xl mb-4">🛁</div> <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3> <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & 今日の占い！)</p> <div className="flex gap-3"> <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button> <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button> </div> </div> </div> ); };
+        const HelpModal = ({ isOpen, onClose }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}> <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button> <div className="text-center mb-6"> <h2 className="text-lg font-black text-gray-800 mb-1 font-pop">使い方ガイド</h2> <p className="text-xs text-pink-500 font-bold">フロハイッタ？へようこそ！</p> </div> <div className="space-y-4 text-sm text-gray-600 font-bold"> <div className="bg-pink-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">❤️</div> <div> <h4 className="text-pink-600 font-black mb-1">HP（清潔度）を守れ！</h4> <p className="text-xs leading-relaxed">時間が経つとHPが減っていきます。0%になるとゾンビになっちゃうかも…！？</p> </div> </div> <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🛁</div> <div> <h4 className="text-blue-600 font-black mb-1">お風呂でリセット</h4> <p className="text-xs leading-relaxed">お風呂に入ったら一番下のボタンをタップ！HPが全回復して、今日の運勢が占えるよ✨</p> </div> </div> <div className="bg-yellow-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🌤️</div> <div> <h4 className="text-yellow-600 font-black mb-1">天気と連動</h4> <p className="text-xs leading-relaxed">暑い日は汗をかくからHPの減りが早くなるよ。「天気取得」ボタンでリアル連携しよう！</p> </div> </div> <div className="bg-purple-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🔮</div> <div> <h4 className="text-purple-600 font-black mb-1">本格お風呂占い</h4> <p className="text-xs leading-relaxed">リセット時に占いが発動！入浴で運気を上げて、ラッキーアクションを実行しよう！</p> </div> </div> </div> <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-6 active:scale-95">わかった！</button> </div> </div> ); };
+        const ActionButton = ({ icon, color, damage, label, onTrigger }) => { const [isCooldown, setIsCooldown] = useState(false); const handleClick = () => { if (isCooldown) return; onTrigger(); setIsCooldown(true); setTimeout(() => { setIsCooldown(false); }, 3000); }; return ( <button onClick={handleClick} disabled={isCooldown} className={`relative ${isCooldown ? 'bg-gray-300 scale-95' : color} w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl transition-all duration-300 border-4 border-white active:scale-90`}> {isCooldown ? <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div> : icon} <span className="absolute -bottom-6 text-[10px] font-bold text-gray-500 whitespace-nowrap bg-white/80 px-1 rounded">{label} -{damage}</span> </button> ); };
+        const CalendarModal = ({ isOpen, onClose, history }) => { const [currentDate, setCurrentDate] = useState(new Date()); if (!isOpen) return null; const historySet = new Set(history); const getDaysInMonth = (date) => { const year = date.getFullYear(); const month = date.getMonth(); const lastDayOfMonth = new Date(year, month + 1, 0).getDate(); const firstDayOfWeek = new Date(year, month, 1).getDay(); const days = []; for (let i = 0; i < firstDayOfWeek; i++) days.push(null); for (let i = 1; i <= lastDayOfMonth; i++) days.push(new Date(year, month, i)); return days; }; const calculateStreakAtDate = (targetDateStr, historySet) => { if (!historySet.has(targetDateStr)) return 0; let streak = 1; let current = new Date(targetDateStr); while (true) { current.setDate(current.getDate() - 1); const prevDateStr = getLocalDateStr(current); if (historySet.has(prevDateStr)) streak++; else break; } return streak; }; const calculateCurrentStreak = (historySet) => { const today = getLocalDateStr(new Date()); const yesterday = getLocalDateStr(new Date(new Date().setDate(new Date().getDate()-1))); let start = historySet.has(today) ? today : historySet.has(yesterday) ? yesterday : null; return start ? calculateStreakAtDate(start, historySet) : 0; }; const streak = calculateCurrentStreak(historySet); const days = getDaysInMonth(currentDate); const monthLabel = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; const getStamp = (s) => s >= 30 ? "🌈" : s >= 7 ? "💎" : s >= 3 ? "👑" : "💮"; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100" onClick={e => e.stopPropagation()}> <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button> <div className="text-center mb-6"> <h2 className="text-sm text-gray-500 font-bold mb-1 font-pop">連続記録チャレンジ！</h2> <div className="text-4xl font-black text-pink-500 font-pop drop-shadow-sm flex items-center justify-center gap-2"><span>{streak}日</span><span className="animate-pulse">🔥</span></div> </div> <div className="flex justify-between items-center mb-2 px-2"> <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-2 text-pink-400"><Icons.ChevronLeft size={20}/></button> <span className="font-bold text-gray-800 text-lg block">{monthLabel}</span> <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="p-2 text-pink-400"><Icons.ChevronRight size={20}/></button> </div> <div className="calendar-grid mb-2 text-center text-xs font-bold text-gray-400 border-b border-gray-100 pb-2"><div className="text-red-400">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div className="text-blue-400">土</div></div> <div className="calendar-grid gap-1"> {days.map((date, i) => { if (!date) return <div key={i}></div>; const dateStr = getLocalDateStr(date); const s = calculateStreakAtDate(dateStr, historySet); const isToday = date.toDateString() === new Date().toDateString(); const rotate = (date.getDate() * 13) % 20 - 10; return ( <div key={i} className={`calendar-cell ${isToday ? 'bg-pink-50 border border-pink-200' : ''}`}> <span className={`text-[10px] mb-0.5 ${isToday ? 'text-pink-600 font-bold' : 'text-gray-400'}`}>{date.getDate()}</span> {s > 0 && <span className="text-2xl absolute bottom-0 stamp-animate select-none" style={{ transform: `rotate(${rotate}deg)` }}>{getStamp(s)}</span>} </div> ); })} </div> </div> </div> ); };
+        const FortuneModal = ({ isOpen, onClose, result }) => { const [isFlipped, setIsFlipped] = useState(false); useEffect(() => { if (isOpen) { setIsFlipped(false); const timer = setTimeout(() => { setIsFlipped(true); if (navigator.vibrate) navigator.vibrate([50, 100]); }, 1000); return () => clearTimeout(timer); } }, [isOpen]); if (!isOpen || !result) return null; const StarRating = ({ count }) => ( <div className="flex text-sm"> {[...Array(5)].map((_, i) => ( <span key={i} className={i < count ? "star-rating" : "star-rating-gray"}>★</span> ))} </div> ); return ( <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={isFlipped ? onClose : null}> <div className="w-full max-w-sm aspect-[3/4] perspective-1000" onClick={e => e.stopPropagation()}> <div className={`card-inner relative w-full h-full duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'flipped' : ''}`} onClick={() => !isFlipped && setIsFlipped(true)}> <div className="card-front"> <div className="text-6xl animate-pulse">🔮</div> <p className="mt-4 text-pink-400 font-bold font-pop">湯の託宣</p> <p className="text-xs text-gray-400 mt-2">心を鎮めてタップ...</p> </div> <div className="card-back overflow-hidden relative"> <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 to-purple-400"></div> <div className="p-6 flex flex-col h-full w-full"> <div className="text-center mb-4"> <p className="text-xs text-gray-400 font-bold mb-1">今日の入浴運勢</p> <h2 className={`text-4xl font-black font-pop ${result.color} tracking-widest`}>{result.rank}</h2> <p className="text-[10px] text-gray-400 font-bold mt-1 tracking-widest">- {result.read} -</p> <h3 className="text-sm font-bold text-gray-700 mt-2">「{result.title}」</h3> </div> <div className="bg-gray-50 rounded-xl p-3 mb-4 text-xs font-bold text-gray-600 leading-relaxed text-center flex-grow flex items-center justify-center"> {result.desc} </div> <div className="space-y-2 mb-4"> <div className="flex justify-between items-center bg-pink-50 px-3 py-1.5 rounded-lg"> <span className="text-xs font-bold text-pink-500">恋愛運</span> <StarRating count={result.love} /> </div> <div className="flex justify-between items-center bg-yellow-50 px-3 py-1.5 rounded-lg"> <span className="text-xs font-bold text-yellow-600">金運</span> <StarRating count={result.money} /> </div> <div className="flex justify-between items-center bg-green-50 px-3 py-1.5 rounded-lg"> <span className="text-xs font-bold text-green-600">健康運</span> <StarRating count={result.health} /> </div> </div> <div className="mt-auto text-center"> <div className="text-[10px] text-purple-500 font-bold mb-1">✨ ラッキーバスアクション ✨</div> <div className="bg-purple-100 text-purple-700 font-bold py-2 px-4 rounded-full text-xs inline-block shadow-sm"> {result.action} </div> </div> <button onClick={onClose} className="mt-4 text-xs text-gray-400 underline">閉じる</button> </div> </div> </div> </div> </div> ); };
+        const BATH_QUESTIONS = [ { q: "Q1. お風呂、シャワーだけで済ませちゃう？", opts: [{ l: "基本シャワーのみ (効率重視)", val: { s: 2 } }, { l: "湯船に浸かりたい (癒し重視)", val: { l: 2 } }] }, { q: "Q2. スマホ、浴室に持ち込む？", opts: [{ l: "絶対持ち込む (ジップロック必須)", val: { d: 2 } }, { l: "持ち込まない (デジタルデトックス)", val: { a: 2 } }] }, { q: "Q3. 入浴剤へのこだわりは？", opts: [{ l: "色々試すのが好き", val: { h: 2 } }, { l: "特にない / さら湯", val: { z: 1 } }] }, { q: "Q4. お風呂で歌う？", opts: [{ l: "熱唱する (リサイタル会場)", val: { l: 1, h: 1 } }, { l: "静かに過ごす", val: { s: 1, a: 1 } }] }, { q: "Q5. 髪を乾かすの、どう思う？", opts: [{ l: "地獄。めんどくさい", val: { z: 3 } }, { l: "ヘアケア大事。ちゃんとやる", val: { h: 2 } }] }, { q: "Q6. お風呂掃除の頻度は？", opts: [{ l: "毎日やる (キレイ好き)", val: { h: 2 } }, { l: "ヌメリが出たらやる (限界)", val: { z: 2 } }] }, { q: "Q7. 入浴中、何してる時間が長い？", opts: [{ l: "動画・SNSチェック", val: { d: 3 } }, { l: "マッサージ・半身浴", val: { h: 2 } }, { l: "ボーッとする・妄想", val: { a: 2 } }] }, { q: "Q8. お風呂上がりの一杯は？", opts: [{ l: "水・ハーブティー・プロテイン", val: { h: 2 } }, { l: "コーヒー牛乳・ビール・炭酸", val: { l: 1, z: 1 } }] }, { q: "Q9. お風呂に入る時間は決まってる？", opts: [{ l: "夜にちゃんと入る (ルーティン)", val: { n: 2 } }, { l: "朝シャン派 / 不定期", val: { m: 2 } }] }, { q: "Q10. 正直、お風呂は好き？", opts: [{ l: "大好き！天国！", val: { l: 3 } }, { l: "義務。入らなきゃ死ぬから入る", val: { s: 2, z: 1 } }] } ];
+        const calculateBathType = (answers) => { let scores = { l:0, s:0, d:0, a:0, h:0, z:0, n:0, m:0 }; answers.forEach(ans => { Object.keys(ans).forEach(key => scores[key] += ans[key]); }); const c1 = scores.l >= scores.s ? 'L' : 'S'; const c2 = scores.d >= scores.a ? 'D' : 'A'; const c3 = scores.h >= scores.z ? 'H' : 'Z'; const c4 = scores.n >= scores.m ? 'N' : 'M'; const code = `${c1}${c2}${c3}${c4}`; let typeData = { name: "バランス湯船グラマー", icon: "🛁", desc: "適度に楽しみ、適度に抜く。標準的なお風呂人。", friend: "LAHN", enemy: "SDZM" }; if (code === 'LDHN' || code === 'LAHN') typeData = { name: "美容完璧うさぎ", icon: "🐰", desc: "お風呂＝美容の聖域。入浴剤もヘアケアも完璧なプロ。", friend: "SXZM", enemy: "SDZM" }; if (code === 'LDZN' || code === 'LDZM') typeData = { name: "スマホ依存ナマケモノ", icon: "🦥", desc: "お風呂は動画を見る場所。のぼせるまで出られない。", friend: "SAZN", enemy: "LAHM" }; if (code === 'SAZN' || code === 'SAZM') typeData = { name: "爆速カラスの行水", icon: "🐦‍⬛", desc: "効率こそ正義。入浴タイムは短ければ短いほど良い。", friend: "LDHN", enemy: "LAHN" }; if (code === 'SDZN' || code === 'SDZM') typeData = { name: "限界ドライヤーゾンビ", icon: "🧟‍♀️", desc: "ドライヤーが地獄。気合だけでお風呂に入っている戦士。", friend: "LAHN", enemy: "LDHN" }; if (code === 'LAHM' || code === 'LNHM') typeData = { name: "デトックス仙人", icon: "🧘‍♀️", desc: "スマホを捨て、湯と向き合う。精神統一の場としている。", friend: "SDZM", enemy: "LDZN" }; if (code === 'SAHN' || code === 'SAHM') typeData = { name: "朝活シャワーアライグマ", icon: "🦝", desc: "夜より朝派。シャキッと目覚めるために水を浴びる。", friend: "LDZM", enemy: "SDZN" }; if (code === 'SDHN' || code === 'SDZM') typeData = { name: "疲れ果てたカバ", icon: "🦛", desc: "最低限しか頑張れない。湯船には浸かるが他の努力はしない。", friend: "LAHN", enemy: "SAZN" }; return { code, ...typeData }; };
+        const TypeDiagnosisModal = ({ isOpen, onClose, onSetType, initialType, onShare }) => { const [step, setStep] = useState(0); const [scores, setScores] = useState([]); const [isLoading, setIsLoading] = useState(false); const [resultData, setResultData] = useState(initialType || null); useEffect(() => { if (isOpen && initialType) { setResultData(initialType); setStep('result'); } else if (isOpen && !initialType) { setStep(0); setScores([]); setResultData(null); } }, [isOpen, initialType]); if (!isOpen) return null; const handleAnswer = (val) => { const newScores = [...scores, val]; setScores(newScores); if (step + 1 < BATH_QUESTIONS.length) { setStep(step + 1); } else { setIsLoading(true); setTimeout(() => { const result = calculateBathType(newScores); setResultData(result); onSetType(result); setIsLoading(false); setStep('result'); }, 1500); } }; return ( <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center relative overflow-hidden" onClick={e => e.stopPropagation()}> {isLoading ? ( <div className="py-10"> <div className="text-4xl animate-spin mb-4">🛁</div> <h3 className="font-bold text-pink-500 font-pop animate-pulse">分析中...</h3> </div> ) : step === 'result' && resultData ? ( <> <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button> <h3 className="text-sm font-bold text-gray-400 mb-1">B.A.T.H.診断結果</h3> <div className="text-3xl font-black text-pink-500 font-pop mb-4 tracking-widest">{resultData.code}型</div> <div className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-2xl p-6 mb-4 relative overflow-hidden"> <div className="absolute -right-4 -top-4 text-8xl opacity-10">{resultData.icon}</div> <div className="text-6xl mb-2 relative z-10">{resultData.icon}</div> <h2 className="text-xl font-black text-gray-800 mb-2 font-pop relative z-10" style={{ textWrap: 'balance' }}>{resultData.name}</h2> <p className="text-xs text-gray-600 font-bold leading-tight relative z-10">{resultData.desc}</p> </div> <div className="grid grid-cols-2 gap-3 mb-6 text-xs font-bold"> <div className="bg-blue-50 p-2 rounded-lg text-blue-600">相性◎: {resultData.friend}型</div> <div className="bg-red-50 p-2 rounded-lg text-red-500">天敵: {resultData.enemy}型</div> </div> <button onClick={() => onShare(resultData)} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 mb-3 flex items-center justify-center gap-2"> <Icons.Share size={20} /> 診断結果をシェアする </button> <button onClick={onClose} className="text-xs text-gray-400 underline">閉じる</button> </> ) : ( <> <div className="flex justify-between items-center mb-6"> <h3 className="text-lg font-bold text-pink-400 font-pop">B.A.T.H.診断</h3> <span className="text-xs font-bold bg-pink-100 text-pink-500 px-2 py-1 rounded-full">{step + 1} / {BATH_QUESTIONS.length}</span> </div> <p className="text-lg font-bold text-gray-800 mb-8 font-hand min-h-[3rem] flex items-center justify-center">{BATH_QUESTIONS[step].q}</p> <div className="space-y-4"> {BATH_QUESTIONS[step].opts.map((opt, i) => ( <button key={i} onClick={() => handleAnswer(opt.val)} className="w-full bg-white border-2 border-pink-100 hover:bg-pink-50 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95 text-sm"> {opt.l} </button> ))} </div> </> )} </div> </div> ); };
 
-        // --- アプリ内ブラウザ警告コンポーネント ---
-        const InAppBrowserWarning = ({ onClose }) => (
-            <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6 modal-enter">
-                <div className="bg-white rounded-3xl p-6 w-full max-w-sm text-center relative border-4 border-pink-400">
-                    <div className="text-pink-500 mb-2 flex justify-center"><Icons.Alert size={48} /></div>
-                    <h2 className="text-xl font-black text-gray-800 mb-2 font-pop">⚠️ データが消えちゃうかも！</h2>
-                    <p className="text-sm text-gray-600 mb-4 font-bold">アプリ内ブラウザ(LINEなど)では履歴が保存されません💦</p>
-                    <div className="bg-gray-100 p-4 rounded-xl text-left mb-4 text-sm text-gray-700">
-                        <p className="mb-2 font-bold">👇 Safari/Chromeで開いてね！</p>
-                        <ol className="list-decimal list-inside space-y-1">
-                            <li>右上の <span className="font-bold bg-white px-1 rounded border">︙</span> やシェアボタンを押す</li>
-                            <li><span className="font-bold text-blue-600">「ブラウザで開く」</span> を選ぶ</li>
-                        </ol>
-                    </div>
-                    <button onClick={onClose} className="text-xs text-gray-400 underline p-2">分かったけどこのまま使う</button>
-                </div>
-            </div>
-        );
-
-        // --- ホーム画面追加ガイド ---
-        const InstallGuide = ({ onClose }) => {
-            const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
-            return (
-                <div className="fixed bottom-0 left-0 right-0 p-4 z-50 slide-up pb-safe">
-                    <div className="bg-gray-800/95 backdrop-blur text-white rounded-2xl p-4 shadow-2xl relative border border-pink-400">
-                        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 p-2"><Icons.X size={18} /></button>
-                        <div className="flex items-start gap-4">
-                            <div className="bg-pink-500 p-3 rounded-xl shrink-0"><Icons.Download size={24} /></div>
-                            <div>
-                                <h3 className="font-bold text-sm mb-1 font-pop">ホーム画面に追加しよう！</h3>
-                                <p className="text-xs text-gray-300 mb-2">アプリみたいに使えて、全画面で見やすくなるよ✨</p>
-                                <div className="text-xs font-bold text-pink-300 flex items-center gap-1 flex-wrap">
-                                    {isIOS ? <><span className="bg-gray-600 px-1 rounded inline-flex"><Icons.IosShare size={12}/></span> から「ホーム画面に追加」</> : <>メニュー <span className="bg-gray-600 px-1 rounded text-[10px]">︙</span> から「アプリをインストール」</>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- おかえりモーダル ---
-        const WelcomeModal = ({ isOpen, onClose, onYes }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="text-5xl mb-4">🏠</div>
-                        <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">おかえりなさい！</h3>
-                        <p className="text-gray-600 font-bold mb-6 text-sm">学校・職場から帰宅した？<br/>移動ダメージを記録しますか？ (-30HP)</p>
-                        <div className="flex gap-3">
-                            <button onClick={onYes} className="flex-1 bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">はい！(記録)</button>
-                            <button onClick={onClose} className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl shadow-md active:scale-95">いいえ</button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- お風呂確認モーダル ---
-        const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}>
-                        <div className="text-5xl mb-4">🛁</div>
-                        <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3>
-                        <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & 今日の占い！)</p>
-                        <div className="flex gap-3">
-                            <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button>
-                            <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- ヘルプモーダル ---
-        const HelpModal = ({ isOpen, onClose }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button>
-                        <div className="text-center mb-6">
-                            <h2 className="text-lg font-black text-gray-800 mb-1 font-pop">使い方ガイド</h2>
-                            <p className="text-xs text-pink-500 font-bold">フロハイッタ？へようこそ！</p>
-                        </div>
-                        
-                        <div className="space-y-4 text-sm text-gray-600 font-bold">
-                            <div className="bg-pink-50 p-3 rounded-xl flex items-start gap-3">
-                                <div className="text-2xl">❤️</div>
-                                <div>
-                                    <h4 className="text-pink-600 font-black mb-1">HP（清潔度）を守れ！</h4>
-                                    <p className="text-xs leading-relaxed">時間が経つとHPが減っていきます。0%になるとゾンビになっちゃうかも…！？</p>
-                                </div>
-                            </div>
-
-                            <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3">
-                                <div className="text-2xl">🛁</div>
-                                <div>
-                                    <h4 className="text-blue-600 font-black mb-1">お風呂でリセット</h4>
-                                    <p className="text-xs leading-relaxed">お風呂に入ったら一番下のボタンをタップ！HPが全回復して、今日の運勢が占えるよ✨</p>
-                                </div>
-                            </div>
-
-                            <div className="bg-yellow-50 p-3 rounded-xl flex items-start gap-3">
-                                <div className="text-2xl">🌤️</div>
-                                <div>
-                                    <h4 className="text-yellow-600 font-black mb-1">天気と連動</h4>
-                                    <p className="text-xs leading-relaxed">暑い日は汗をかくからHPの減りが早くなるよ。「天気取得」ボタンでリアル連携しよう！</p>
-                                </div>
-                            </div>
-
-                            <div className="bg-purple-50 p-3 rounded-xl flex items-start gap-3">
-                                <div className="text-2xl">🔮</div>
-                                <div>
-                                    <h4 className="text-purple-600 font-black mb-1">本格お風呂占い</h4>
-                                    <p className="text-xs leading-relaxed">リセット時に占いが発動！入浴で運気を上げて、ラッキーアクションを実行しよう！</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-6 active:scale-95">わかった！</button>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- タップボタン ---
-        const ActionButton = ({ icon, color, damage, label, onTrigger }) => {
-            const [isCooldown, setIsCooldown] = useState(false);
-            const handleClick = () => {
-                if (isCooldown) return; 
-                onTrigger(); 
-                setIsCooldown(true);
-                setTimeout(() => { setIsCooldown(false); }, 3000); 
-            };
-            return (
-                <button onClick={handleClick} disabled={isCooldown} className={`relative ${isCooldown ? 'bg-gray-300 scale-95' : color} w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl transition-all duration-300 border-4 border-white active:scale-90`}>
-                    {isCooldown ? <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div> : icon}
-                    <span className="absolute -bottom-6 text-[10px] font-bold text-gray-500 whitespace-nowrap bg-white/80 px-1 rounded">{label} -{damage}</span>
-                </button>
-            );
-        };
-
-        // --- カレンダーモーダル ---
-        const CalendarModal = ({ isOpen, onClose, history }) => {
-            const [currentDate, setCurrentDate] = useState(new Date());
-            if (!isOpen) return null;
-            const historySet = new Set(history);
-            const getDaysInMonth = (date) => {
-                const year = date.getFullYear();
-                const month = date.getMonth();
-                const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
-                const firstDayOfWeek = new Date(year, month, 1).getDay();
-                const days = [];
-                for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
-                for (let i = 1; i <= lastDayOfMonth; i++) days.push(new Date(year, month, i));
-                return days;
-            };
-            const calculateStreakAtDate = (targetDateStr, historySet) => {
-                if (!historySet.has(targetDateStr)) return 0;
-                let streak = 1;
-                let current = new Date(targetDateStr);
-                while (true) {
-                    current.setDate(current.getDate() - 1);
-                    const prevDateStr = getLocalDateStr(current);
-                    if (historySet.has(prevDateStr)) streak++; else break;
-                }
-                return streak;
-            };
-            const calculateCurrentStreak = (historySet) => {
-                const today = getLocalDateStr(new Date());
-                const yesterday = getLocalDateStr(new Date(new Date().setDate(new Date().getDate()-1)));
-                let start = historySet.has(today) ? today : historySet.has(yesterday) ? yesterday : null;
-                return start ? calculateStreakAtDate(start, historySet) : 0;
-            };
-            const streak = calculateCurrentStreak(historySet);
-            const days = getDaysInMonth(currentDate);
-            const monthLabel = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`;
-            const getStamp = (s) => s >= 30 ? "🌈" : s >= 7 ? "💎" : s >= 3 ? "👑" : "💮";
-
-            return (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100" onClick={e => e.stopPropagation()}>
-                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button>
-                        <div className="text-center mb-6">
-                            <h2 className="text-sm text-gray-500 font-bold mb-1 font-pop">連続記録チャレンジ！</h2>
-                            <div className="text-4xl font-black text-pink-500 font-pop drop-shadow-sm flex items-center justify-center gap-2"><span>{streak}日</span><span className="animate-pulse">🔥</span></div>
-                        </div>
-                        <div className="flex justify-between items-center mb-2 px-2">
-                            <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-2 text-pink-400"><Icons.ChevronLeft size={20}/></button>
-                            <span className="font-bold text-gray-800 text-lg block">{monthLabel}</span>
-                            <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="p-2 text-pink-400"><Icons.ChevronRight size={20}/></button>
-                        </div>
-                        <div className="calendar-grid mb-2 text-center text-xs font-bold text-gray-400 border-b border-gray-100 pb-2"><div className="text-red-400">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div className="text-blue-400">土</div></div>
-                        <div className="calendar-grid gap-1">
-                            {days.map((date, i) => {
-                                if (!date) return <div key={i}></div>;
-                                const dateStr = getLocalDateStr(date);
-                                const s = calculateStreakAtDate(dateStr, historySet);
-                                const isToday = date.toDateString() === new Date().toDateString();
-                                const rotate = (date.getDate() * 13) % 20 - 10;
-                                return (
-                                    <div key={i} className={`calendar-cell ${isToday ? 'bg-pink-50 border border-pink-200' : ''}`}>
-                                        <span className={`text-[10px] mb-0.5 ${isToday ? 'text-pink-600 font-bold' : 'text-gray-400'}`}>{date.getDate()}</span>
-                                        {s > 0 && <span className="text-2xl absolute bottom-0 stamp-animate select-none" style={{ transform: `rotate(${rotate}deg)` }}>{getStamp(s)}</span>}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- 占いモーダル（新規・本格版） ---
-        const FortuneModal = ({ isOpen, onClose, result }) => {
-            const [isFlipped, setIsFlipped] = useState(false);
-            
-            useEffect(() => {
-                if (isOpen) {
-                    setIsFlipped(false);
-                    // 1秒後に自動でめくる
-                    const timer = setTimeout(() => {
-                        setIsFlipped(true);
-                        if (navigator.vibrate) navigator.vibrate([50, 100]);
-                    }, 1000);
-                    return () => clearTimeout(timer);
-                }
-            }, [isOpen]);
-
-            if (!isOpen || !result) return null;
-
-            const StarRating = ({ count }) => (
-                <div className="flex text-sm">
-                    {[...Array(5)].map((_, i) => (
-                        <span key={i} className={i < count ? "star-rating" : "star-rating-gray"}>★</span>
-                    ))}
-                </div>
-            );
-
-            return (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={isFlipped ? onClose : null}>
-                    <div className="w-full max-w-sm aspect-[3/4] perspective-1000" onClick={e => e.stopPropagation()}>
-                        <div className={`card-inner relative w-full h-full duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'flipped' : ''}`} onClick={() => !isFlipped && setIsFlipped(true)}>
-                            
-                            {/* カード裏面（最初に見える面） */}
-                            <div className="card-front">
-                                <div className="text-6xl animate-pulse">🔮</div>
-                                <p className="mt-4 text-pink-400 font-bold font-pop">湯の託宣</p>
-                                <p className="text-xs text-gray-400 mt-2">心を鎮めてタップ...</p>
-                            </div>
-
-                            {/* カード表面（結果） */}
-                            <div className="card-back overflow-hidden relative">
-                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 to-purple-400"></div>
-                                <div className="p-6 flex flex-col h-full w-full">
-                                    <div className="text-center mb-4">
-                                        <p className="text-xs text-gray-400 font-bold mb-1">今日の入浴運勢</p>
-                                        <h2 className={`text-4xl font-black font-pop ${result.color} tracking-widest`}>{result.rank}</h2>
-                                        <p className="text-[10px] text-gray-400 font-bold mt-1 tracking-widest">- {result.read} -</p>
-                                        <h3 className="text-sm font-bold text-gray-700 mt-2">「{result.title}」</h3>
-                                    </div>
-
-                                    <div className="bg-gray-50 rounded-xl p-3 mb-4 text-xs font-bold text-gray-600 leading-relaxed text-center flex-grow flex items-center justify-center">
-                                        {result.desc}
-                                    </div>
-
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex justify-between items-center bg-pink-50 px-3 py-1.5 rounded-lg">
-                                            <span className="text-xs font-bold text-pink-500">恋愛運</span>
-                                            <StarRating count={result.love} />
-                                        </div>
-                                        <div className="flex justify-between items-center bg-yellow-50 px-3 py-1.5 rounded-lg">
-                                            <span className="text-xs font-bold text-yellow-600">金運</span>
-                                            <StarRating count={result.money} />
-                                        </div>
-                                        <div className="flex justify-between items-center bg-green-50 px-3 py-1.5 rounded-lg">
-                                            <span className="text-xs font-bold text-green-600">健康運</span>
-                                            <StarRating count={result.health} />
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-auto text-center">
-                                        <div className="text-[10px] text-purple-500 font-bold mb-1">✨ ラッキーバスアクション ✨</div>
-                                        <div className="bg-purple-100 text-purple-700 font-bold py-2 px-4 rounded-full text-xs inline-block shadow-sm">
-                                            {result.action}
-                                        </div>
-                                    </div>
-                                    
-                                    <button onClick={onClose} className="mt-4 text-xs text-gray-400 underline">閉じる</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- B.A.T.H. 診断ロジック ---
-        const BATH_QUESTIONS = [
-            { q: "Q1. お風呂、シャワーだけで済ませちゃう？", opts: [{ l: "基本シャワーのみ (効率重視)", val: { s: 2 } }, { l: "湯船に浸かりたい (癒し重視)", val: { l: 2 } }] },
-            { q: "Q2. スマホ、浴室に持ち込む？", opts: [{ l: "絶対持ち込む (ジップロック必須)", val: { d: 2 } }, { l: "持ち込まない (デジタルデトックス)", val: { a: 2 } }] },
-            { q: "Q3. 入浴剤へのこだわりは？", opts: [{ l: "色々試すのが好き", val: { h: 2 } }, { l: "特にない / さら湯", val: { z: 1 } }] },
-            { q: "Q4. お風呂で歌う？", opts: [{ l: "熱唱する (リサイタル会場)", val: { l: 1, h: 1 } }, { l: "静かに過ごす", val: { s: 1, a: 1 } }] },
-            { q: "Q5. 髪を乾かすの、どう思う？", opts: [{ l: "地獄。めんどくさい", val: { z: 3 } }, { l: "ヘアケア大事。ちゃんとやる", val: { h: 2 } }] },
-            { q: "Q6. お風呂掃除の頻度は？", opts: [{ l: "毎日やる (キレイ好き)", val: { h: 2 } }, { l: "ヌメリが出たらやる (限界)", val: { z: 2 } }] },
-            { q: "Q7. 入浴中、何してる時間が長い？", opts: [{ l: "動画・SNSチェック", val: { d: 3 } }, { l: "マッサージ・半身浴", val: { h: 2 } }, { l: "ボーッとする・妄想", val: { a: 2 } }] },
-            { q: "Q8. お風呂上がりの一杯は？", opts: [{ l: "水・ハーブティー・プロテイン", val: { h: 2 } }, { l: "コーヒー牛乳・ビール・炭酸", val: { l: 1, z: 1 } }] },
-            { q: "Q9. お風呂に入る時間は決まってる？", opts: [{ l: "夜にちゃんと入る (ルーティン)", val: { n: 2 } }, { l: "朝シャン派 / 不定期", val: { m: 2 } }] },
-            { q: "Q10. 正直、お風呂は好き？", opts: [{ l: "大好き！天国！", val: { l: 3 } }, { l: "義務。入らなきゃ死ぬから入る", val: { s: 2, z: 1 } }] }
-        ];
-
-        const calculateBathType = (answers) => {
-            let scores = { l:0, s:0, d:0, a:0, h:0, z:0, n:0, m:0 };
-            answers.forEach(ans => { Object.keys(ans).forEach(key => scores[key] += ans[key]); });
-            const c1 = scores.l >= scores.s ? 'L' : 'S';
-            const c2 = scores.d >= scores.a ? 'D' : 'A';
-            const c3 = scores.h >= scores.z ? 'H' : 'Z';
-            const c4 = scores.n >= scores.m ? 'N' : 'M';
-            const code = `${c1}${c2}${c3}${c4}`;
-            
-            let typeData = { name: "バランス湯船グラマー", icon: "🛁", desc: "適度に楽しみ、適度に抜く。標準的なお風呂人。", friend: "LAHN", enemy: "SDZM" };
-            if (code === 'LDHN' || code === 'LAHN') typeData = { name: "美容完璧うさぎ", icon: "🐰", desc: "お風呂＝美容の聖域。入浴剤もヘアケアも完璧なプロ。", friend: "SXZM", enemy: "SDZM" };
-            if (code === 'LDZN' || code === 'LDZM') typeData = { name: "スマホ依存ナマケモノ", icon: "🦥", desc: "お風呂は動画を見る場所。のぼせるまで出られない。", friend: "SAZN", enemy: "LAHM" };
-            if (code === 'SAZN' || code === 'SAZM') typeData = { name: "爆速カラスの行水", icon: "🐦‍⬛", desc: "効率こそ正義。入浴タイムは短ければ短いほど良い。", friend: "LDHN", enemy: "LAHN" };
-            if (code === 'SDZN' || code === 'SDZM') typeData = { name: "限界ドライヤーゾンビ", icon: "🧟‍♀️", desc: "ドライヤーが地獄。気合だけでお風呂に入っている戦士。", friend: "LAHN", enemy: "LDHN" };
-            if (code === 'LAHM' || code === 'LNHM') typeData = { name: "デトックス仙人", icon: "🧘‍♀️", desc: "スマホを捨て、湯と向き合う。精神統一の場としている。", friend: "SDZM", enemy: "LDZN" };
-            if (code === 'SAHN' || code === 'SAHM') typeData = { name: "朝活シャワーアライグマ", icon: "🦝", desc: "夜より朝派。シャキッと目覚めるために水を浴びる。", friend: "LDZM", enemy: "SDZN" };
-            if (code === 'SDHN' || code === 'SDZM') typeData = { name: "疲れ果てたカバ", icon: "🦛", desc: "最低限しか頑張れない。湯船には浸かるが他の努力はしない。", friend: "LAHN", enemy: "SAZN" };
-            return { code, ...typeData };
-        };
-
-        const TypeDiagnosisModal = ({ isOpen, onClose, onSetType, initialType, onShare }) => {
-            const [step, setStep] = useState(0);
-            const [scores, setScores] = useState([]);
-            const [isLoading, setIsLoading] = useState(false);
-            const [resultData, setResultData] = useState(initialType || null); 
-            
-            useEffect(() => {
-                if (isOpen && initialType) {
-                    setResultData(initialType);
-                    setStep('result');
-                } else if (isOpen && !initialType) {
-                    setStep(0);
-                    setScores([]);
-                    setResultData(null);
-                }
-            }, [isOpen, initialType]);
-
-            if (!isOpen) return null;
-
-            const handleAnswer = (val) => {
-                const newScores = [...scores, val];
-                setScores(newScores);
-                if (step + 1 < BATH_QUESTIONS.length) {
-                    setStep(step + 1);
-                } else {
-                    setIsLoading(true);
-                    setTimeout(() => {
-                        const result = calculateBathType(newScores);
-                        setResultData(result); 
-                        onSetType(result);      
-                        setIsLoading(false);
-                        setStep('result');
-                    }, 1500); 
-                }
-            };
-
-            return (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center relative overflow-hidden" onClick={e => e.stopPropagation()}>
-                        {isLoading ? (
-                            <div className="py-10">
-                                <div className="text-4xl animate-spin mb-4">🛁</div>
-                                <h3 className="font-bold text-pink-500 font-pop animate-pulse">分析中...</h3>
-                            </div>
-                        ) : step === 'result' && resultData ? (
-                             <>
-                                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button>
-                                <h3 className="text-sm font-bold text-gray-400 mb-1">B.A.T.H.診断結果</h3>
-                                <div className="text-3xl font-black text-pink-500 font-pop mb-4 tracking-widest">{resultData.code}型</div>
-                                
-                                <div className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-2xl p-6 mb-4 relative overflow-hidden">
-                                    <div className="absolute -right-4 -top-4 text-8xl opacity-10">{resultData.icon}</div>
-                                    <div className="text-6xl mb-2 relative z-10">{resultData.icon}</div>
-                                    <h2 className="text-xl font-black text-gray-800 mb-2 font-pop relative z-10" style={{ textWrap: 'balance' }}>{resultData.name}</h2>
-                                    <p className="text-xs text-gray-600 font-bold leading-tight relative z-10">{resultData.desc}</p>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 mb-6 text-xs font-bold">
-                                    <div className="bg-blue-50 p-2 rounded-lg text-blue-600">相性◎: {resultData.friend}型</div>
-                                    <div className="bg-red-50 p-2 rounded-lg text-red-500">天敵: {resultData.enemy}型</div>
-                                </div>
-
-                                <button onClick={() => onShare(resultData)} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 mb-3 flex items-center justify-center gap-2">
-                                    <Icons.Share size={20} /> 診断結果をシェアする
-                                </button>
-                                <button onClick={onClose} className="text-xs text-gray-400 underline">閉じる</button>
-                            </>
-                        ) : (
-                            <>
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-pink-400 font-pop">B.A.T.H.診断</h3>
-                                    <span className="text-xs font-bold bg-pink-100 text-pink-500 px-2 py-1 rounded-full">{step + 1} / {BATH_QUESTIONS.length}</span>
-                                </div>
-                                <p className="text-lg font-bold text-gray-800 mb-8 font-hand min-h-[3rem] flex items-center justify-center">{BATH_QUESTIONS[step].q}</p>
-                                <div className="space-y-4">
-                                    {BATH_QUESTIONS[step].opts.map((opt, i) => (
-                                        <button key={i} onClick={() => handleAnswer(opt.val)} className="w-full bg-white border-2 border-pink-100 hover:bg-pink-50 text-gray-700 font-bold py-4 rounded-xl shadow-sm transition-all active:scale-95 text-sm">
-                                            {opt.l}
-                                        </button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // --- Main App ---
         const App = () => {
             const [hp, setHp] = useState(100);
             const [lastBathTime, setLastBathTime] = useState(new Date());
@@ -675,9 +159,9 @@
 
             const [isCalendarOpen, setIsCalendarOpen] = useState(false);
             const [isTypeDiagOpen, setIsTypeDiagOpen] = useState(false);
-            const [isFortuneOpen, setIsFortuneOpen] = useState(false); // 占いモーダル
+            const [isFortuneOpen, setIsFortuneOpen] = useState(false); 
             const [isHelpOpen, setIsHelpOpen] = useState(false); 
-            const [fortuneResult, setFortuneResult] = useState(null); // 占い結果
+            const [fortuneResult, setFortuneResult] = useState(null); 
             const [showWelcomeModal, setShowWelcomeModal] = useState(false);
             const [showInAppWarning, setShowInAppWarning] = useState(false);
             const [showInstallGuide, setShowInstallGuide] = useState(false);
@@ -687,199 +171,94 @@
             const [generatedImage, setGeneratedImage] = useState(null);
             const [isFetchingWeather, setIsFetchingWeather] = useState(false);
 
-            // 初期ロード
-            useEffect(() => {
-                const load = (k) => localStorage.getItem(k);
-                if (load(STORAGE_KEY_HP)) setHp(parseFloat(load(STORAGE_KEY_HP)));
-                if (load(STORAGE_KEY_LAST_BATH)) setLastBathTime(new Date(load(STORAGE_KEY_LAST_BATH)));
-                if (load(STORAGE_KEY_DAMAGE)) setEventDamageTotal(parseFloat(load(STORAGE_KEY_DAMAGE)));
-                if (load(STORAGE_KEY_LOGS)) setLogs(JSON.parse(load(STORAGE_KEY_LOGS)));
-                if (load(STORAGE_KEY_HISTORY)) setBathHistory(JSON.parse(load(STORAGE_KEY_HISTORY)));
-                if (load(STORAGE_KEY_USER_TYPE)) setUserType(JSON.parse(load(STORAGE_KEY_USER_TYPE)));
-                if (load(STORAGE_KEY_WEATHER)) setWeatherData(JSON.parse(load(STORAGE_KEY_WEATHER)));
-                
-                // アプリ内ブラウザ判定
-                const ua = navigator.userAgent.toLowerCase();
-                if (/line|instagram|twitter|fbav|fban/.test(ua)) {
-                    setShowInAppWarning(true);
-                } else {
-                    // PWAインストール判定 (スタンドアロンでない場合)
-                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-                    if (!isStandalone) setTimeout(() => setShowInstallGuide(true), 2000);
-                }
+            useEffect(() => { const load = (k) => localStorage.getItem(k); if (load(STORAGE_KEY_HP)) setHp(parseFloat(load(STORAGE_KEY_HP))); if (load(STORAGE_KEY_LAST_BATH)) setLastBathTime(new Date(load(STORAGE_KEY_LAST_BATH))); if (load(STORAGE_KEY_DAMAGE)) setEventDamageTotal(parseFloat(load(STORAGE_KEY_DAMAGE))); if (load(STORAGE_KEY_LOGS)) setLogs(JSON.parse(load(STORAGE_KEY_LOGS))); if (load(STORAGE_KEY_HISTORY)) setBathHistory(JSON.parse(load(STORAGE_KEY_HISTORY))); if (load(STORAGE_KEY_USER_TYPE)) setUserType(JSON.parse(load(STORAGE_KEY_USER_TYPE))); if (load(STORAGE_KEY_WEATHER)) setWeatherData(JSON.parse(load(STORAGE_KEY_WEATHER))); const ua = navigator.userAgent.toLowerCase(); if (/line|instagram|twitter|fbav|fban/.test(ua)) { setShowInAppWarning(true); } else { const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; if (!isStandalone) setTimeout(() => setShowInstallGuide(true), 2000); } const lastLogin = localStorage.getItem('hq_last_login'); const now = new Date(); if (lastLogin) { const diff = (now - new Date(lastLogin)) / (1000 * 60 * 60); if (diff > 6 && diff < 16) { setShowWelcomeModal(true); } } localStorage.setItem('hq_last_login', now.toISOString()); }, []);
+            useEffect(() => { localStorage.setItem(STORAGE_KEY_HP, hp.toString()); localStorage.setItem(STORAGE_KEY_LAST_BATH, lastBathTime.toISOString()); localStorage.setItem(STORAGE_KEY_DAMAGE, eventDamageTotal.toString()); localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs)); localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(bathHistory)); if (userType) localStorage.setItem(STORAGE_KEY_USER_TYPE, JSON.stringify(userType)); if (weatherData) localStorage.setItem(STORAGE_KEY_WEATHER, JSON.stringify(weatherData)); }, [hp, lastBathTime, eventDamageTotal, logs, bathHistory, userType, weatherData]);
 
-                // おかえりモーダル判定
-                const lastLogin = localStorage.getItem('hq_last_login');
-                const now = new Date();
-                if (lastLogin) {
-                    const diff = (now - new Date(lastLogin)) / (1000 * 60 * 60);
-                    if (diff > 6 && diff < 16) {
-                        setShowWelcomeModal(true);
-                    }
-                }
-                localStorage.setItem('hq_last_login', now.toISOString());
-            }, []);
-
-            // 保存
-            useEffect(() => {
-                localStorage.setItem(STORAGE_KEY_HP, hp.toString());
-                localStorage.setItem(STORAGE_KEY_LAST_BATH, lastBathTime.toISOString());
-                localStorage.setItem(STORAGE_KEY_DAMAGE, eventDamageTotal.toString());
-                localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
-                localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(bathHistory));
-                if (userType) localStorage.setItem(STORAGE_KEY_USER_TYPE, JSON.stringify(userType));
-                if (weatherData) localStorage.setItem(STORAGE_KEY_WEATHER, JSON.stringify(weatherData));
-            }, [hp, lastBathTime, eventDamageTotal, logs, bathHistory, userType, weatherData]);
-
-            // 天気ダメージ倍率計算
-            const getWeatherDamageRate = () => {
-                if (!weatherData) return 1.0;
-                const t = weatherData.temperature;
-                if (t >= 30) return 1.5; // 猛暑
-                if (t >= 25) return 1.2; // 夏日
-                if (t <= 10) return 0.8; // 冬
-                return 1.0;
-            };
-
+            const getWeatherDamageRate = () => { if (!weatherData) return 1.0; const t = weatherData.temperature; if (t >= 30) return 1.5; if (t >= 25) return 1.2; if (t <= 10) return 0.8; return 1.0; };
             const weatherRate = getWeatherDamageRate();
-
-            // HP計算
             const [currentTime, setCurrentTime] = useState(new Date());
-            useEffect(() => {
-                const timer = setInterval(() => setCurrentTime(new Date()), 5000);
-                return () => clearInterval(timer);
-            }, []);
+            useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 5000); return () => clearInterval(timer); }, []);
+            useEffect(() => { const diffMs = new Date() - lastBathTime; const hours = diffMs / (1000 * 60 * 60); const timeDamage = hours * BASE_RATE_PER_HOUR * weatherRate; const totalDamage = timeDamage + eventDamageTotal; setHp(Math.max(0, Math.min(100, 100 - totalDamage))); }, [currentTime, lastBathTime, eventDamageTotal, weatherRate]);
+            const addLog = (text, icon) => { const timeStr = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }); setLogs(prev => [{ time: timeStr, text, icon: icon || "📱" }, ...prev].slice(0, 50)); };
 
-            useEffect(() => {
-                const diffMs = new Date() - lastBathTime;
-                const hours = diffMs / (1000 * 60 * 60);
-                
-                // 天気倍率を適用
-                const timeDamage = hours * BASE_RATE_PER_HOUR * weatherRate; 
-                
-                const totalDamage = timeDamage + eventDamageTotal;
-                setHp(Math.max(0, Math.min(100, 100 - totalDamage)));
-            }, [currentTime, lastBathTime, eventDamageTotal, weatherRate]);
+            const fetchWeather = () => { setIsFetchingWeather(true); const handleWeatherData = (temp, isFallback = false) => { setWeatherData({ temperature: temp, updated: new Date().toISOString() }); if (isFallback) { addLog(`位置情報が取れないため東京の気温(${temp}°C)を取得しました`, "🗼"); } else { addLog(`天気取得完了！現在${temp}°C`, "🌤️"); } if (temp >= 30) addLog("猛暑アラート発令🥵 ダメージ1.5倍！", "🔥"); else if (temp >= 25) addLog("暑い...汗ばむ... ダメージ1.2倍💦", "💦"); else if (temp <= 10) addLog("寒い...汗かかないボーナス❄️ ダメージ0.8倍", "❄️"); setIsFetchingWeather(false); }; const fetchTokyoWeather = async () => { try { const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current_weather=true`); if (!res.ok) throw new Error('API Error'); const data = await res.json(); handleWeatherData(data.current_weather.temperature, true); } catch (e) { addLog("天気の取得に失敗しました💦", "❌"); setIsFetchingWeather(false); } }; if (!navigator.geolocation) { fetchTokyoWeather(); return; } const options = { timeout: 10000, maximumAge: 0 }; navigator.geolocation.getCurrentPosition(async (pos) => { const { latitude, longitude } = pos.coords; try { const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`); if (!res.ok) throw new Error('API Error'); const data = await res.json(); handleWeatherData(data.current_weather.temperature, false); } catch(e) { fetchTokyoWeather(); } }, (err) => { console.warn(`Geolocation Error(${err.code}): ${err.message}`); fetchTokyoWeather(); }, options); };
+            const handleBath = () => { setShowBathConfirmModal(false); setLastBathTime(new Date()); setEventDamageTotal(0); setHp(100); addLog("お風呂入って復活！今日も私が一番カワイイ💖", "🛁"); const today = getLocalDateStr(new Date()); setBathHistory(prev => Array.from(new Set(prev).add(today))); const result = generateFortune(); setFortuneResult(result); setTimeout(() => setIsFortuneOpen(true), 500); if (navigator.vibrate) navigator.vibrate([0, 100, 50, 100]); };
 
-            const addLog = (text, icon) => {
-                const timeStr = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-                setLogs(prev => [{ time: timeStr, text, icon: icon || "📱" }, ...prev].slice(0, 50));
-            };
-
-            // 天気取得 (フォールバック付き)
-            const fetchWeather = () => {
-                setIsFetchingWeather(true);
-                
-                // 共通の天気処理ロジック
-                const handleWeatherData = (temp, isFallback = false) => {
-                    setWeatherData({
-                        temperature: temp,
-                        updated: new Date().toISOString()
-                    });
-                    
-                    if (isFallback) {
-                        addLog(`位置情報が取れないため東京の気温(${temp}°C)を取得しました`, "🗼");
-                    } else {
-                        addLog(`天気取得完了！現在${temp}°C`, "🌤️");
-                    }
-
-                    if (temp >= 30) addLog("猛暑アラート発令🥵 ダメージ1.5倍！", "🔥");
-                    else if (temp >= 25) addLog("暑い...汗ばむ... ダメージ1.2倍💦", "💦");
-                    else if (temp <= 10) addLog("寒い...汗かかないボーナス❄️ ダメージ0.8倍", "❄️");
-                    
-                    setIsFetchingWeather(false);
-                };
-
-                // 東京の天気を取得するフォールバック関数
-                const fetchTokyoWeather = async () => {
-                    try {
-                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current_weather=true`);
-                        if (!res.ok) throw new Error('API Error');
-                        const data = await res.json();
-                        handleWeatherData(data.current_weather.temperature, true);
-                    } catch (e) {
-                        addLog("天気の取得に失敗しました💦", "❌");
-                        setIsFetchingWeather(false);
-                    }
-                };
-
-                // ブラウザが対応していない場合 -> 即座に東京の天気へ
-                if (!navigator.geolocation) {
-                    fetchTokyoWeather();
-                    return;
-                }
-                
-                // タイムアウト設定を追加 (10秒)
-                const options = {
-                    timeout: 10000,
-                    maximumAge: 0
-                };
-
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const { latitude, longitude } = pos.coords;
-                    try {
-                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-                        if (!res.ok) throw new Error('API Error');
-                        
-                        const data = await res.json();
-                        handleWeatherData(data.current_weather.temperature, false);
-                    
-                    } catch(e) { 
-                        // APIエラー時もフォールバック
-                        fetchTokyoWeather();
-                    }
-                }, (err) => {
-                    // 位置情報取得エラー時 -> フォールバック
-                    console.warn(`Geolocation Error(${err.code}): ${err.message}`);
-                    fetchTokyoWeather();
-                }, options);
-            };
-
-            // お風呂リセット処理（確認後に呼ばれる）
-            const handleBath = () => {
-                setShowBathConfirmModal(false); // モーダル閉じる
-                setLastBathTime(new Date());
-                setEventDamageTotal(0);
-                setHp(100);
-                addLog("お風呂入って復活！今日も私が一番カワイイ💖", "🛁");
-                const today = getLocalDateStr(new Date());
-                setBathHistory(prev => Array.from(new Set(prev).add(today)));
-                
-                // 占い実行 (動的生成)
-                const result = generateFortune();
-                setFortuneResult(result);
-                
-                setTimeout(() => setIsFortuneOpen(true), 500); 
-
-                if (navigator.vibrate) navigator.vibrate([0, 100, 50, 100]);
-            };
+            const drawRoundedRect = (ctx, x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
 
             const generateShareImage = async (mode = 'status') => {
                 setIsGenerating(true);
-                const targetId = mode === 'type' ? 'share-target-type' : 'share-target-status';
-                const node = document.getElementById(targetId);
-                
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const W = 800; const H = 1200;
+                canvas.width = W; canvas.height = H;
+
                 try {
-                    await new Promise(r => setTimeout(r, 200));
-                    const dataUrl = await htmlToImage.toPng(node, { quality: 1.0, pixelRatio: 3, style: { transform: 'scale(1)' } });
-                    setGeneratedImage(dataUrl);
-                    
-                    if (navigator.canShare && navigator.canShare({ files: [new File([], 't.png')] })) {
-                        const blob = await (await fetch(dataUrl)).blob();
-                        const file = new File([blob], "checker.png", { type: "image/png" });
-                        const shareText = mode === 'type' 
-                            ? `私の入浴タイプは【${userType?.code}型】！性格までバレるかも...？🛀 #フロハイッタ`
-                            : `清潔度${Math.floor(hp)}%！${getStatus(hp).shareMsg} #フロハイッタ`;
-                        try { await navigator.share({ title: 'フロハイッタ？', text: shareText, files: [file] }); } catch(e){}
+                    // 背景
+                    ctx.fillStyle = '#fdf2f8'; ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = '#fbcfe8'; for(let i=0; i<W; i+=40) { for(let j=0; j<H; j+=40) { if ((i+j)%80 === 0) { ctx.beginPath(); ctx.arc(i, j, 8, 0, Math.PI*2); ctx.fill(); } } }
+
+                    // ヘッダー削除 (中央に大きく表示するため)
+
+                    if (mode === 'status') {
+                        const currentStatus = getStatus(hp);
+                        const cx = W/2; const cy = 350;
+
+                        // ★★★ 画像の代わりに絵文字を使用 ★★★
+                        ctx.shadowBlur = 60; ctx.shadowColor = currentStatus.glow.includes('pink') ? '#f472b6' : currentStatus.glow.includes('yellow') ? '#facc15' : currentStatus.glow.includes('purple') ? '#c084fc' : '#9ca3af';
+                        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(cx, cy, 200, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0; 
+
+                        // 中央アイコン: お風呂の絵文字
+                        ctx.textAlign = 'center';
+                        ctx.font = '200px sans-serif';
+                        ctx.fillText('🛁', cx, cy + 60);
+
+                        // タイトル表示
+                        ctx.fillStyle = '#ec4899';
+                        ctx.font = '900 60px "Mochiy Pop One"';
+                        ctx.fillText('フロハイッタ？', cx, cy + 220);
+
+                        // 時間表示ボックス
+                        ctx.fillStyle = 'rgba(255,255,255,0.8)'; drawRoundedRect(ctx, 100, 650, 600, 120, 20); ctx.fill(); ctx.strokeStyle = '#fbcfe8'; ctx.stroke();
+                        ctx.fillStyle = '#f472b6'; ctx.font = 'bold 24px "Zen Maru Gothic"'; ctx.fillText('お風呂に入らず...', W/2, 690); ctx.font = '900 60px "Mochiy Pop One"'; ctx.fillStyle = '#db2777'; ctx.fillText(`${hoursSince} 時間`, W/2, 750);
+                        
+                        // メインステータスボックス
+                        ctx.fillStyle = 'rgba(255,255,255,0.9)'; drawRoundedRect(ctx, 50, 800, 700, 250, 30); ctx.fill();
+                        ctx.fillStyle = '#6b7280'; ctx.font = 'bold 30px "Zen Maru Gothic"'; ctx.textAlign = 'left'; ctx.fillText('現在の清潔度', 100, 860); ctx.textAlign = 'right'; ctx.font = '900 80px "Mochiy Pop One"'; ctx.fillStyle = '#ec4899'; ctx.fillText(`${Math.floor(hp)}%`, 700, 880);
+                        
+                        // 一言メッセージ
+                        ctx.textAlign = 'center'; ctx.fillStyle = '#374151'; ctx.font = 'bold 36px "Yomogi"'; ctx.fillText(`「${currentStatus.shareMsg}」`, W/2, 980);
+
+                    } else {
+                        // タイプ診断（こちらは絵文字なのでそのまま表示）
+                        if (!userType) throw new Error("No Data");
+                        ctx.fillStyle = '#ec4899'; ctx.font = '900 50px "Mochiy Pop One"'; ctx.textAlign = 'center'; ctx.fillText(`${userType.code}型`, W/2, 200);
+                        ctx.font = '150px sans-serif'; ctx.fillText(userType.icon, W/2, 380);
+                        ctx.fillStyle = '#1f2937'; ctx.font = '900 40px "Mochiy Pop One"'; ctx.fillText(userType.name, W/2, 500);
+                        ctx.fillStyle = '#4b5563'; ctx.font = 'bold 24px "Zen Maru Gothic"'; const desc = userType.desc; if(desc.length > 20) { ctx.fillText(desc.substring(0, 20), W/2, 560); ctx.fillText(desc.substring(20), W/2, 600); } else { ctx.fillText(desc, W/2, 560); }
+                        const drawRelation = (label, type, color, x, y) => { ctx.fillStyle = color === 'blue' ? '#eff6ff' : '#fef2f2'; ctx.strokeStyle = color === 'blue' ? '#bfdbfe' : '#fecaca'; drawRoundedRect(ctx, x, y, 300, 150, 20); ctx.fill(); ctx.stroke(); ctx.fillStyle = color === 'blue' ? '#2563eb' : '#dc2626'; ctx.textAlign = 'center'; ctx.font = 'bold 24px "Zen Maru Gothic"'; ctx.fillText(label, x + 150, y + 50); ctx.font = '900 40px "Mochiy Pop One"'; ctx.fillText(type, x + 150, y + 110); };
+                        drawRelation("相性◎", `${userType.friend}型`, 'blue', 80, 700); drawRelation("天敵", `${userType.enemy}型`, 'red', 420, 700);
                     }
-                } catch (e) { 
-                     alert('画像生成失敗💦'); 
-                     console.error(e);
-                } 
-                finally { setIsGenerating(false); }
+
+                    ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Mochiy Pop One"'; ctx.textAlign = 'center'; ctx.fillText('🛁 お風呂入って盛れ度UP！', W/2, 1150);
+
+                    canvas.toBlob(async (blob) => {
+                        if (!blob) throw new Error("Canvas Error");
+                        const file = new File([blob], "share.png", { type: "image/png" });
+                        const dataUrl = URL.createObjectURL(blob);
+                        setGeneratedImage(dataUrl);
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            try {
+                                const url = 'https://ioriiroikw-eng.github.io/bath-check/';
+                                const title = 'フロハイッタ？';
+                                const text = mode === 'type' ? `私の入浴タイプ診断結果！🛀 #フロハイッタ\n${url}` : `清潔度チェック！ #フロハイッタ\n${url}`;
+                                await navigator.share({ title: title, text: text, url: url, files: [file] });
+                            } catch (err) { console.log("Share canceled"); }
+                        }
+                    }, 'image/png');
+                } catch (e) { console.error(e); alert("画像生成に失敗しました💦"); } finally { setIsGenerating(false); }
             };
 
-            // ▼▼▼ 修正箇所: 画像ファイルへの変更 ▼▼▼
             const getStatus = (hp) => {
                 if (hp >= 80) return { avatar: "./char_80.png", label: "大勝利", deco: "👑", shareMsg: "全人類見て✨", glow: "bg-pink-400" };
                 if (hp >= 50) return { avatar: "./char_50.png", label: "天使", deco: "✨", shareMsg: "まだ舞えるはず", glow: "bg-yellow-200" };
@@ -893,145 +272,40 @@
             return (
                 <div className="min-h-screen w-full flex flex-col items-center py-6 px-4 pb-safe relative">
                     <div className="float-bg">{[...Array(15)].map((_,i)=><div key={i} className="float-item" style={{left:`${Math.random()*100}%`, animationDuration:`${15+Math.random()*20}s`, animationDelay:`${Math.random()*10}s`, fontSize:`${10+Math.random()*20}px`}}>{i%3===0?'💖':i%3===1?'✨':'🛁'}</div>)}</div>
-
-                    {/* モーダル群 (警告・ガイド・おかえり) */}
                     {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
                     {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
-                    <WelcomeModal 
-                        isOpen={showWelcomeModal} 
-                        onClose={() => setShowWelcomeModal(false)}
-                        onYes={() => {
-                            setEventDamageTotal(prev => prev + 30);
-                            addLog("おかえり自動記録 (-30)", "🏠");
-                            setShowWelcomeModal(false);
-                        }}
-                    />
-                    <BathConfirmModal 
-                        isOpen={showBathConfirmModal} 
-                        onClose={() => setShowBathConfirmModal(false)} 
-                        onConfirm={handleBath} 
-                    />
-                    <HelpModal 
-                        isOpen={isHelpOpen} 
-                        onClose={() => setIsHelpOpen(false)} 
-                    />
-                    <FortuneModal
-                        isOpen={isFortuneOpen}
-                        onClose={() => setIsFortuneOpen(false)}
-                        result={fortuneResult}
-                    />
+                    <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} onYes={() => { setEventDamageTotal(prev => prev + 30); addLog("おかえり自動記録 (-30)", "🏠"); setShowWelcomeModal(false); }} />
+                    <BathConfirmModal isOpen={showBathConfirmModal} onClose={() => setShowBathConfirmModal(false)} onConfirm={handleBath} />
+                    <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+                    <FortuneModal isOpen={isFortuneOpen} onClose={() => setIsFortuneOpen(false)} result={fortuneResult} />
 
-                    {/* Header: アイコン削除済み */}
                     <div className="w-full flex justify-between items-center pt-safe mb-4 mt-2 relative z-20 px-2">
-                        <div className="flex gap-2">
-                            <button onClick={() => setIsCalendarOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Calendar size={24} /></button>
-                        </div>
-                        <div className="flex gap-2">
-                            <button onClick={() => setIsHelpOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Help size={24} /></button>
-                            <button onClick={() => generateShareImage('status')} disabled={isGenerating} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform disabled:opacity-50">{isGenerating ? <div className="animate-spin w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"></div> : <Icons.Share size={24} />}</button>
-                        </div>
+                        <div className="flex gap-2"> <button onClick={() => setIsCalendarOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Calendar size={24} /></button> </div>
+                        <div className="flex gap-2"> <button onClick={() => setIsHelpOpen(true)} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"><Icons.Help size={24} /></button> <button onClick={() => generateShareImage('status')} disabled={isGenerating} className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform disabled:opacity-50">{isGenerating ? <div className="animate-spin w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full"></div> : <Icons.Share size={24} />}</button> </div>
                     </div>
 
-                    {/* 天気ウィジェット */}
                     <div className="w-full max-w-sm mb-4">
-                        {!weatherData ? (
-                            <button onClick={fetchWeather} disabled={isFetchingWeather} className="w-full bg-blue-50 border-2 border-blue-200 text-blue-500 font-bold py-2 rounded-xl shadow-sm text-xs flex items-center justify-center gap-2 transition-transform active:scale-95">
-                                {isFetchingWeather ? <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div> : <Icons.Cloud size={16} />}
-                                <span>現在地の天気を取得してリアル連携 (β)</span>
-                            </button>
-                        ) : (
-                            <div className="w-full bg-white/80 border-2 border-blue-100 rounded-xl p-3 flex items-center justify-between shadow-sm relative overflow-hidden">
-                                {weatherRate > 1.0 && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg animate-pulse">ダメージ加速中!</div>}
-                                {weatherRate < 1.0 && <div className="absolute top-0 right-0 bg-blue-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">快適ボーナス中!</div>}
-                                
-                                <div className="flex items-center gap-3">
-                                    <div className="text-3xl">{weatherData.temperature >= 25 ? '🥵' : weatherData.temperature <= 10 ? '🥶' : '🌤️'}</div>
-                                    <div>
-                                        <div className="text-xs font-bold text-gray-400">現在の気温</div>
-                                        <div className="text-xl font-black text-gray-700 font-pop">{weatherData.temperature}°C</div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-[10px] font-bold text-gray-400">ダメージ倍率</div>
-                                    <div className={`text-lg font-black font-pop ${weatherRate > 1.0 ? 'text-red-500' : weatherRate < 1.0 ? 'text-blue-500' : 'text-gray-600'}`}>x{weatherRate}</div>
-                                </div>
-                                <button onClick={fetchWeather} className="absolute bottom-2 right-2 text-gray-300 p-1 hover:text-blue-400"><Icons.Cloud size={12} /></button>
-                            </div>
-                        )}
+                        {!weatherData ? ( <button onClick={fetchWeather} disabled={isFetchingWeather} className="w-full bg-blue-50 border-2 border-blue-200 text-blue-500 font-bold py-2 rounded-xl shadow-sm text-xs flex items-center justify-center gap-2 transition-transform active:scale-95"> {isFetchingWeather ? <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div> : <Icons.Cloud size={16} />} <span>現在地の天気を取得してリアル連携 (β)</span> </button> ) : ( <div className="w-full bg-white/80 border-2 border-blue-100 rounded-xl p-3 flex items-center justify-between shadow-sm relative overflow-hidden"> {weatherRate > 1.0 && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg animate-pulse">ダメージ加速中!</div>} {weatherRate < 1.0 && <div className="absolute top-0 right-0 bg-blue-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">快適ボーナス中!</div>} <div className="flex items-center gap-3"> <div className="text-3xl">{weatherData.temperature >= 25 ? '🥵' : weatherData.temperature <= 10 ? '🥶' : '🌤️'}</div> <div> <div className="text-xs font-bold text-gray-400">現在の気温</div> <div className="text-xl font-black text-gray-700 font-pop">{weatherData.temperature}°C</div> </div> </div> <div className="text-right"> <div className="text-[10px] font-bold text-gray-400">ダメージ倍率</div> <div className={`text-lg font-black font-pop ${weatherRate > 1.0 ? 'text-red-500' : weatherRate < 1.0 ? 'text-blue-500' : 'text-gray-600'}`}>x{weatherRate}</div> </div> <button onClick={fetchWeather} className="absolute bottom-2 right-2 text-gray-300 p-1 hover:text-blue-400"><Icons.Cloud size={12} /></button> </div> )}
                     </div>
 
-                    {/* Main Card (画像版・Safari対策・画像切り抜き) */}
                     <div className="w-full max-w-sm glass-card rounded-3xl p-6 mb-6 text-center relative overflow-visible">
                         <div className="absolute -top-6 -right-1 text-6xl animate-bounce z-20 filter drop-shadow-lg">{status.deco}</div>
                         <div className="absolute top-0 left-0 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-br-2xl rounded-tl-2xl shadow-sm z-10 font-pop">{status.label}</div>
                         <div className="w-40 h-40 mx-auto mt-8 mb-6 relative purupuru select-none flex items-center justify-center">
                             <div className={`absolute inset-2 rounded-full opacity-60 blur-2xl ${status.glow}`} style={{transform: 'translate3d(0,0,0)'}}></div>
-                            {/* 画像に変更 (rounded-fullを追加して強制的に丸くする) */}
                             <img src={status.avatar} alt={status.label} className="relative z-10 w-32 h-32 object-contain drop-shadow-md rounded-full" />
                         </div>
-                        <div className="relative pt-1 mb-2">
-                            <div className="flex mb-2 items-center justify-between font-pop">
-                                <span className="text-sm font-bold inline-block py-1 px-3 uppercase rounded-full text-white bg-pink-400 shadow-md">盛れ度</span>
-                                <span className="text-2xl font-black text-pink-500 drop-shadow-sm">{Math.floor(hp)}%</span>
-                            </div>
-                            <div className="h-6 w-full rounded-full meter-track relative mt-2"><div style={{ width: `${hp}%` }} className="h-full rounded-full meter-fill relative"></div><div style={{ left: `calc(${hp}% - 12px)` }} className="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center meter-icon"><span className="text-2xl">💖</span></div></div>
-                        </div>
-                        <div className="relative bg-white/80 rounded-xl p-4 border-2 border-pink-100 shadow-sm mt-4">
-                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-t-2 border-l-2 border-pink-100 rotate-45"></div>
-                            <p className="font-bold text-gray-700 leading-relaxed text-sm font-hand">{status.shareMsg}</p>
-                        </div>
+                        <div className="relative pt-1 mb-2"> <div className="flex mb-2 items-center justify-between font-pop"> <span className="text-sm font-bold inline-block py-1 px-3 uppercase rounded-full text-white bg-pink-400 shadow-md">盛れ度</span> <span className="text-2xl font-black text-pink-500 drop-shadow-sm">{Math.floor(hp)}%</span> </div> <div className="h-6 w-full rounded-full meter-track relative mt-2"><div style={{ width: `${hp}%` }} className="h-full rounded-full meter-fill relative"></div><div style={{ left: `calc(${hp}% - 12px)` }} className="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center meter-icon"><span className="text-2xl">💖</span></div></div> </div>
+                        <div className="relative bg-white/80 rounded-xl p-4 border-2 border-pink-100 shadow-sm mt-4"> <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-t-2 border-l-2 border-pink-100 rotate-45"></div> <p className="font-bold text-gray-700 leading-relaxed text-sm font-hand">{status.shareMsg}</p> </div>
                     </div>
 
-                    <div className="bg-white/80 px-6 py-3 rounded-2xl mb-6 shadow-md border-2 border-white flex items-center justify-between w-full max-w-sm">
-                        <div className="flex items-center gap-2 text-pink-400"><Icons.Clock size={20} /><span className="text-xs font-bold">経過時間</span></div>
-                        <span className="text-2xl font-black text-pink-500 font-pop">{hoursSince}<span className="text-sm ml-1 text-pink-400">H</span></span>
-                    </div>
-
-                    <button onClick={() => setIsTypeDiagOpen(true)} className="w-full max-w-sm bg-white border-2 border-blue-200 text-blue-500 hover:bg-blue-50 font-bold py-3 rounded-2xl shadow-sm mb-4 flex items-center justify-center gap-2 transition-all active:scale-95">
-                        <span className="text-xl">🛁</span> <span>{userType ? '診断結果を見る' : 'B.A.T.H.タイプ診断をする'}</span>
-                    </button>
-
-                    <button onClick={() => setShowBathConfirmModal(true)} className="w-full max-w-sm bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-black py-4 rounded-full shadow-lg border-4 border-white active:scale-95 transition-all mb-8 flex items-center justify-center gap-2 text-lg font-pop relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                        <Icons.Bath size={24} /> <span>お風呂入ってリセット✨</span>
-                    </button>
-
-                    <div className="w-full max-w-sm bg-white/50 rounded-2xl p-4 h-48 overflow-y-auto border border-white scrollbar-hide">
-                        <h3 className="text-xs font-bold text-gray-400 mb-3 pl-1 sticky top-0 bg-transparent font-pop">HISTORY</h3>
-                        <div className="space-y-3">
-                            {logs.map((log, index) => (
-                                <div key={index} className="flex gap-3 animate-fade-in-up">
-                                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 text-lg border border-pink-200 select-none">{log.icon}</div>
-                                    <div className="bg-white p-2 rounded-r-xl rounded-bl-xl text-xs shadow-sm border border-gray-100 flex-1">
-                                        <div className="text-gray-400 text-[10px] mb-0.5 font-pop">{log.time}</div>
-                                        <div className="text-gray-600 font-hand">{log.text}</div>
-                                    </div>
-                                </div>
-                            ))}
-                            {logs.length === 0 && <p className="text-xs text-gray-400 text-center py-4 font-hand">履歴はないよ！</p>}
-                        </div>
-                    </div>
-
-                    <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 z-40 pointer-events-none">
-                        <div className="pointer-events-auto">
-                            <ActionButton icon="💦" color="bg-blue-400" damage={30} label="運動" onTrigger={()=>{setEventDamageTotal(p=>p+30); addLog("ボタン: 運動した！ (-30)", "💦"); if(navigator.vibrate) navigator.vibrate([50,50]);}} />
-                        </div>
-                        <div className="pointer-events-auto">
-                            <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{setEventDamageTotal(p=>p+10); addLog("ボタン: 食事 (-10)", "🍖"); if(navigator.vibrate) navigator.vibrate(100);}} />
-                        </div>
-                        <div className="pointer-events-auto">
-                            <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{setEventDamageTotal(p=>p+20); addLog("ボタン: 寝て起きた (-20)", "🛌"); if(navigator.vibrate) navigator.vibrate(50);}} />
-                        </div>
-                    </div>
-
+                    <div className="bg-white/80 px-6 py-3 rounded-2xl mb-6 shadow-md border-2 border-white flex items-center justify-between w-full max-w-sm"> <div className="flex items-center gap-2 text-pink-400"><Icons.Clock size={20} /><span className="text-xs font-bold">経過時間</span></div> <span className="text-2xl font-black text-pink-500 font-pop">{hoursSince}<span className="text-sm ml-1 text-pink-400">H</span></span> </div>
+                    <button onClick={() => setIsTypeDiagOpen(true)} className="w-full max-w-sm bg-white border-2 border-blue-200 text-blue-500 hover:bg-blue-50 font-bold py-3 rounded-2xl shadow-sm mb-4 flex items-center justify-center gap-2 transition-all active:scale-95"> <span className="text-xl">🛁</span> <span>{userType ? '診断結果を見る' : 'B.A.T.H.タイプ診断をする'}</span> </button>
+                    <button onClick={() => setShowBathConfirmModal(true)} className="w-full max-w-sm bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-black py-4 rounded-full shadow-lg border-4 border-white active:scale-95 transition-all mb-8 flex items-center justify-center gap-2 text-lg font-pop relative overflow-hidden group"> <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div> <Icons.Bath size={24} /> <span>お風呂入ってリセット✨</span> </button>
+                    <div className="w-full max-w-sm bg-white/50 rounded-2xl p-4 h-48 overflow-y-auto border border-white scrollbar-hide"> <h3 className="text-xs font-bold text-gray-400 mb-3 pl-1 sticky top-0 bg-transparent font-pop">HISTORY</h3> <div className="space-y-3"> {logs.map((log, index) => ( <div key={index} className="flex gap-3 animate-fade-in-up"> <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 text-lg border border-pink-200 select-none">{log.icon}</div> <div className="bg-white p-2 rounded-r-xl rounded-bl-xl text-xs shadow-sm border border-gray-100 flex-1"> <div className="text-gray-400 text-[10px] mb-0.5 font-pop">{log.time}</div> <div className="text-gray-600 font-hand">{log.text}</div> </div> </div> ))} {logs.length === 0 && <p className="text-xs text-gray-400 text-center py-4 font-hand">履歴はないよ！</p>} </div> </div>
+                    <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 z-40 pointer-events-none"> <div className="pointer-events-auto"> <ActionButton icon="💦" color="bg-blue-400" damage={30} label="運動" onTrigger={()=>{setEventDamageTotal(p=>p+30); addLog("ボタン: 運動した！ (-30)", "💦"); if(navigator.vibrate) navigator.vibrate([50,50]);}} /> </div> <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{setEventDamageTotal(p=>p+10); addLog("ボタン: 食事 (-10)", "🍖"); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{setEventDamageTotal(p=>p+20); addLog("ボタン: 寝て起きた (-20)", "🛌"); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> </div>
                     <CalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} history={bathHistory} />
-                    <TypeDiagnosisModal 
-                        isOpen={isTypeDiagOpen} 
-                        onClose={() => setIsTypeDiagOpen(false)} 
-                        onSetType={setUserType} 
-                        initialType={userType} 
-                        onShare={() => generateShareImage('type')} 
-                    />
+                    <TypeDiagnosisModal isOpen={isTypeDiagOpen} onClose={() => setIsTypeDiagOpen(false)} onSetType={setUserType} initialType={userType} onShare={() => generateShareImage('type')} />
                     
                     {generatedImage && (
                         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}>
@@ -1042,53 +316,6 @@
                             </div>
                         </div>
                     )}
-
-                    {/* --- 撮影用隠し要素 (2種類) --- */}
-                    <div style={{ position: 'fixed', top: '-9999px', left: '-9999px' }}>
-                        
-                        {/* 1. ステータス共有用 (画像版・切り抜き) */}
-                        <div id="share-target-status" className="w-[375px] h-[600px] bg-[#fdf2f8] p-8 flex flex-col items-center justify-center relative overflow-hidden text-center border-4 border-white">
-                            <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(#fbcfe8 20%, transparent 20%)', backgroundSize: '20px 20px'}}></div>
-                            <div className="bg-white/90 px-4 py-2 rounded-full border-2 border-pink-200 shadow-sm mb-4 z-10"><h1 className="text-xl font-black text-pink-500 font-pop">フロハイッタ？</h1></div>
-                            <div className="mb-4 relative z-10 scale-110">
-                                {/* 画像に変更 (共有時も丸く切り抜く) */}
-                                <img src={status.avatar} alt={status.label} className="w-40 h-40 object-contain filter drop-shadow-xl rounded-full" />
-                                <div className="absolute -top-4 -right-4 text-5xl">{status.deco}</div>
-                            </div>
-                            <div className="bg-white/60 p-4 rounded-xl border border-pink-100 mb-4 w-full z-10"><div className="text-xs font-bold text-pink-400 mb-1">お風呂に入らず...</div><div className="text-5xl font-black text-pink-600 font-pop leading-none">{hoursSince}<span className="text-lg ml-1">時間</span></div></div>
-                            <div className="bg-white/80 rounded-2xl p-4 border-2 border-pink-100 shadow-md w-full z-10">
-                                <div className="flex justify-between items-end mb-2 border-b border-pink-100 pb-2"><span className="font-bold text-gray-500 text-sm">現在の清潔度</span><span className="font-black text-4xl text-pink-500 font-pop">{Math.floor(hp)}%</span></div>
-                                <div className="text-left"><span className={`text-xs font-bold text-white px-2 py-1 rounded ${status.glow}`}>{status.label}</span></div>
-                                <p className="mt-3 text-sm font-bold text-gray-700 font-hand leading-relaxed">「{status.shareMsg}」</p>
-                            </div>
-                            <div className="mt-6 text-gray-400 text-xs font-bold font-pop flex items-center gap-2 opacity-70"><span>🛁 お風呂入って盛れ度UP！</span></div>
-                        </div>
-
-                        {/* 2. タイプ診断共有用 */}
-                        <div id="share-target-type" className="w-[375px] h-[600px] bg-[#fdf2f8] p-8 flex flex-col items-center justify-center relative overflow-hidden text-center border-4 border-white">
-                            <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(#fbcfe8 20%, transparent 20%)', backgroundSize: '20px 20px'}}></div>
-                            <div className="bg-white/90 px-4 py-2 rounded-full border-2 border-pink-200 shadow-sm mb-8 z-10"><h1 className="text-xl font-black text-pink-500 font-pop">B.A.T.H.タイプ診断</h1></div>
-                            
-                            {userType ? (
-                                <>
-                                    <div className="text-3xl font-black text-pink-500 font-pop mb-6 tracking-widest">{userType.code}型</div>
-                                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 border-2 border-pink-200 rounded-3xl p-6 mb-4 relative overflow-hidden w-full shadow-lg"> {/* パディングをp-8からp-6に縮小 */}
-                                        <div className="text-8xl mb-4 relative z-10">{userType.icon}</div> {/* アイコンサイズを9xlから8xlに縮小 */}
-                                        <h2 className="text-xl font-black text-gray-800 mb-2 font-pop relative z-10" style={{ textWrap: 'balance' }}>{userType.name}</h2>
-                                        <p className="text-xs text-gray-600 font-bold leading-tight relative z-10">{userType.desc}</p> {/* 文字サイズをxsに、行間を詰める */}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 w-full text-xs font-bold mb-8">
-                                        <div className="bg-blue-50 p-3 rounded-xl text-blue-600 border border-blue-100">相性◎<br/><span className="text-lg">{userType.friend}型</span></div>
-                                        <div className="bg-red-50 p-3 rounded-xl text-red-500 border border-red-100">天敵<br/><span className="text-lg">{userType.enemy}型</span></div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="text-gray-400">診断データがありません</div>
-                            )}
-                            <div className="text-gray-400 text-xs font-bold font-pop flex items-center gap-2 opacity-70"><span>🛁 あなたも今すぐ診断！</span></div>
-                        </div>
-
-                    </div>
                 </div>
             );
         };
