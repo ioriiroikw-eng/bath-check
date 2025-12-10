@@ -3,15 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- ▼▼▼ STEP 1 & 2: URLと認証コードを設定しました ▼▼▼ -->
+    <link rel="canonical" href="https://ioriiroikw-eng.github.io/bath-check/">
+    <meta name="google-site-verification" content="yEVgbMoZqDxkxql3bO3llulxWiebh1FDnB4xKPgmrPQ" />
+
+    <!-- SEO対策: 検索エンジン向けの設定 -->
+    <title>お風呂チェッカー｜B.A.T.H.診断＆入浴習慣アプリ</title>
+    <meta name="description" content="「お風呂チェッカー」は、あなたのお風呂タイプを診断し、毎日の入浴を楽しく習慣化する無料Webアプリです。B.A.T.H.診断で性格分析、天気連動ダメージ機能、お風呂ガチャで楽しく清潔度をキープしよう！">
+    <meta name="keywords" content="お風呂,診断,入浴剤,健康,習慣化,アプリ,性格診断,サウナ,入浴">
+    <meta name="robots" content="index, follow">
+    
+    <!-- PWA / モバイル設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#fdf2f8">
-    <title>お風呂チェッカー</title>
     
+    <!-- OGP: SNSシェア時の設定 -->
     <meta property="og:title" content="お風呂チェッカー｜B.A.T.H.診断">
     <meta property="og:description" content="私のお風呂タイプは...？あなたの入浴性格を診断してみない？ #お風呂チェッカー">
     <meta property="og:type" content="website">
     <meta property="og:image" content="icon.png">
+    <meta property="og:site_name" content="お風呂チェッカー">
+    <meta property="og:locale" content="ja_JP">
+    
+    <!-- 構造化データ (JSON-LD): Googleにアプリであることを伝える -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "お風呂チェッカー",
+      "description": "お風呂タイプ診断と入浴習慣化をサポートするエンタメヘルスケアアプリ。",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      },
+      "featureList": "B.A.T.H.タイプ診断, お風呂ログ, 天気連動HP減少, お風呂ガチャ"
+    }
+    </script>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
