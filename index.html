@@ -746,59 +746,146 @@
 
             const drawRoundedRect = (ctx, x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
 
+// --- 画像生成機能（テンプレート合成方式：音楽プレイヤー風） ---
             const generateShareImage = async () => {
                 playSe('pop');
                 setIsGenerating(true);
+                
+                // ★設定：キャンバスサイズ（テンプレート画像のサイズに合わせて変更してください）
+                const W = 1080; 
+                const H = 1450; 
+                
                 const canvas = document.createElement('canvas');
+                canvas.width = W;
+                canvas.height = H;
                 const ctx = canvas.getContext('2d');
-                const W = 800; const H = 1200;
-                canvas.width = W; canvas.height = H;
+
+                // 画像読み込み用ヘルパー関数
+                const loadImage = (src) => new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.src = src;
+                    img.onload = () => resolve(img);
+                    img.onerror = (e) => reject(e);
+                });
 
                 try {
-                    ctx.fillStyle = '#fdf2f8'; ctx.fillRect(0, 0, W, H);
-                    ctx.fillStyle = '#fbcfe8'; for(let i=0; i<W; i+=40) { for(let j=0; j<H; j+=40) { if ((i+j)%80 === 0) { ctx.beginPath(); ctx.arc(i, j, 8, 0, Math.PI*2); ctx.fill(); } } }
+                    // 1. 画像リソースの一括読み込み
+                    // ※ 'template_music.jpg' を同じフォルダに置いてください
+                    const [bgImg, avatarImg] = await Promise.all([
+                        loadImage('./template_music.jpg'), 
+                        loadImage(status.avatar)
+                    ]);
 
-                    const currentStatus = getStatus(hp);
-                    const cx = W/2; const cy = 350;
+                    // 2. 背景テンプレートを描画
+                    ctx.drawImage(bgImg, 0, 0, W, H);
 
-                    ctx.shadowBlur = 60; ctx.shadowColor = currentStatus.glow.includes('pink') ? '#f472b6' : currentStatus.glow.includes('yellow') ? '#facc15' : currentStatus.glow.includes('purple') ? '#c084fc' : '#9ca3af';
-                    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(cx, cy, 200, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0; 
+                    // --- ★座標設定エリア（テンプレートに合わせて位置を調整してください） ---
+                    // アバター（ジャケット画像）の位置とサイズ
+                    const JACKET_X = 158;  
+                    const JACKET_Y = 158;  
+                    const JACKET_SIZE = 765; 
 
+                    // 文字の位置（高さ Y座標）
+                    const TITLE_Y = 1010;   // 状態（曲名）
+                    const ARTIST_Y = 1080;  // 時間（アーティスト名）
+                    
+                    // プログレスバー（HPゲージ）の位置
+                    const BAR_X = 140;      // 左端
+                    const BAR_Y = 1195;     // 高さ
+                    const BAR_W = 800;      // 横幅
+                    const BAR_H = 15;       // 太さ
+                    // -------------------------------------------------------
+
+                    // 3. アバター（ジャケット）の描画
+                    ctx.save();
+                    // 角丸クリッピング
+                    const radius = 40; 
+                    ctx.beginPath();
+                    ctx.roundRect(JACKET_X, JACKET_Y, JACKET_SIZE, JACKET_SIZE, radius);
+                    ctx.clip();
+                    // 画像を描画
+                    ctx.drawImage(avatarImg, JACKET_X, JACKET_Y, JACKET_SIZE, JACKET_SIZE);
+                    ctx.restore();
+
+                    // 4. 文字情報の描画
                     ctx.textAlign = 'center';
-                    ctx.font = '200px sans-serif';
-                    ctx.fillText('🛁', cx, cy + 60);
-
-                    ctx.fillStyle = '#ec4899';
-                    ctx.font = '900 60px "Mochiy Pop One"';
-                    ctx.fillText('フロハイッタ？', cx, cy + 220);
-
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)'; drawRoundedRect(ctx, 100, 650, 600, 120, 20); ctx.fill(); ctx.strokeStyle = '#fbcfe8'; ctx.stroke();
-                    ctx.fillStyle = '#f472b6'; ctx.font = 'bold 24px "Zen Maru Gothic"'; ctx.fillText('お風呂に入らず...', W/2, 690); ctx.font = '900 60px "Mochiy Pop One"'; ctx.fillStyle = '#db2777'; ctx.fillText(`${hoursSince} 時間`, W/2, 750);
                     
-                    ctx.fillStyle = 'rgba(255,255,255,0.9)'; drawRoundedRect(ctx, 50, 800, 700, 250, 30); ctx.fill();
-                    ctx.fillStyle = '#6b7280'; ctx.font = 'bold 30px "Zen Maru Gothic"'; ctx.textAlign = 'left'; ctx.fillText('現在の清潔度', 100, 860); ctx.textAlign = 'right'; ctx.font = '900 80px "Mochiy Pop One"'; ctx.fillStyle = '#ec4899'; ctx.fillText(`${Math.floor(hp)}%`, 700, 880);
+                    // 曲名エリア：現在の状態（HP）
+                    ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#374151'; // 文字色（濃いグレー）
+                    ctx.font = '900 55px "Mochiy Pop One"'; 
+                    const titleText = `${status.label}モード (HP ${Math.floor(hp)}%)`;
+                    ctx.fillText(titleText, W/2, TITLE_Y);
+
+                    // アーティスト名エリア：経過時間
+                    ctx.fillStyle = '#ec4899'; // 文字色（ピンク）
+                    ctx.font = 'bold 40px "Zen Maru Gothic"';
+                    ctx.fillText(`お風呂に入らず ${hoursSince}時間経過`, W/2, ARTIST_Y);
+
+                    // 5. プログレスバー（HPゲージ）の描画
+                    const currentBarWidth = BAR_W * (hp / 100);
                     
-                    ctx.textAlign = 'center'; ctx.fillStyle = '#374151'; ctx.font = 'bold 36px "Yomogi"'; ctx.fillText(`「${status.shareMsg}」`, W/2, 980);
+                    // バーの背景（薄いグレー）
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                    ctx.beginPath();
+                    ctx.roundRect(BAR_X, BAR_Y - BAR_H/2, BAR_W, BAR_H, 10);
+                    ctx.fill();
 
-                    ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Mochiy Pop One"'; ctx.textAlign = 'center'; ctx.fillText('🛁 お風呂入って盛れ度UP！', W/2, 1150);
+                    // 現在のHP（グラデーションバー）
+                    if (hp > 0) {
+                        const gradient = ctx.createLinearGradient(BAR_X, 0, BAR_X + currentBarWidth, 0);
+                        gradient.addColorStop(0, '#f472b6'); // ピンク
+                        gradient.addColorStop(1, '#a855f7'); // 紫
+                        ctx.fillStyle = gradient;
+                        
+                        ctx.beginPath();
+                        ctx.roundRect(BAR_X, BAR_Y - BAR_H/2, currentBarWidth, BAR_H, 10);
+                        ctx.fill();
+                        
+                        // シークバーのつまみ（白い丸）
+                        ctx.beginPath();
+                        ctx.arc(BAR_X + currentBarWidth, BAR_Y, 18, 0, Math.PI * 2);
+                        ctx.fillStyle = '#fff';
+                        ctx.fill();
+                        ctx.shadowColor = "rgba(0,0,0,0.2)";
+                        ctx.shadowBlur = 4;
+                        ctx.stroke();
+                    }
 
+                    // 時間表示（左端：0:00、右端：現在時間）
+                    ctx.font = 'bold 24px "Zen Maru Gothic"';
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.textAlign = 'left';
+                    ctx.fillText("0:00", BAR_X, BAR_Y + 50);
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`${hoursSince}H`, BAR_X + BAR_W, BAR_Y + 50);
+
+                    // 6. 書き出し処理
                     canvas.toBlob(async (blob) => {
                         if (!blob) throw new Error("Canvas Error");
                         const file = new File([blob], "share.png", { type: "image/png" });
                         const dataUrl = URL.createObjectURL(blob);
                         setGeneratedImage(dataUrl);
+                        
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
                                 const url = 'https://ioriiroikw-eng.github.io/bath-check/';
                                 const title = 'フロハイッタ？';
-                                const text = `清潔度チェック！ #フロハイッタ\n${url}`;
-                                await navigator.share({ title: title, text: text, url: url, files: [file] });
+                                const shareText = `🎵 Now Playing: ${titleText}\n⏱️ Time: ${hoursSince}時間\n\n#フロハイッタ #入浴習慣`;
+                                await navigator.share({ title: title, text: shareText, url: url, files: [file] });
                             } catch (err) { console.log("Share canceled"); }
                         }
                     }, 'image/png');
-                } catch (e) { console.error(e); alert("画像生成に失敗しました💦"); } finally { setIsGenerating(false); }
-            };
 
+                } catch (e) {
+                    console.error(e);
+                    alert("画像生成に失敗しました💦\nテンプレート画像(template_music.jpg)がフォルダにあるか確認してね！");
+                } finally {
+                    setIsGenerating(false);
+                }
+            };
             const getStatus = (hp) => {
                 if (hp >= 80) return { avatar: "./char_80.png", label: "大勝利", deco: "👑", glow: "bg-pink-400", msgList: STATUS_MESSAGES.high };
                 if (hp >= 50) return { avatar: "./char_50.png", label: "天使", deco: "✨", glow: "bg-yellow-200", msgList: STATUS_MESSAGES.mid };
