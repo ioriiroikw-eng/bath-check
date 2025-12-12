@@ -79,7 +79,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
         // --- 設定・定数 ---
         const BASE_RATE_PER_HOUR = 2.5; 
@@ -89,6 +89,30 @@
         const STORAGE_KEY_LOGS = 'hq_logs';
         const STORAGE_KEY_HISTORY = 'hq_history';
         const STORAGE_KEY_WEATHER = 'hq_weather_v1'; 
+
+        // --- メッセージリストの拡張 ---
+        const STATUS_MESSAGES = {
+            high: [ // 80%以上
+                "全人類見て✨", "今なら無敵モード", "毛穴？何それ美味しいの？", 
+                "オーラで見えません", "フローラルな香り漂う", "鏡を見るのが楽しい",
+                "清潔感の塊", "世界が私に恋してる"
+            ],
+            mid: [ // 50%以上
+                "まだ舞えるはず", "ギリ人間保ってます", "急な呼び出しはNGで", 
+                "フィルタかければ余裕", "近づいても大丈夫...たぶん", "清潔感...70点くらい？",
+                "可もなく不可もなく", "明日の私に期待"
+            ],
+            low: [ // 20%以上
+                "半径2m接近禁止", "帽子とマスクが本体", "前髪がバーコード", 
+                "Zoomなら耐える", "野生の香りがする", "誰にも会いたくない",
+                "頭皮がかゆい気がする", "自分から逃げたい"
+            ],
+            bad: [ // 20%未満
+                "社会的に死😇", "お風呂...どこ...", "人権を失いました", 
+                "ハエが友達", "触るな危険", "バイオハザード発生中",
+                "終わりの始まり", "記憶から消去したい"
+            ]
+        };
 
         // --- 音声ファイル ---
         const SE_POP_URL = "./audio/se_pop.mp3";   
@@ -158,15 +182,95 @@
         
         const InstallGuide = ({ onClose }) => { const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()); return ( <div className="fixed bottom-0 left-0 right-0 p-4 z-50 slide-up pb-safe"> <div className="bg-gray-800/95 backdrop-blur text-white rounded-2xl p-4 shadow-2xl relative border border-pink-400"> <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 p-2"><Icons.X size={18} /></button> <div className="flex items-start gap-4"> <div className="bg-pink-500 p-3 rounded-xl shrink-0"><Icons.Download size={24} /></div> <div> <h3 className="font-bold text-sm mb-1 font-pop">ホーム画面に追加しよう！</h3> <p className="text-xs text-gray-300 mb-2">アプリみたいに使えて、全画面で見やすくなるよ✨</p> <div className="text-xs font-bold text-pink-300 flex items-center gap-1 flex-wrap"> {isIOS ? <><span className="bg-gray-600 px-1 rounded inline-flex"><Icons.IosShare size={12}/></span> から「ホーム画面に追加」</> : <>メニュー <span className="bg-gray-600 px-1 rounded text-[10px]">︙</span> から「アプリをインストール」</>} </div> </div> </div> </div> </div> ); };
         
-        const WelcomeModal = ({ isOpen, onClose, onYes }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl" onClick={e => e.stopPropagation()}> <div className="text-5xl mb-4">🏠</div> <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">おかえりなさい！</h3> <p className="text-gray-600 font-bold mb-6 text-sm">学校・職場から帰宅した？<br/>移動ダメージを記録しますか？ (-30HP)</p> <div className="flex gap-3"> <button onClick={onYes} className="flex-1 bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">はい！(記録)</button> <button onClick={onClose} className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl shadow-md active:scale-95">いいえ</button> </div> </div> </div> ); };
+        // --- 帰宅時モーダル (WelcomeModal) ---
+        const WelcomeModal = ({ isOpen, onClose, onAction }) => { 
+            if (!isOpen) return null; 
+            return ( 
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> 
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl" onClick={e => e.stopPropagation()}> 
+                        <div className="text-center mb-6">
+                            <div className="text-5xl mb-2 animate-bounce">🏠</div> 
+                            <h3 className="text-xl font-black text-gray-800 mb-1 font-pop">おかえり〜！</h3> 
+                            <p className="text-xs text-gray-500 font-bold">外の汚れを記録する？<br/>(今の状態を選んでね！)</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <button onClick={() => onAction(5, "近所行ってきただけ！セーフ🙆‍♀️", "👟")} className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">👟</span>
+                                <span className="text-xs font-bold text-gray-700">ちょっとそこまで</span>
+                                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 rounded-full font-bold">-5%</span>
+                            </button>
+                            <button onClick={() => onAction(15, "無事帰宅🏠 ベタベタする〜🥺", "🏫")} className="bg-green-50 hover:bg-green-100 border-2 border-green-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">🏫</span>
+                                <span className="text-xs font-bold text-gray-700">学校/バイトおわ！</span>
+                                <span className="text-[10px] bg-green-200 text-green-800 px-2 rounded-full font-bold">-15%</span>
+                            </button>
+                            <button onClick={() => onAction(25, "満員電車とか無理...早くお風呂...😇", "🥵")} className="bg-red-50 hover:bg-red-100 border-2 border-red-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">🥵</span>
+                                <span className="text-xs font-bold text-gray-700">汗だく限界...</span>
+                                <span className="text-[10px] bg-red-200 text-red-800 px-2 rounded-full font-bold">-25%</span>
+                            </button>
+                            <button onClick={() => onAction(0, "ただいま！まだ舞える✨", "✨")} className="bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">✨</span>
+                                <span className="text-xs font-bold text-gray-700">まだ余裕✨</span>
+                                <span className="text-[10px] bg-yellow-200 text-yellow-800 px-2 rounded-full font-bold">±0%</span>
+                            </button>
+                        </div>
+
+                        <button onClick={onClose} className="w-full text-xs text-gray-400 underline py-2">今は記録しない</button> 
+                    </div> 
+                </div> 
+            ); 
+        };
+
+        // --- 外出アクションモーダル (OutingActionModal) ---
+        const OutingActionModal = ({ isOpen, onClose, onAction }) => { 
+            if (!isOpen) return null; 
+            return ( 
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> 
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl" onClick={e => e.stopPropagation()}> 
+                        <div className="text-center mb-6">
+                            <div className="text-5xl mb-2 animate-bounce">🏠</div> 
+                            <h3 className="text-xl font-black text-gray-800 mb-1 font-pop">外出アクション記録</h3> 
+                            <p className="text-xs text-gray-500 font-bold">自主的に汚れ/疲労を記録するよ！</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <button onClick={() => onAction(5, "👟 近くのコンビニまで！軽く活動", "👟")} className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">🚶‍♀️</span>
+                                <span className="text-xs font-bold text-gray-700">ちょっとそこまで</span>
+                                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 rounded-full font-bold">-5HP</span>
+                            </button>
+                            <button onClick={() => onAction(15, "🛍️ 友達と街で満喫！遊んできたー", "🛍️")} className="bg-green-50 hover:bg-green-100 border-2 border-green-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">👯‍♀️</span>
+                                <span className="text-xs font-bold text-gray-700">しっかり遊んできた</span>
+                                <span className="text-[10px] bg-green-200 text-green-800 px-2 rounded-full font-bold">-15HP</span>
+                            </button>
+                            <button onClick={() => onAction(30, "🥵 体育祭/遠足！汗で HP 限界突破", "🔥")} className="bg-red-50 hover:bg-red-100 border-2 border-red-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">🏃‍♀️</span>
+                                <span className="text-xs font-bold text-gray-700">一日がっつり活動</span>
+                                <span className="text-[10px] bg-red-200 text-red-800 px-2 rounded-full font-bold">-30HP</span>
+                            </button>
+                            <button onClick={() => onAction(0, "💻 今日はPC前！引きこもりデー", "💻")} className="bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                                <span className="text-2xl">😴</span>
+                                <span className="text-xs font-bold text-gray-700">今日は引きこもり</span>
+                                <span className="text-[10px] bg-yellow-200 text-yellow-800 px-2 rounded-full font-bold">±0HP</span>
+                            </button>
+                        </div>
+
+                        <button onClick={onClose} className="w-full text-xs text-gray-400 underline py-2">やっぱりやめる</button> 
+                    </div> 
+                </div> 
+            ); 
+        };
         
         const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}> <div className="text-5xl mb-4">🛁</div> <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3> <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & 今日の占い！)</p> <div className="flex gap-3"> <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button> <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button> </div> </div> </div> ); };
         
         const HelpModal = ({ isOpen, onClose }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}> <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button> <div className="text-center mb-6"> <h2 className="text-lg font-black text-gray-800 mb-1 font-pop">使い方ガイド</h2> <p className="text-xs text-pink-500 font-bold">フロハイッタ？へようこそ！</p> </div> <div className="space-y-4 text-sm text-gray-600 font-bold"> <div className="bg-pink-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">❤️</div> <div> <h4 className="text-pink-600 font-black mb-1">HP（清潔度）を守れ！</h4> <p className="text-xs leading-relaxed">時間が経つとHPが減っていきます。0%になるとゾンビになっちゃうかも…！？</p> </div> </div> <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🛁</div> <div> <h4 className="text-blue-600 font-black mb-1">お風呂でリセット</h4> <p className="text-xs leading-relaxed">お風呂に入ったら一番下のボタンをタップ！HPが全回復して、今日の運勢が占えるよ✨</p> </div> </div> <div className="bg-yellow-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🌤️</div> <div> <h4 className="text-yellow-600 font-black mb-1">天気と連動</h4> <p className="text-xs leading-relaxed">暑い日は汗をかくからHPの減りが早くなるよ。「天気取得」ボタンでリアル連携しよう！</p> </div> </div> <div className="bg-purple-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🔮</div> <div> <h4 className="text-purple-600 font-black mb-1">本格お風呂占い</h4> <p className="text-xs leading-relaxed">リセット時に占いが発動！入浴で運気を上げて、ラッキーアクションを実行しよう！</p> </div> </div> </div> <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-6 active:scale-95">わかった！</button> </div> </div> ); };
         
-        const ActionButton = ({ icon, color, damage, label, onTrigger }) => { const [isCooldown, setIsCooldown] = useState(false); const handleClick = () => { if (isCooldown) return; onTrigger(); setIsCooldown(true); setTimeout(() => { setIsCooldown(false); }, 3000); }; return ( <button onClick={handleClick} disabled={isCooldown} className={`relative ${isCooldown ? 'bg-gray-300 scale-95' : color} w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl transition-all duration-300 border-4 border-white active:scale-90`}> {isCooldown ? <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div> : icon} <span className="absolute -bottom-6 text-[10px] font-bold text-gray-500 whitespace-nowrap bg-white/80 px-1 rounded">{label} -{damage}</span> </button> ); };
+        const ActionButton = ({ icon, color, damage, label, onTrigger }) => { const [isCooldown, setIsCooldown] = useState(false); const handleClick = () => { if (isCooldown) return; onTrigger(); setIsCooldown(true); setTimeout(() => { setIsCooldown(false); }, 3000); }; return ( <button onClick={handleClick} disabled={isCooldown} className={`relative ${isCooldown ? 'bg-gray-300 scale-95' : color} w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl transition-all duration-300 border-4 border-white active:scale-90`}> {isCooldown ? <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div> : icon} <span className="absolute -bottom-6 text-[10px] font-bold text-gray-500 whitespace-nowrap bg-white/80 px-1 rounded">{label} {damage !== null ? `-${damage}` : ''}</span> </button> ); };
         
-        // ★★★ 詳細モーダル (日誌 + 簡易占い) ★★★
+        // --- 詳細モーダル (日誌 + 簡易占い) ---
         const DayDetailModal = ({ isOpen, onClose, details, logs, onOpenFortune }) => {
             if (!isOpen || !details) return null;
 
@@ -200,7 +304,7 @@
                         <div className="space-y-4 overflow-y-auto pr-1 pb-4 flex-grow">
                             <div className="flex gap-3">
                                 <div className="flex-1 bg-pink-50 p-3 rounded-xl text-center">
-                                    <p className="text-[10px] font-bold text-gray-500 mb-1">直前の盛れ度</p>
+                                    <p className="text-[10px] font-bold text-gray-500 mb-1">直前の清潔度</p>
                                     <p className="text-3xl font-black text-pink-600 font-pop">{preBathHp !== undefined ? preBathHp : '?'}%</p>
                                 </div>
                                 <div className="flex-1 bg-blue-50 p-3 rounded-xl text-center">
@@ -212,7 +316,6 @@
                             {fortune ? (
                                 <div 
                                     onClick={(e) => {
-                                        // ★修正箇所: 親のonClick(閉じる処理)への伝播を止める
                                         e.stopPropagation();
                                         onOpenFortune(fortune);
                                     }}
@@ -380,7 +483,8 @@
             const [logs, setLogs] = useState([]);
             const [bathEvents, setBathEvents] = useState([]); 
             const [weatherData, setWeatherData] = useState(null); 
-            const [isBgmPlaying, setIsBgmPlaying] = useState(false);
+            const [isBgmPlaying, setIsBgmPlaying] = useState(true);
+            const isBgmPlayingRef = useRef(true);
 
             const [isCalendarOpen, setIsCalendarOpen] = useState(false);
             const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -393,6 +497,8 @@
             const [showInAppWarning, setShowInAppWarning] = useState(false);
             const [showInstallGuide, setShowInstallGuide] = useState(false);
             const [showBathConfirmModal, setShowBathConfirmModal] = useState(false);
+            // ★★★ 新規ステート: 外出アクションモーダル表示 ★★★
+            const [showOutingActionModal, setShowOutingActionModal] = useState(false);
             
             const [isGenerating, setIsGenerating] = useState(false);
             const [generatedImage, setGeneratedImage] = useState(null);
@@ -402,6 +508,32 @@
             const sePopRef = useRef(null);
             const seKiraRef = useRef(null);
 
+            // BGM処理の定義
+            useEffect(() => {
+                isBgmPlayingRef.current = isBgmPlaying;
+                
+                if (audioRef.current) {
+                    if (isBgmPlaying) {
+                        const playPromise = audioRef.current.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {
+                                const enableAudio = () => {
+                                    if (audioRef.current && isBgmPlayingRef.current) {
+                                        audioRef.current.play().catch(e => console.log(e));
+                                    }
+                                    document.removeEventListener('click', enableAudio);
+                                    document.removeEventListener('touchstart', enableAudio);
+                                };
+                                document.addEventListener('click', enableAudio);
+                                document.addEventListener('touchstart', enableAudio);
+                            });
+                        }
+                    } else {
+                        audioRef.current.pause();
+                    }
+                }
+            }, [isBgmPlaying]);
+
             useEffect(() => {
                 audioRef.current = new Audio(BGM_URL);
                 audioRef.current.loop = true;
@@ -410,11 +542,26 @@
                 sePopRef.current = new Audio(SE_POP_URL);
                 seKiraRef.current = new Audio(SE_KIRA_URL);
 
+                if (isBgmPlayingRef.current) {
+                    const p = audioRef.current.play();
+                    if (p !== undefined) {
+                        p.catch(() => {
+                            const resume = () => {
+                                if(isBgmPlayingRef.current && audioRef.current) audioRef.current.play();
+                                document.removeEventListener('click', resume);
+                                document.removeEventListener('touchstart', resume);
+                            };
+                            document.addEventListener('click', resume);
+                            document.addEventListener('touchstart', resume);
+                        });
+                    }
+                }
+
                 const handleVisibilityChange = () => {
                     if (document.hidden) {
                         if (audioRef.current) audioRef.current.pause();
                     } else {
-                        if (isBgmPlaying && audioRef.current) {
+                        if (isBgmPlayingRef.current && audioRef.current) {
                             audioRef.current.play().catch(e => console.log("Resume error", e));
                         }
                     }
@@ -428,16 +575,10 @@
                         audioRef.current = null;
                     }
                 };
-            }, [isBgmPlaying]);
+            }, []);
 
             const toggleBgm = () => {
-                if (!audioRef.current) return;
-                if (isBgmPlaying) {
-                    audioRef.current.pause();
-                } else {
-                    audioRef.current.play().catch(e => console.log("再生エラー:", e));
-                }
-                setIsBgmPlaying(!isBgmPlaying);
+                setIsBgmPlaying(prev => !prev);
             };
 
             const playSe = (type) => {
@@ -448,77 +589,14 @@
                 }
             };
 
-            useEffect(() => { 
-                const load = (k) => localStorage.getItem(k); 
-                if (load(STORAGE_KEY_HP)) setHp(parseFloat(load(STORAGE_KEY_HP))); 
-                if (load(STORAGE_KEY_LAST_BATH)) setLastBathTime(new Date(load(STORAGE_KEY_LAST_BATH))); 
-                if (load(STORAGE_KEY_DAMAGE)) setEventDamageTotal(parseFloat(load(STORAGE_KEY_DAMAGE))); 
-                if (load(STORAGE_KEY_LOGS)) setLogs(JSON.parse(load(STORAGE_KEY_LOGS))); 
-                
-                if (load(STORAGE_KEY_HISTORY)) {
-                    const loadedHistory = JSON.parse(load(STORAGE_KEY_HISTORY));
-                    if (Array.isArray(loadedHistory)) {
-                        if (loadedHistory.length > 0 && typeof loadedHistory[0] === 'string') {
-                            const migrated = loadedHistory.map(dStr => ({
-                                dateStr: dStr,
-                                time: new Date(dStr).toISOString(), 
-                                preBathHp: '?',
-                                hoursSince: '?',
-                                fortune: null
-                            }));
-                            setBathEvents(migrated);
-                        } else {
-                            setBathEvents(loadedHistory);
-                        }
-                    }
-                }
-                
-                if (load(STORAGE_KEY_WEATHER)) setWeatherData(JSON.parse(load(STORAGE_KEY_WEATHER))); 
-
-                const ua = navigator.userAgent.toLowerCase(); 
-                if (/line|instagram|twitter|fbav|fban/.test(ua)) { setShowInAppWarning(true); } 
-                else { 
-                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; 
-                    if (!isStandalone) setTimeout(() => setShowInstallGuide(true), 2000); 
-                } 
-                const lastLogin = localStorage.getItem('hq_last_login'); 
-                const now = new Date(); 
-                if (lastLogin) { 
-                    const diff = (now - new Date(lastLogin)) / (1000 * 60 * 60); 
-                    if (diff > 6 && diff < 16) { setShowWelcomeModal(true); } 
-                } 
-                localStorage.setItem('hq_last_login', now.toISOString()); 
-            }, []);
-
-            useEffect(() => { 
-                localStorage.setItem(STORAGE_KEY_HP, hp.toString()); 
-                localStorage.setItem(STORAGE_KEY_LAST_BATH, lastBathTime.toISOString()); 
-                localStorage.setItem(STORAGE_KEY_DAMAGE, eventDamageTotal.toString()); 
-                localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs)); 
-                localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(bathEvents)); 
-                if (weatherData) localStorage.setItem(STORAGE_KEY_WEATHER, JSON.stringify(weatherData)); 
-            }, [hp, lastBathTime, eventDamageTotal, logs, bathEvents, weatherData]);
-
-            const getWeatherDamageRate = () => { if (!weatherData) return 1.0; const t = weatherData.temperature; if (t >= 30) return 1.5; if (t >= 25) return 1.2; if (t <= 10) return 0.8; return 1.0; };
-            const weatherRate = getWeatherDamageRate();
-            const [currentTime, setCurrentTime] = useState(new Date());
-            useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 5000); return () => clearInterval(timer); }, []);
-            
-            useEffect(() => { 
-                const diffMs = new Date() - lastBathTime; 
-                const hours = diffMs / (1000 * 60 * 60); 
-                const timeDamage = hours * BASE_RATE_PER_HOUR * weatherRate; 
-                const totalDamage = timeDamage + eventDamageTotal; 
-                setHp(Math.max(0, Math.min(100, 100 - totalDamage))); 
-            }, [currentTime, lastBathTime, eventDamageTotal, weatherRate]);
-
+            // ★★★ 修正: fetchWeather を useEffect より前に定義 ★★★
             const addLog = (text, icon) => { 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }); 
                 setLogs(prev => [{ timestamp: now.toISOString(), time: timeStr, text, icon: icon || "📱" }, ...prev].slice(0, 150)); 
             };
 
-            const fetchWeather = () => {
+            const fetchWeather = useCallback(() => {
                 playSe('pop');
                 setIsFetchingWeather(true);
                 const handleWeatherData = (temp, isFallback = false) => {
@@ -549,6 +627,90 @@
                         handleWeatherData(data.current_weather.temperature, false);
                     } catch(e) { fetchTokyoWeather(); }
                 }, (err) => { console.warn(`Geolocation Error(${err.code}): ${err.message}`); fetchTokyoWeather(); }, options);
+            }, []);
+
+            useEffect(() => { 
+                const load = (k) => localStorage.getItem(k); 
+                if (load(STORAGE_KEY_HP)) setHp(parseFloat(load(STORAGE_KEY_HP))); 
+                if (load(STORAGE_KEY_LAST_BATH)) setLastBathTime(new Date(load(STORAGE_KEY_LAST_BATH))); 
+                if (load(STORAGE_KEY_DAMAGE)) setEventDamageTotal(parseFloat(load(STORAGE_KEY_DAMAGE))); 
+                if (load(STORAGE_KEY_LOGS)) setLogs(JSON.parse(load(STORAGE_KEY_LOGS))); 
+                
+                if (load(STORAGE_KEY_HISTORY)) {
+                    const loadedHistory = JSON.parse(load(STORAGE_KEY_HISTORY));
+                    if (Array.isArray(loadedHistory)) {
+                        if (loadedHistory.length > 0 && typeof loadedHistory[0] === 'string') {
+                            const migrated = loadedHistory.map(dStr => ({
+                                dateStr: dStr,
+                                time: new Date(dStr).toISOString(), 
+                                preBathHp: '?',
+                                hoursSince: '?',
+                                fortune: null
+                            }));
+                            setBathEvents(migrated);
+                        } else {
+                            setBathEvents(loadedHistory);
+                        }
+                    }
+                }
+                
+                // ★★★ 修正: 天気自動更新ロジック ★★★
+                if (load(STORAGE_KEY_WEATHER)) {
+                    const savedWeather = JSON.parse(load(STORAGE_KEY_WEATHER));
+                    setWeatherData(savedWeather);
+                    const lastUpdate = new Date(savedWeather.updated);
+                    const now = new Date();
+                    // 1時間以上経過していたら自動更新
+                    if ((now - lastUpdate) > 1000 * 60 * 60) {
+                        fetchWeather();
+                    }
+                } else {
+                    // データがない場合も自動更新
+                    fetchWeather();
+                }
+
+                const ua = navigator.userAgent.toLowerCase(); 
+                if (/line|instagram|twitter|fbav|fban/.test(ua)) { setShowInAppWarning(true); } 
+                else { 
+                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; 
+                    if (!isStandalone) setTimeout(() => setShowInstallGuide(true), 2000); 
+                } 
+                const lastLogin = localStorage.getItem('hq_last_login'); 
+                const now = new Date(); 
+                if (lastLogin) { 
+                    const diff = (now - new Date(lastLogin)) / (1000 * 60 * 60); 
+                    if (diff > 6 && diff < 16) { setShowWelcomeModal(true); } 
+                } 
+                localStorage.setItem('hq_last_login', now.toISOString()); 
+            }, [fetchWeather]); // 依存配列にfetchWeatherを追加
+
+            useEffect(() => { 
+                localStorage.setItem(STORAGE_KEY_HP, hp.toString()); 
+                localStorage.setItem(STORAGE_KEY_LAST_BATH, lastBathTime.toISOString()); 
+                localStorage.setItem(STORAGE_KEY_DAMAGE, eventDamageTotal.toString()); 
+                localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs)); 
+                localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(bathEvents)); 
+                if (weatherData) localStorage.setItem(STORAGE_KEY_WEATHER, JSON.stringify(weatherData)); 
+            }, [hp, lastBathTime, eventDamageTotal, logs, bathEvents, weatherData]);
+
+            const getWeatherDamageRate = () => { if (!weatherData) return 1.0; const t = weatherData.temperature; if (t >= 30) return 1.5; if (t >= 25) return 1.2; if (t <= 10) return 0.8; return 1.0; };
+            const weatherRate = getWeatherDamageRate();
+            const [currentTime, setCurrentTime] = useState(new Date());
+            useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 5000); return () => clearInterval(timer); }, []);
+            
+            useEffect(() => { 
+                const diffMs = new Date() - lastBathTime; 
+                const hours = diffMs / (1000 * 60 * 60); 
+                const timeDamage = hours * BASE_RATE_PER_HOUR * weatherRate; 
+                const totalDamage = timeDamage + eventDamageTotal; 
+                setHp(Math.max(0, Math.min(100, 100 - totalDamage))); 
+            }, [currentTime, lastBathTime, eventDamageTotal, weatherRate]);
+
+            const handleManualDamage = (damage, logText, icon) => {
+                setEventDamageTotal(prev => prev + damage); 
+                addLog(logText, icon); 
+                setShowOutingActionModal(false); 
+                playSe('pop');
             };
 
             const handleBath = () => {
@@ -616,7 +778,7 @@
                     ctx.fillStyle = 'rgba(255,255,255,0.9)'; drawRoundedRect(ctx, 50, 800, 700, 250, 30); ctx.fill();
                     ctx.fillStyle = '#6b7280'; ctx.font = 'bold 30px "Zen Maru Gothic"'; ctx.textAlign = 'left'; ctx.fillText('現在の清潔度', 100, 860); ctx.textAlign = 'right'; ctx.font = '900 80px "Mochiy Pop One"'; ctx.fillStyle = '#ec4899'; ctx.fillText(`${Math.floor(hp)}%`, 700, 880);
                     
-                    ctx.textAlign = 'center'; ctx.fillStyle = '#374151'; ctx.font = 'bold 36px "Yomogi"'; ctx.fillText(`「${currentStatus.shareMsg}」`, W/2, 980);
+                    ctx.textAlign = 'center'; ctx.fillStyle = '#374151'; ctx.font = 'bold 36px "Yomogi"'; ctx.fillText(`「${status.shareMsg}」`, W/2, 980);
 
                     ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Mochiy Pop One"'; ctx.textAlign = 'center'; ctx.fillText('🛁 お風呂入って盛れ度UP！', W/2, 1150);
 
@@ -638,13 +800,18 @@
             };
 
             const getStatus = (hp) => {
-                if (hp >= 80) return { avatar: "./char_80.png", label: "大勝利", deco: "👑", shareMsg: "全人類見て✨", glow: "bg-pink-400" };
-                if (hp >= 50) return { avatar: "./char_50.png", label: "天使", deco: "✨", shareMsg: "まだ舞えるはず", glow: "bg-yellow-200" };
-                if (hp >= 20) return { avatar: "./char_20.png", label: "限界", deco: "💦", shareMsg: "半径2m接近禁止", glow: "bg-purple-300" };
-                return { avatar: "./char_00.png", label: "終了", deco: "💀", shareMsg: "社会的に死😇", glow: "bg-gray-500" };
+                if (hp >= 80) return { avatar: "./char_80.png", label: "大勝利", deco: "👑", glow: "bg-pink-400", msgList: STATUS_MESSAGES.high };
+                if (hp >= 50) return { avatar: "./char_50.png", label: "天使", deco: "✨", glow: "bg-yellow-200", msgList: STATUS_MESSAGES.mid };
+                if (hp >= 20) return { avatar: "./char_20.png", label: "限界", deco: "💦", glow: "bg-purple-300", msgList: STATUS_MESSAGES.low };
+                return { avatar: "./char_00.png", label: "終了", deco: "💀", glow: "bg-gray-500", msgList: STATUS_MESSAGES.bad };
             };
             
-            const status = getStatus(hp);
+            const status = useMemo(() => {
+                const s = getStatus(hp);
+                const randomMsg = s.msgList[Math.floor(Math.random() * s.msgList.length)];
+                return { ...s, shareMsg: randomMsg };
+            }, [Math.floor(hp / 10)]); 
+
             const hoursSince = ((new Date() - lastBathTime) / (1000 * 60 * 60)).toFixed(1);
 
             return (
@@ -653,7 +820,26 @@
                     
                     {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
                     {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
-                    <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} onYes={() => { setEventDamageTotal(prev => prev + 30); addLog("おかえり自動記録 (-30)", "🏠"); setShowWelcomeModal(false); }} />
+                    
+                    {/* 帰宅時モーダル */}
+                    <WelcomeModal 
+                        isOpen={showWelcomeModal} 
+                        onClose={() => setShowWelcomeModal(false)} 
+                        onAction={(damage, logText, icon) => { 
+                            setEventDamageTotal(prev => prev + damage); 
+                            addLog(logText, icon); 
+                            setShowWelcomeModal(false); 
+                            playSe('pop');
+                        }} 
+                    />
+                    
+                    {/* 外出アクションモーダル */}
+                    <OutingActionModal
+                        isOpen={showOutingActionModal} 
+                        onClose={() => setShowOutingActionModal(false)} 
+                        onAction={handleManualDamage}
+                    />
+                    
                     <BathConfirmModal isOpen={showBathConfirmModal} onClose={() => setShowBathConfirmModal(false)} onConfirm={handleBath} />
                     <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} />
                     <FortuneModal isOpen={isFortuneOpen} onClose={() => setIsFortuneOpen(false)} result={fortuneResult} />
@@ -729,7 +915,7 @@
                         </div>
                         <div className="relative pt-1 mb-2"> 
                             <div className="flex mb-2 items-center justify-between font-pop"> 
-                                <span className="text-sm font-bold inline-block py-1 px-3 uppercase rounded-full text-white bg-pink-400 shadow-md">盛れ度</span> 
+                                <span className="text-sm font-bold inline-block py-1 px-3 uppercase rounded-full text-white bg-pink-400 shadow-md">清潔度</span> 
                                 <span className="text-2xl font-black text-pink-500 drop-shadow-sm">{Math.floor(hp)}%</span> 
                             </div> 
                             <div className="h-6 w-full rounded-full meter-track relative mt-2"><div style={{ width: `${hp}%` }} className="h-full rounded-full meter-fill relative"></div><div style={{ left: `calc(${hp}% - 12px)` }} className="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center meter-icon"><span className="text-2xl">💖</span></div></div> 
@@ -751,7 +937,11 @@
                     </button>
 
                     <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 z-40 pointer-events-none"> 
-                        <div className="pointer-events-auto"> <ActionButton icon="💦" color="bg-blue-400" damage={30} label="運動" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+30); addLog("ボタン: 運動した！ (-30)", "💦"); if(navigator.vibrate) navigator.vibrate([50,50]);}} /> </div> 
+                        {/* ★★★ 修正: 運動ボタンを外出アクションボタンに変更 ★★★ */}
+                        <div className="pointer-events-auto"> 
+                            <ActionButton icon="🏠" color="bg-blue-400" damage={null} label="外出アクション" onTrigger={()=>{ playSe('pop'); setShowOutingActionModal(true);}} /> 
+                        </div> 
+                        
                         <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+10); addLog("ボタン: 食事 (-10)", "🍖"); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> 
                         <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+20); addLog("ボタン: 寝て起きた (-20)", "🛌"); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> 
                     </div>
