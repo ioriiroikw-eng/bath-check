@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>フロハイッタ？｜入浴習慣アプリ</title>
+    <title>フロハイッタ？｜入浴タイミング最適化アプリ</title>
     <meta name="application-name" content="フロハイッタ？">
     <meta name="apple-mobile-web-app-title" content="フロハイッタ？">
-    <meta name="description" content="「フロハイッタ？」は、毎日の入浴を楽しく習慣化する無料Webアプリです。天気連動HP、本格お風呂占いで楽しく清潔度をキープしよう！">
-    <meta name="keywords" content="お風呂,記録,入浴剤,健康,習慣化,アプリ,サウナ,入浴,フロハイッタ,占い">
+    <meta name="description" content="「フロハイッタ？」は、活動量や天気から清潔度(HP)を算出し、あなたにとって「適切な入浴タイミング」を可視化するWebアプリです。義務感ではなく、戦略的なバスタイムを。">
+    <meta name="keywords" content="お風呂,タイミング,清潔度,入浴,健康,ライフハック,アプリ,サウナ,フロハイッタ,占い,QOL">
     <meta name="robots" content="index, follow">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -17,8 +17,8 @@
     <link rel="icon" href="https://ioriiroikw-eng.github.io/bath-check/icon.png">
     <link rel="apple-touch-icon" href="https://ioriiroikw-eng.github.io/bath-check/icon.png">
     
-    <meta property="og:title" content="フロハイッタ？｜入浴習慣アプリ">
-    <meta property="og:description" content="現在のお風呂状況を記録中... 私の清潔度は？楽しく入浴習慣をつけよう！ #フロハイッタ">
+    <meta property="og:title" content="フロハイッタ？｜入浴タイミング最適化アプリ">
+    <meta property="og:description" content="現在のお風呂タイミングを診断中... 私の清潔度は？適切なタイミングでリフレッシュしよう！ #フロハイッタ">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ioriiroikw-eng.github.io/bath-check/">
     <meta property="og:image" content="https://ioriiroikw-eng.github.io/bath-check/icon.png">
@@ -26,8 +26,8 @@
     <meta property="og:locale" content="ja_JP">
     
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="フロハイッタ？｜入浴習慣アプリ">
-    <meta name="twitter:description" content="現在のお風呂状況を記録中... 清潔度をキープしてキャラを育てよう！">
+    <meta name="twitter:title" content="フロハイッタ？｜入浴タイミング最適化アプリ">
+    <meta name="twitter:description" content="現在のお風呂タイミングを診断中... 清潔度を管理して、自分に最適なリフレッシュを。">
     <meta name="twitter:image" content="https://ioriiroikw-eng.github.io/bath-check/icon.png">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -90,7 +90,7 @@
         const STORAGE_KEY_HISTORY = 'hq_history';
         const STORAGE_KEY_WEATHER = 'hq_weather_v1'; 
 
-        // --- メッセージリストの拡張 ---
+        // --- メッセージリスト ---
         const STATUS_MESSAGES = {
             high: [ // 80%以上
                 "全人類見て✨", "今なら無敵モード", "毛穴？何それ美味しいの？", 
@@ -266,11 +266,12 @@
         
         const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}> <div className="text-5xl mb-4">🛁</div> <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3> <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br/>(HP全回復 & 今日の占い！)</p> <div className="flex gap-3"> <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button> <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button> </div> </div> </div> ); };
         
-        const HelpModal = ({ isOpen, onClose }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}> <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button> <div className="text-center mb-6"> <h2 className="text-lg font-black text-gray-800 mb-1 font-pop">使い方ガイド</h2> <p className="text-xs text-pink-500 font-bold">フロハイッタ？へようこそ！</p> </div> <div className="space-y-4 text-sm text-gray-600 font-bold"> <div className="bg-pink-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">❤️</div> <div> <h4 className="text-pink-600 font-black mb-1">HP（清潔度）を守れ！</h4> <p className="text-xs leading-relaxed">時間が経つとHPが減っていきます。0%になるとゾンビになっちゃうかも…！？</p> </div> </div> <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🛁</div> <div> <h4 className="text-blue-600 font-black mb-1">お風呂でリセット</h4> <p className="text-xs leading-relaxed">お風呂に入ったら一番下のボタンをタップ！HPが全回復して、今日の運勢が占えるよ✨</p> </div> </div> <div className="bg-yellow-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🌤️</div> <div> <h4 className="text-yellow-600 font-black mb-1">天気と連動</h4> <p className="text-xs leading-relaxed">暑い日は汗をかくからHPの減りが早くなるよ。「天気取得」ボタンでリアル連携しよう！</p> </div> </div> <div className="bg-purple-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🔮</div> <div> <h4 className="text-purple-600 font-black mb-1">本格お風呂占い</h4> <p className="text-xs leading-relaxed">リセット時に占いが発動！入浴で運気を上げて、ラッキーアクションを実行しよう！</p> </div> </div> </div> <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-6 active:scale-95">わかった！</button> </div> </div> ); };
+        const HelpModal = ({ isOpen, onClose }) => { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}> <button onClick={onClose} className="absolute top-4 right-4 text-gray-400"><Icons.X /></button> <div className="text-center mb-6"> <h2 className="text-lg font-black text-gray-800 mb-1 font-pop">使い方ガイド</h2> <p className="text-xs text-pink-500 font-bold">無理せず、適切なタイミングで！</p> </div> <div className="space-y-4 text-sm text-gray-600 font-bold"> <div className="bg-pink-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">❤️</div> <div> <h4 className="text-pink-600 font-black mb-1">HP（清潔度）を管理</h4> <p className="text-xs leading-relaxed">時間が経つとHPが減ります。「毎日入る」のではなく「HPが減ったら入る」目安にしてください。</p> </div> </div> <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🛁</div> <div> <h4 className="text-blue-600 font-black mb-1">お風呂でリセット</h4> <p className="text-xs leading-relaxed">お風呂に入ったらボタンをタップ！HP全回復＆占いで運気アップ✨</p> </div> </div> <div className="bg-yellow-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🌤️</div> <div> <h4 className="text-yellow-600 font-black mb-1">天気と連動</h4> <p className="text-xs leading-relaxed">暑い日は汗をかくからHPの減りが早くなるよ。「天気取得」ボタンでリアル連携しよう！</p> </div> </div> <div className="bg-purple-50 p-3 rounded-xl flex items-start gap-3"> <div className="text-2xl">🔮</div> <div> <h4 className="text-purple-600 font-black mb-1">本格お風呂占い</h4> <p className="text-xs leading-relaxed">リセット時に占いが発動！入浴で運気を上げて、ラッキーアクションを実行しよう！</p> </div> </div> </div> <button onClick={onClose} className="w-full bg-pink-500 text-white font-bold py-3 rounded-xl shadow-md mt-6 active:scale-95">わかった！</button> </div> </div> ); };
         
         const ActionButton = ({ icon, color, damage, label, onTrigger }) => { const [isCooldown, setIsCooldown] = useState(false); const handleClick = () => { if (isCooldown) return; onTrigger(); setIsCooldown(true); setTimeout(() => { setIsCooldown(false); }, 3000); }; return ( <button onClick={handleClick} disabled={isCooldown} className={`relative ${isCooldown ? 'bg-gray-300 scale-95' : color} w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl transition-all duration-300 border-4 border-white active:scale-90`}> {isCooldown ? <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div> : icon} <span className="absolute -bottom-6 text-[10px] font-bold text-gray-500 whitespace-nowrap bg-white/80 px-1 rounded">{label} {damage !== null ? `-${damage}` : ''}</span> </button> ); };
         
         // --- 詳細モーダル (日誌 + 簡易占い) ---
+        // ★修正: Action logsだけを表示するようにフィルタリング
         const DayDetailModal = ({ isOpen, onClose, details, logs, onOpenFortune }) => {
             if (!isOpen || !details) return null;
 
@@ -284,10 +285,14 @@
                 ? d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
                 : '--:--';
 
-            // その日のログをフィルタリング
+            // その日のログをフィルタリング（actionタイプのみ）
             const dayLogs = logs.filter(log => {
                 if (!log.timestamp) return false;
-                return getLocalDateStr(new Date(log.timestamp)) === dateStr;
+                // 日付の一致確認
+                const isSameDay = getLocalDateStr(new Date(log.timestamp)) === dateStr;
+                // 行動ログ(type === 'action')のみを表示。typeが未定義(古いログ)の場合は表示しないか、システムログとみなす
+                const isAction = log.type === 'action';
+                return isSameDay && isAction;
             });
 
             return (
@@ -497,7 +502,6 @@
             const [showInAppWarning, setShowInAppWarning] = useState(false);
             const [showInstallGuide, setShowInstallGuide] = useState(false);
             const [showBathConfirmModal, setShowBathConfirmModal] = useState(false);
-            // ★★★ 新規ステート: 外出アクションモーダル表示 ★★★
             const [showOutingActionModal, setShowOutingActionModal] = useState(false);
             
             const [isGenerating, setIsGenerating] = useState(false);
@@ -589,11 +593,11 @@
                 }
             };
 
-            // ★★★ 修正: fetchWeather を useEffect より前に定義 ★★★
-            const addLog = (text, icon) => { 
+            // ★修正: logにtypeを追加 (action または system)
+            const addLog = (text, icon, type = 'system') => { 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }); 
-                setLogs(prev => [{ timestamp: now.toISOString(), time: timeStr, text, icon: icon || "📱" }, ...prev].slice(0, 150)); 
+                setLogs(prev => [{ timestamp: now.toISOString(), time: timeStr, text, icon: icon || "📱", type }, ...prev].slice(0, 150)); 
             };
 
             const fetchWeather = useCallback(() => {
@@ -601,11 +605,11 @@
                 setIsFetchingWeather(true);
                 const handleWeatherData = (temp, isFallback = false) => {
                     setWeatherData({ temperature: temp, updated: new Date().toISOString() });
-                    if (isFallback) { addLog(`位置情報が取れないため東京の気温(${temp}°C)を取得しました`, "🗼"); } 
-                    else { addLog(`天気取得完了！現在${temp}°C`, "🌤️"); }
-                    if (temp >= 30) addLog("猛暑アラート発令🥵 ダメージ1.5倍！", "🔥");
-                    else if (temp >= 25) addLog("暑い...汗ばむ... ダメージ1.2倍💦", "💦");
-                    else if (temp <= 10) addLog("寒い...汗かかないボーナス❄️ ダメージ0.8倍", "❄️");
+                    if (isFallback) { addLog(`位置情報が取れないため東京の気温(${temp}°C)を取得しました`, "🗼", 'system'); } 
+                    else { addLog(`天気取得完了！現在${temp}°C`, "🌤️", 'system'); }
+                    if (temp >= 30) addLog("猛暑アラート発令🥵 ダメージ1.5倍！", "🔥", 'system');
+                    else if (temp >= 25) addLog("暑い...汗ばむ... ダメージ1.2倍💦", "💦", 'system');
+                    else if (temp <= 10) addLog("寒い...汗かかないボーナス❄️ ダメージ0.8倍", "❄️", 'system');
                     setIsFetchingWeather(false);
                 };
                 const fetchTokyoWeather = async () => {
@@ -614,7 +618,7 @@
                         if (!res.ok) throw new Error('API Error');
                         const data = await res.json();
                         handleWeatherData(data.current_weather.temperature, true);
-                    } catch (e) { addLog("天気の取得に失敗しました💦", "❌"); setIsFetchingWeather(false); }
+                    } catch (e) { addLog("天気の取得に失敗しました💦", "❌", 'system'); setIsFetchingWeather(false); }
                 };
                 if (!navigator.geolocation) { fetchTokyoWeather(); return; }
                 const options = { timeout: 10000, maximumAge: 0 };
@@ -654,18 +658,15 @@
                     }
                 }
                 
-                // ★★★ 修正: 天気自動更新ロジック ★★★
                 if (load(STORAGE_KEY_WEATHER)) {
                     const savedWeather = JSON.parse(load(STORAGE_KEY_WEATHER));
                     setWeatherData(savedWeather);
                     const lastUpdate = new Date(savedWeather.updated);
                     const now = new Date();
-                    // 1時間以上経過していたら自動更新
                     if ((now - lastUpdate) > 1000 * 60 * 60) {
                         fetchWeather();
                     }
                 } else {
-                    // データがない場合も自動更新
                     fetchWeather();
                 }
 
@@ -682,7 +683,7 @@
                     if (diff > 6 && diff < 16) { setShowWelcomeModal(true); } 
                 } 
                 localStorage.setItem('hq_last_login', now.toISOString()); 
-            }, [fetchWeather]); // 依存配列にfetchWeatherを追加
+            }, [fetchWeather]);
 
             useEffect(() => { 
                 localStorage.setItem(STORAGE_KEY_HP, hp.toString()); 
@@ -708,7 +709,8 @@
 
             const handleManualDamage = (damage, logText, icon) => {
                 setEventDamageTotal(prev => prev + damage); 
-                addLog(logText, icon); 
+                // ★修正: 手動アクションは action タイプ
+                addLog(logText, icon, 'action'); 
                 setShowOutingActionModal(false); 
                 playSe('pop');
             };
@@ -734,7 +736,8 @@
                 setLastBathTime(now);
                 setEventDamageTotal(0);
                 setHp(100);
-                addLog("お風呂入って復活！今日も私が一番カワイイ💖", "🛁");
+                // ★修正: お風呂も action タイプ
+                addLog("お風呂入って復活！今日も私が一番カワイイ💖", "🛁", 'action');
                 
                 setFortuneResult(fortune);
                 setTimeout(() => {
@@ -764,15 +767,31 @@
                     ctx.shadowBlur = 60; ctx.shadowColor = currentStatus.glow.includes('pink') ? '#f472b6' : currentStatus.glow.includes('yellow') ? '#facc15' : currentStatus.glow.includes('purple') ? '#c084fc' : '#9ca3af';
                     ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(cx, cy, 200, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0; 
 
-                    ctx.textAlign = 'center';
-                    ctx.font = '200px sans-serif';
-                    ctx.fillText('🛁', cx, cy + 60);
+                    // ★修正: 絵文字ではなく画像をロードして描画
+                    try {
+                        const img = new Image();
+                        img.src = currentStatus.avatar; // "./char_80.png" etc
+                        await new Promise((resolve, reject) => {
+                            img.onload = resolve;
+                            img.onerror = resolve; // 失敗しても続行
+                        });
+                        // 画像描画
+                        const imgSize = 350; 
+                        ctx.drawImage(img, cx - imgSize/2, cy - imgSize/2 + 20, imgSize, imgSize);
+                    } catch (e) {
+                         // 画像ロード失敗時はフォールバックで絵文字
+                        ctx.textAlign = 'center';
+                        ctx.font = '200px sans-serif';
+                        ctx.fillText('🛁', cx, cy + 60);
+                    }
 
+                    ctx.textAlign = 'center';
                     ctx.fillStyle = '#ec4899';
                     ctx.font = '900 60px "Mochiy Pop One"';
                     ctx.fillText('フロハイッタ？', cx, cy + 220);
 
                     ctx.fillStyle = 'rgba(255,255,255,0.8)'; drawRoundedRect(ctx, 100, 650, 600, 120, 20); ctx.fill(); ctx.strokeStyle = '#fbcfe8'; ctx.stroke();
+                    
                     ctx.fillStyle = '#f472b6'; ctx.font = 'bold 24px "Zen Maru Gothic"'; ctx.fillText('お風呂に入らず...', W/2, 690); ctx.font = '900 60px "Mochiy Pop One"'; ctx.fillStyle = '#db2777'; ctx.fillText(`${hoursSince} 時間`, W/2, 750);
                     
                     ctx.fillStyle = 'rgba(255,255,255,0.9)'; drawRoundedRect(ctx, 50, 800, 700, 250, 30); ctx.fill();
@@ -780,7 +799,8 @@
                     
                     ctx.textAlign = 'center'; ctx.fillStyle = '#374151'; ctx.font = 'bold 36px "Yomogi"'; ctx.fillText(`「${status.shareMsg}」`, W/2, 980);
 
-                    ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Mochiy Pop One"'; ctx.textAlign = 'center'; ctx.fillText('🛁 お風呂入って盛れ度UP！', W/2, 1150);
+                    
+                    ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Mochiy Pop One"'; ctx.textAlign = 'center'; ctx.fillText('🛁 入浴タイミング可視化中', W/2, 1150);
 
                     canvas.toBlob(async (blob) => {
                         if (!blob) throw new Error("Canvas Error");
@@ -827,7 +847,8 @@
                         onClose={() => setShowWelcomeModal(false)} 
                         onAction={(damage, logText, icon) => { 
                             setEventDamageTotal(prev => prev + damage); 
-                            addLog(logText, icon); 
+                            // ★修正: Action type
+                            addLog(logText, icon, 'action'); 
                             setShowWelcomeModal(false); 
                             playSe('pop');
                         }} 
@@ -866,7 +887,7 @@
                         <div className="flex gap-2">
                             <button 
                                 onClick={() => {
-                                    const text = `現在の清潔度: ${Math.floor(hp)}% (${status.label})\nお風呂に入らず${hoursSince}時間が経過... ${status.deco}\n\nお風呂習慣アプリ「フロハイッタ？」でチェック！ #フロハイッタ`;
+                                    const text = `現在の清潔度: ${Math.floor(hp)}% (${status.label})\nお風呂に入らず${hoursSince}時間が経過... ${status.deco}\n\n適切な入浴タイミングを診断中！ #フロハイッタ`;
                                     const url = "https://ioriiroikw-eng.github.io/bath-check/";
                                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
                                 }}
@@ -937,13 +958,14 @@
                     </button>
 
                     <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 z-40 pointer-events-none"> 
-                        {/* ★★★ 修正: 運動ボタンを外出アクションボタンに変更 ★★★ */}
                         <div className="pointer-events-auto"> 
                             <ActionButton icon="🏠" color="bg-blue-400" damage={null} label="外出アクション" onTrigger={()=>{ playSe('pop'); setShowOutingActionModal(true);}} /> 
                         </div> 
                         
-                        <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+10); addLog("ボタン: 食事 (-10)", "🍖"); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> 
-                        <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+20); addLog("ボタン: 寝て起きた (-20)", "🛌"); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> 
+                        <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+10); // ★修正: Action type
+                            addLog("ボタン: 食事 (-10)", "🍖", 'action'); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> 
+                        <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+20); // ★修正: Action type
+                            addLog("ボタン: 寝て起きた (-20)", "🛌", 'action'); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> 
                     </div>
 
                     <CalendarModal 
