@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://ioriiroikw-eng.github.io/bath-check/sitemap.xml
+# サイトマップの場所を新しいドメイン（アプリ側）に変更
+Sitemap: https://app.bath-check.com/sitemap.xml

@@ -21,15 +21,15 @@
     <meta property="og:title" content="フロハイッタ？｜入浴タイミング最適化アプリ">
     <meta property="og:description" content="現在のお風呂タイミングを診断中... 私の清潔度は？適切なタイミングでリフレッシュしよう！ #フロハイッタ">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ioriiroikw-eng.github.io/bath-check/">
-    <meta property="og:image" content="https://ioriiroikw-eng.github.io/bath-check/icon.png">
+    <meta property="og:url" content="https://app.bath-check.com/">
+    <meta property="og:image" content="https://app.bath-check.com/icon.png">
     <meta property="og:site_name" content="フロハイッタ？">
     <meta property="og:locale" content="ja_JP">
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="フロハイッタ？｜入浴タイミング最適化アプリ">
     <meta name="twitter:description" content="現在のお風呂タイミングを診断中... 清潔度を管理して、自分に最適なリフレッシュを。">
-    <meta name="twitter:image" content="https://ioriiroikw-eng.github.io/bath-check/icon.png">
+    <meta name="twitter:image" content="https://app.bath-check.com/icon.png">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -116,7 +116,7 @@
         };
 
         // --- 音声ファイル ---
-        const SE_POP_URL = "./audio/se_pop.mp3";   
+        const SE_POP_URL = "./audio/se_pop.mp3";    
         const SE_KIRA_URL = "./audio/se_kira.mp3"; 
         const BGM_URL = "./audio/bgm.mp3"; 
         
@@ -855,7 +855,8 @@
                         setGeneratedImage(dataUrl);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
-                                const url = 'https://ioriiroikw-eng.github.io/bath-check/';
+                                // 修正: 新しいアプリドメインに変更
+                                const url = 'https://app.bath-check.com/';
                                 const title = 'フロハイッタ？';
                                 const text = `清潔度チェック！ #フロハイッタ\n${url}`;
                                 await navigator.share({ title: title, text: text, url: url, files: [file] });
@@ -933,7 +934,8 @@
                             <button 
                                 onClick={() => {
                                     const text = `現在の清潔度: ${Math.floor(hp)}% (${status.label})\nお風呂に入らず${hoursSince}時間が経過... ${status.deco}\n\n適切な入浴タイミングを診断中！ #フロハイッタ`;
-                                    const url = "https://ioriiroikw-eng.github.io/bath-check/";
+                                    // 修正: 新しいアプリドメインに変更
+                                    const url = "https://app.bath-check.com/";
                                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
                                 }}
                                 className="bg-white/80 p-3 rounded-full shadow-md text-pink-500 hover:scale-110 transition-transform"
