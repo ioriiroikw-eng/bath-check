@@ -14,8 +14,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#fdf2f8">
 
-    <link rel="icon" href="https://ioriiroikw-eng.github.io/bath-check/icon.png">
-    <link rel="apple-touch-icon" href="https://ioriiroikw-eng.github.io/bath-check/icon.png">
+    <link rel="icon" href="./icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="./icon.png">
     
     <meta property="og:title" content="フロハイッタ？｜入浴タイミング最適化アプリ">
     <meta property="og:description" content="現在のお風呂タイミングを診断中... 私の清潔度は？適切なタイミングでリフレッシュしよう！ #フロハイッタ">
@@ -271,7 +271,6 @@
         const ActionButton = ({ icon, color, damage, label, onTrigger }) => { const [isCooldown, setIsCooldown] = useState(false); const handleClick = () => { if (isCooldown) return; onTrigger(); setIsCooldown(true); setTimeout(() => { setIsCooldown(false); }, 3000); }; return ( <button onClick={handleClick} disabled={isCooldown} className={`relative ${isCooldown ? 'bg-gray-300 scale-95' : color} w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl transition-all duration-300 border-4 border-white active:scale-90`}> {isCooldown ? <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div> : icon} <span className="absolute -bottom-6 text-[10px] font-bold text-gray-500 whitespace-nowrap bg-white/80 px-1 rounded">{label} {damage !== null ? `-${damage}` : ''}</span> </button> ); };
         
         // --- 詳細モーダル (日誌 + 簡易占い) ---
-        // ★修正: Action logsだけを表示するようにフィルタリング
         const DayDetailModal = ({ isOpen, onClose, details, logs, onOpenFortune }) => {
             if (!isOpen || !details) return null;
 
@@ -593,7 +592,6 @@
                 }
             };
 
-            // ★修正: logにtypeを追加 (action または system)
             const addLog = (text, icon, type = 'system') => { 
                 const now = new Date();
                 const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }); 
@@ -709,7 +707,6 @@
 
             const handleManualDamage = (damage, logText, icon) => {
                 setEventDamageTotal(prev => prev + damage); 
-                // ★修正: 手動アクションは action タイプ
                 addLog(logText, icon, 'action'); 
                 setShowOutingActionModal(false); 
                 playSe('pop');
@@ -736,7 +733,6 @@
                 setLastBathTime(now);
                 setEventDamageTotal(0);
                 setHp(100);
-                // ★修正: お風呂も action タイプ
                 addLog("お風呂入って復活！今日も私が一番カワイイ💖", "🛁", 'action');
                 
                 setFortuneResult(fortune);
@@ -749,7 +745,6 @@
 
             const drawRoundedRect = (ctx, x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
 
-            // ★★★ 大幅刷新: シェア画像生成ロジック ★★★
             const generateShareImage = async () => {
                 playSe('pop');
                 setIsGenerating(true);
@@ -759,15 +754,13 @@
                 canvas.width = W; canvas.height = H;
 
                 try {
-                    // 1. 背景（リッチなグラデーション）
                     const grad = ctx.createLinearGradient(0, 0, 0, H);
-                    grad.addColorStop(0, '#fce7f3'); // 薄いピンク
-                    grad.addColorStop(0.5, '#fbcfe8'); // 少し濃いピンク
-                    grad.addColorStop(1, '#ffffff'); // 白
+                    grad.addColorStop(0, '#fce7f3'); 
+                    grad.addColorStop(0.5, '#fbcfe8'); 
+                    grad.addColorStop(1, '#ffffff'); 
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, W, H);
 
-                    // 2. パターン装飾（ランダムな泡）
                     for(let i=0; i<30; i++) {
                         const x = Math.random() * W;
                         const y = Math.random() * H;
@@ -781,7 +774,6 @@
                     const currentStatus = getStatus(hp);
                     const cx = W/2; 
                     
-                    // 3. タイトル（影付き）
                     ctx.shadowColor = "rgba(236, 72, 153, 0.3)";
                     ctx.shadowBlur = 10;
                     ctx.shadowOffsetX = 4;
@@ -790,11 +782,10 @@
                     ctx.font = '900 70px "Mochiy Pop One"';
                     ctx.textAlign = 'center';
                     ctx.fillText('フロハイッタ？', cx, 150);
-                    ctx.shadowBlur = 0; // 影リセット
+                    ctx.shadowBlur = 0; 
                     ctx.shadowOffsetX = 0;
                     ctx.shadowOffsetY = 0;
 
-                    // 4. メインカード（白背景・角丸・影）
                     const cardY = 220;
                     const cardH = 750;
                     const cardW = 680;
@@ -804,41 +795,34 @@
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                     drawRoundedRect(ctx, (W - cardW)/2, cardY, cardW, cardH, 40);
                     ctx.fill();
-                    ctx.shadowBlur = 0; // 影リセット
+                    ctx.shadowBlur = 0; 
                     ctx.shadowOffsetY = 0;
 
-                    // 5. キャラクター描画（縦横比維持・リサイズ）
                     try {
                         const img = new Image();
-                        img.src = currentStatus.avatar; // "./char_80.png" etc
+                        img.src = currentStatus.avatar; 
                         await new Promise((resolve, reject) => {
                             img.onload = resolve;
-                            img.onerror = resolve; // 失敗しても続行
+                            img.onerror = resolve; 
                         });
                         
-                        // 画像描画エリアの設定
                         const maxImgW = 400;
                         const maxImgH = 400;
                         const imgY = cardY + 50;
                         
-                        // アスペクト比を維持してサイズ計算
                         const scale = Math.min(maxImgW / img.naturalWidth, maxImgH / img.naturalHeight);
                         const drawW = img.naturalWidth * scale;
                         const drawH = img.naturalHeight * scale;
                         
-                        // センター配置
                         ctx.drawImage(img, cx - drawW / 2, imgY + (maxImgH - drawH) / 2, drawW, drawH);
                         
                     } catch (e) {
-                         // 画像ロード失敗時はフォールバックで絵文字
                         ctx.font = '200px sans-serif';
                         ctx.fillText('🛁', cx, cardY + 250);
                     }
 
-                    // 6. 情報表示エリア
                     const infoStartY = cardY + 480;
                     
-                    // 清潔度
                     ctx.fillStyle = '#db2777';
                     ctx.font = 'bold 30px "Zen Maru Gothic"';
                     ctx.fillText('現在の清潔度', cx, infoStartY);
@@ -847,7 +831,6 @@
                     ctx.font = '900 120px "Mochiy Pop One"';
                     ctx.fillText(`${Math.floor(hp)}%`, cx, infoStartY + 110);
 
-                    // 経過時間（バッジ風）
                     const badgeY = infoStartY + 160;
                     ctx.fillStyle = '#fce7f3';
                     drawRoundedRect(ctx, cx - 180, badgeY, 360, 60, 30);
@@ -856,7 +839,6 @@
                     ctx.font = 'bold 32px "Zen Maru Gothic"';
                     ctx.fillText(`お風呂に入らず ${hoursSince} 時間`, cx, badgeY + 42);
 
-                    // 7. フッターメッセージ（カードの外）
                     ctx.fillStyle = '#374151';
                     ctx.font = 'bold 40px "Yomogi"';
                     ctx.fillText(`「${status.shareMsg}」`, W/2, 1080);
@@ -910,7 +892,6 @@
                         onClose={() => setShowWelcomeModal(false)} 
                         onAction={(damage, logText, icon) => { 
                             setEventDamageTotal(prev => prev + damage); 
-                            // ★修正: Action type
                             addLog(logText, icon, 'action'); 
                             setShowWelcomeModal(false); 
                             playSe('pop');
@@ -1025,9 +1006,9 @@
                             <ActionButton icon="🏠" color="bg-blue-400" damage={null} label="外出アクション" onTrigger={()=>{ playSe('pop'); setShowOutingActionModal(true);}} /> 
                         </div> 
                         
-                        <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+10); // ★修正: Action type
+                        <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+10); 
                             addLog("ボタン: 食事 (-10)", "🍖", 'action'); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> 
-                        <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+20); // ★修正: Action type
+                        <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+20); 
                             addLog("ボタン: 寝て起きた (-20)", "🛌", 'action'); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> 
                     </div>
 
