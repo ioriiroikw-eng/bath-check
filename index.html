@@ -84,6 +84,8 @@
 
         // --- 設定・定数 ---
         const BASE_RATE_PER_HOUR = 2.5; 
+        const BASE_SLEEP_DAMAGE = 12; // 睡眠の基本ダメージ（これに気温倍率がかかる）
+
         const STORAGE_KEY_HP = 'hq_hp';
         const STORAGE_KEY_LAST_BATH = 'hq_last_bath';
         const STORAGE_KEY_DAMAGE = 'hq_damage';
@@ -196,20 +198,20 @@
                         </div>
                         
                         <div className="grid grid-cols-2 gap-3 mb-4">
-                            <button onClick={() => onAction(5, "近所行ってきただけ！セーフ🙆‍♀️", "👟")} className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                            <button onClick={() => onAction(3, "近所行ってきただけ！セーフ🙆‍♀️", "👟")} className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">👟</span>
                                 <span className="text-xs font-bold text-gray-700">ちょっとそこまで</span>
-                                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 rounded-full font-bold">-5%</span>
+                                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 rounded-full font-bold">-3%</span>
                             </button>
-                            <button onClick={() => onAction(15, "無事帰宅🏠 ベタベタする〜🥺", "🏫")} className="bg-green-50 hover:bg-green-100 border-2 border-green-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                            <button onClick={() => onAction(10, "無事帰宅🏠 ベタベタする〜🥺", "🏫")} className="bg-green-50 hover:bg-green-100 border-2 border-green-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">🏫</span>
                                 <span className="text-xs font-bold text-gray-700">学校/バイトおわ！</span>
-                                <span className="text-[10px] bg-green-200 text-green-800 px-2 rounded-full font-bold">-15%</span>
+                                <span className="text-[10px] bg-green-200 text-green-800 px-2 rounded-full font-bold">-10%</span>
                             </button>
-                            <button onClick={() => onAction(25, "満員電車とか無理...早くお風呂...😇", "🥵")} className="bg-red-50 hover:bg-red-100 border-2 border-red-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                            <button onClick={() => onAction(20, "満員電車とか無理...早くお風呂...😇", "🥵")} className="bg-red-50 hover:bg-red-100 border-2 border-red-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">🥵</span>
                                 <span className="text-xs font-bold text-gray-700">汗だく限界...</span>
-                                <span className="text-[10px] bg-red-200 text-red-800 px-2 rounded-full font-bold">-25%</span>
+                                <span className="text-[10px] bg-red-200 text-red-800 px-2 rounded-full font-bold">-20%</span>
                             </button>
                             <button onClick={() => onAction(0, "ただいま！まだ舞える✨", "✨")} className="bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">✨</span>
@@ -237,20 +239,20 @@
                         </div>
                         
                         <div className="grid grid-cols-2 gap-3 mb-4">
-                            <button onClick={() => onAction(5, "👟 近くのコンビニまで！軽く活動", "👟")} className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                            <button onClick={() => onAction(3, "👟 近くのコンビニまで！軽く活動", "👟")} className="bg-blue-50 hover:bg-blue-100 border-2 border-blue-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">🚶‍♀️</span>
                                 <span className="text-xs font-bold text-gray-700">ちょっとそこまで</span>
-                                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 rounded-full font-bold">-5HP</span>
+                                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 rounded-full font-bold">-3HP</span>
                             </button>
-                            <button onClick={() => onAction(15, "🛍️ 友達と街で満喫！遊んできたー", "🛍️")} className="bg-green-50 hover:bg-green-100 border-2 border-green-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                            <button onClick={() => onAction(10, "🛍️ 友達と街で満喫！遊んできたー", "🛍️")} className="bg-green-50 hover:bg-green-100 border-2 border-green-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">👯‍♀️</span>
                                 <span className="text-xs font-bold text-gray-700">しっかり遊んできた</span>
-                                <span className="text-[10px] bg-green-200 text-green-800 px-2 rounded-full font-bold">-15HP</span>
+                                <span className="text-[10px] bg-green-200 text-green-800 px-2 rounded-full font-bold">-10HP</span>
                             </button>
-                            <button onClick={() => onAction(30, "🥵 体育祭/遠足！汗で HP 限界突破", "🔥")} className="bg-red-50 hover:bg-red-100 border-2 border-red-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                            <button onClick={() => onAction(20, "🥵 体育祭/遠足！汗で HP 限界突破", "🔥")} className="bg-red-50 hover:bg-red-100 border-2 border-red-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">🏃‍♀️</span>
                                 <span className="text-xs font-bold text-gray-700">一日がっつり活動</span>
-                                <span className="text-[10px] bg-red-200 text-red-800 px-2 rounded-full font-bold">-30HP</span>
+                                <span className="text-[10px] bg-red-200 text-red-800 px-2 rounded-full font-bold">-20HP</span>
                             </button>
                             <button onClick={() => onAction(0, "💻 今日はPC前！引きこもりデー", "💻")} className="bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-100 p-3 rounded-xl flex flex-col items-center gap-1 active:scale-95 transition-transform">
                                 <span className="text-2xl">😴</span>
@@ -695,6 +697,10 @@
 
             const getWeatherDamageRate = () => { if (!weatherData) return 1.0; const t = weatherData.temperature; if (t >= 30) return 1.5; if (t >= 25) return 1.2; if (t <= 10) return 0.8; return 1.0; };
             const weatherRate = getWeatherDamageRate();
+            
+            // 睡眠ダメージの動的計算 (天候倍率を適用)
+            const sleepDamage = Math.floor(BASE_SLEEP_DAMAGE * weatherRate);
+
             const [currentTime, setCurrentTime] = useState(new Date());
             useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 5000); return () => clearInterval(timer); }, []);
             
@@ -855,7 +861,6 @@
                         setGeneratedImage(dataUrl);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
-                                // 修正: 新しいアプリドメインに変更
                                 const url = 'https://app.bath-check.com/';
                                 const title = 'フロハイッタ？';
                                 const text = `清潔度チェック！ #フロハイッタ\n${url}`;
@@ -934,7 +939,6 @@
                             <button 
                                 onClick={() => {
                                     const text = `現在の清潔度: ${Math.floor(hp)}% (${status.label})\nお風呂に入らず${hoursSince}時間が経過... ${status.deco}\n\n適切な入浴タイミングを診断中！ #フロハイッタ`;
-                                    // 修正: 新しいアプリドメインに変更
                                     const url = "https://app.bath-check.com/";
                                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
                                 }}
@@ -1009,10 +1013,10 @@
                             <ActionButton icon="🏠" color="bg-blue-400" damage={null} label="外出アクション" onTrigger={()=>{ playSe('pop'); setShowOutingActionModal(true);}} /> 
                         </div> 
                         
-                        <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={10} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+10); 
-                            addLog("ボタン: 食事 (-10)", "🍖", 'action'); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> 
-                        <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={20} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+20); 
-                            addLog("ボタン: 寝て起きた (-20)", "🛌", 'action'); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> 
+                        <div className="pointer-events-auto"> <ActionButton icon="🍖" color="bg-orange-400" damage={5} label="食事" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+5); 
+                            addLog("ボタン: 食事 (-5)", "🍖", 'action'); if(navigator.vibrate) navigator.vibrate(100);}} /> </div> 
+                        <div className="pointer-events-auto"> <ActionButton icon="🛌" color="bg-purple-400" damage={sleepDamage} label="睡眠" onTrigger={()=>{ playSe('pop'); setEventDamageTotal(p=>p+sleepDamage); 
+                            addLog(`ボタン: 寝て起きた (-${sleepDamage})`, "🛌", 'action'); if(navigator.vibrate) navigator.vibrate(50);}} /> </div> 
                     </div>
 
                     <CalendarModal 
