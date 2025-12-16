@@ -16,6 +16,7 @@ import InAppBrowserWarning from './components/modals/InAppBrowserWarning';
 import InstallGuide from './components/modals/InstallGuide';
 
 import SleepModeView from './components/SleepModeView';
+import SplashScreen from './components/SplashScreen';
 import ActionButton from './components/ActionButton';
 
 const App = () => {
@@ -56,6 +57,7 @@ const App = () => {
   const audioRef = useRef(null);
   const sePopRef = useRef(null);
   const seKiraRef = useRef(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   // BGM処理
   useEffect(() => {
@@ -366,6 +368,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center py-6 px-4 pb-safe relative">
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <div className="float-bg">{[...Array(15)].map((_, i) => <div key={i} className="float-item" style={{ left: `${Math.random() * 100}%`, animationDuration: `${15 + Math.random() * 20}s`, animationDelay: `${Math.random() * 10}s`, fontSize: `${10 + Math.random() * 20}px` }}>{i % 3 === 0 ? '💖' : i % 3 === 1 ? '✨' : '🛁'}</div>)}</div>
 
       {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
