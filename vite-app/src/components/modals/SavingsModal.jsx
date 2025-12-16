@@ -19,7 +19,7 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
     // ランダム提案 (3つ選出)
     const suggestions = useMemo(() => {
         const affordable = ZUBORA_CONVERSIONS.filter(item => item.min <= savedMinutes);
-        if (affordable.length === 0) return [ZUBORA_CONVERSIONS[0]];
+        if (affordable.length === 0) return [];
         const shuffled = [...affordable].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, 3);
     }, [savedMinutes, isOpen]);
@@ -54,17 +54,24 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                     <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
                         <span>🎁</span>今のあなたならコレができる！
                     </h3>
-                    <div className="space-y-2">
-                        {suggestions.map((item, i) => (
-                            <div key={i} className="flex items-center gap-3 bg-white border border-gray-100 p-3 rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
-                                <div className="text-2xl">{item.icon}</div>
-                                <div className="flex-1">
-                                    <div className="text-xs font-bold text-gray-600">{item.text}</div>
-                                    <div className="text-[10px] text-gray-400">{item.type === 'money' ? '💰 お金換算' : '⏳ 時間換算'}</div>
+                    {suggestions.length > 0 ? (
+                        <div className="space-y-2">
+                            {suggestions.map((item, i) => (
+                                <div key={i} className="flex items-center gap-3 bg-white border border-gray-100 p-3 rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
+                                    <div className="text-2xl">{item.icon}</div>
+                                    <div className="flex-1">
+                                        <div className="text-xs font-bold text-gray-600">{item.text}</div>
+                                        <div className="text-[10px] text-gray-400">{item.type === 'money' ? '💰 お金換算' : '⏳ 時間換算'}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-6 bg-indigo-50/50 rounded-xl border border-dashed border-indigo-200">
+                            <div className="text-2xl mb-2">🌱</div>
+                            <div className="text-xs text-indigo-400 font-bold">まだ貯金が足りないみたい...<br />お風呂をスキップして貯めよう！</div>
+                        </div>
+                    )}
                 </div>
 
                 <p className="text-[10px] text-center text-gray-400">
