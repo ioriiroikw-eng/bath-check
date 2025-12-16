@@ -30,7 +30,7 @@ export const RANK_TITLES = [
     { lv: 30, title: '虚無の支配者' },
     { lv: 50, title: 'お風呂？何それ' },
     { lv: 80, title: '伝説のドライ人間' },
-    { lv: 99, title: '入浴の概念を忘れた神' },
+    { lv: 100, title: '入浴の概念を忘れた神' },
 ];
 
 export const FORTUNE_RANKS = [

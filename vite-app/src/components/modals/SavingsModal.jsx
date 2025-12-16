@@ -1,12 +1,15 @@
 import React, { useMemo } from 'react';
 import { Icons } from '../Icons';
 import { RANK_TITLES, ZUBORA_CONVERSIONS } from '../../constants';
+import { calculateLevel, getNextLevelMinutes } from '../../utils';
 
 const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
     if (!isOpen) return null;
 
-    // レベル計算 (30分 = 1Lv, Max 99)
-    const level = Math.min(99, Math.floor(savedMinutes / 30.3) + 1);
+    // レベル計算
+    const level = calculateLevel(savedMinutes);
+    const nextLevelMinutes = getNextLevelMinutes(level);
+
     // ランク称号
     let rankTitle = RANK_TITLES[0].title;
     for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
@@ -45,9 +48,13 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                     <div className="text-lg font-bold text-indigo-700 mb-3">「{rankTitle}」</div>
 
                     <div className="w-full bg-white rounded-full h-2.5 mb-1">
-                        <div className="bg-indigo-400 h-2.5 rounded-full transition-all duration-1000" style={{ width: `${(level / 99) * 100}%` }}></div>
+                        <div className="bg-indigo-400 h-2.5 rounded-full transition-all duration-1000" style={{ width: `${(level / 100) * 100}%` }}></div>
                     </div>
-                    <div className="text-[10px] text-right text-indigo-300">MAX Lv.99まであと{3000 - savedMinutes}分</div>
+                    {level < 100 ? (
+                        <div className="text-[10px] text-right text-indigo-300">次レベルまであと{nextLevelMinutes - savedMinutes}分</div>
+                    ) : (
+                        <div className="text-[10px] text-right text-indigo-300">MAX LEVEL</div>
+                    )}
                 </div>
 
                 <div className="mb-4">

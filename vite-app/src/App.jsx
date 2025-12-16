@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Icons } from './components/Icons';
 import { STATUS_MESSAGES, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
-import { generateFortune, getLocalDateStr } from './utils';
+import { generateFortune, getLocalDateStr, calculateLevel } from './utils';
 
 import WelcomeModal from './components/modals/WelcomeModal';
 import OutingActionModal from './components/modals/OutingActionModal';
@@ -404,7 +404,7 @@ const App = () => {
       >
         <Icons.Gem size={18} className="text-indigo-400" />
         <div className="flex-1 text-left">
-          <div className="text-[10px] text-indigo-400 font-bold">ズボラ貯金 Lv.{Math.min(99, Math.floor(savedMinutes / 30.3) + 1)}</div>
+          <div className="text-[10px] text-indigo-400 font-bold">ズボラ貯金 Lv.{calculateLevel(savedMinutes)}</div>
           <div className="text-xs font-bold text-indigo-600 font-pop">{savedMinutes}分 <span className="text-[10px] text-indigo-400 font-normal">(詳細をタップ✨)</span></div>
         </div>
       </button>
