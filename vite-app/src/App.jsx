@@ -178,6 +178,9 @@ const App = () => {
     const now = new Date();
     if (lastLogin && !isSleeping) { // 睡眠中は帰宅モーダルを出さない
       const diff = (now - new Date(lastLogin)) / (1000 * 60 * 60);
+      if (diff >= 1) { // 1時間以上ぶりなら外出アクション確認
+        setShowOutingActionModal(true);
+      }
       if (diff > 6 && diff < 16) { setShowWelcomeModal(true); }
     }
     localStorage.setItem('hq_last_login', now.toISOString());
@@ -480,7 +483,7 @@ const App = () => {
       </div>
 
       <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-4 z-40 pointer-events-none">
-        <div className="pointer-events-auto"> <ActionButton icon="🏠" color="bg-blue-400" damage={null} label="外出アクション" onTrigger={() => { playSe('pop'); setShowOutingActionModal(true); }} /> </div>
+
       </div>
 
       <CalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} bathEvents={bathEvents} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsCalendarOpen(false); }} />
