@@ -3,7 +3,7 @@ import { Icons } from './components/Icons';
 import { STATUS_MESSAGES, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
 import { generateFortune, getLocalDateStr, calculateLevel } from './utils';
 
-import WelcomeModal from './components/modals/WelcomeModal';
+
 import OutingActionModal from './components/modals/OutingActionModal';
 import BathConfirmModal from './components/modals/BathConfirmModal';
 import SleepConfirmModal from './components/modals/SleepConfirmModal';
@@ -44,7 +44,7 @@ const App = () => {
 
   const [selectedDateDetails, setSelectedDateDetails] = useState(null);
 
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
   const [showInAppWarning, setShowInAppWarning] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [showBathConfirmModal, setShowBathConfirmModal] = useState(false);
@@ -183,7 +183,7 @@ const App = () => {
       if (diff >= 1) { // 1時間以上ぶりなら外出アクション確認
         setShowOutingActionModal(true);
       }
-      if (diff > 6 && diff < 16) { setShowWelcomeModal(true); }
+
     }
     localStorage.setItem('hq_last_login', now.toISOString());
   }, [fetchWeather]);
@@ -373,7 +373,7 @@ const App = () => {
 
       {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
       {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
-      <WelcomeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} onAction={(damage, logText, icon) => { setEventDamageTotal(prev => prev + damage); addLog(logText, icon, 'action'); setShowWelcomeModal(false); playSe('pop'); }} />
+
       <OutingActionModal isOpen={showOutingActionModal} onClose={() => setShowOutingActionModal(false)} onAction={handleManualDamage} />
       <BathConfirmModal isOpen={showBathConfirmModal} onClose={() => setShowBathConfirmModal(false)} onConfirm={handleBath} />
       <SleepConfirmModal
