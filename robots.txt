@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+# サイトマップの場所を新しいドメイン（アプリ側）に変更
+Sitemap: https://app.bath-check.com/sitemap.xml
