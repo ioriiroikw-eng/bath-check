@@ -369,7 +369,7 @@ const App = () => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center py-6 px-4 pb-safe relative">
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
-      <div className="float-bg">{[...Array(15)].map((_, i) => <div key={i} className="float-item" style={{ left: `${Math.random() * 100}%`, animationDuration: `${15 + Math.random() * 20}s`, animationDelay: `${Math.random() * 10}s`, fontSize: `${10 + Math.random() * 20}px` }}>{i % 3 === 0 ? '💖' : i % 3 === 1 ? '✨' : '🛁'}</div>)}</div>
+
 
       {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
       {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
