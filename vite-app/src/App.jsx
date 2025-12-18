@@ -14,6 +14,7 @@ import FortuneModal from './components/modals/FortuneModal';
 import SavingsModal from './components/modals/SavingsModal';
 import InAppBrowserWarning from './components/modals/InAppBrowserWarning';
 import InstallGuide from './components/modals/InstallGuide';
+import LocationPermissionModal from './components/modals/LocationPermissionModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
@@ -53,6 +54,7 @@ const App = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedImage, setGeneratedImage] = useState(null);
     const [isFetchingWeather, setIsFetchingWeather] = useState(false);
+    const [showLocationModal, setShowLocationModal] = useState(false);
 
     const audioRef = useRef(null);
     const sePopRef = useRef(null);
@@ -83,9 +85,17 @@ const App = () => {
         sePopRef.current = new Audio(SE_POP_URL);
         seKiraRef.current = new Audio(SE_KIRA_URL);
 
-        if (isBgmPlayingRef.current && !isSleeping) {
-            audioRef.current.play().catch(() => { });
-        }
+        // 最初のユーザーインタラクションでBGMを開始
+        const startBgmOnInteraction = () => {
+            if (isBgmPlayingRef.current && audioRef.current && !isSleeping) {
+                audioRef.current.play().catch(() => { });
+            }
+            // 一度だけ実行
+            document.removeEventListener('click', startBgmOnInteraction);
+            document.removeEventListener('touchstart', startBgmOnInteraction);
+        };
+        document.addEventListener('click', startBgmOnInteraction);
+        document.addEventListener('touchstart', startBgmOnInteraction);
 
         const handleVisibilityChange = () => {
             if (document.hidden) {
@@ -99,6 +109,8 @@ const App = () => {
         document.addEventListener("visibilitychange", handleVisibilityChange);
         return () => {
             document.removeEventListener("visibilitychange", handleVisibilityChange);
+            document.removeEventListener('click', startBgmOnInteraction);
+            document.removeEventListener('touchstart', startBgmOnInteraction);
             if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
         };
     }, []);
@@ -115,23 +127,26 @@ const App = () => {
         setLogs(prev => [{ timestamp: now.toISOString(), time: timeStr, text, icon: icon || "📱", type }, ...prev].slice(0, 150));
     };
 
-    const fetchWeather = useCallback(() => {
-        playSe('pop');
+    // 天気取得のヘルパー関数
+    const handleWeatherData = useCallback((temp, isFallback = false) => {
+        setWeatherData({ temperature: temp, updated: new Date().toISOString() });
+        if (isFallback) { addLog(`東京の気温(${temp}°C)を取得しました`, "🗼", 'system'); }
+        else { addLog(`天気取得完了！現在${temp}°C`, "🌤️", 'system'); }
+        setIsFetchingWeather(false);
+    }, []);
+
+    const fetchTokyoWeather = useCallback(async () => {
         setIsFetchingWeather(true);
-        const handleWeatherData = (temp, isFallback = false) => {
-            setWeatherData({ temperature: temp, updated: new Date().toISOString() });
-            if (isFallback) { addLog(`位置情報が取れないため東京の気温(${temp}°C)を取得しました`, "🗼", 'system'); }
-            else { addLog(`天気取得完了！現在${temp}°C`, "🌤️", 'system'); }
-            setIsFetchingWeather(false);
-        };
-        const fetchTokyoWeather = async () => {
-            try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current_weather=true`);
-                if (!res.ok) throw new Error('API Error');
-                const data = await res.json();
-                handleWeatherData(data.current_weather.temperature, true);
-            } catch (e) { addLog("天気の取得に失敗しました💦", "❌", 'system'); setIsFetchingWeather(false); }
-        };
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current_weather=true`);
+            if (!res.ok) throw new Error('API Error');
+            const data = await res.json();
+            handleWeatherData(data.current_weather.temperature, true);
+        } catch (e) { addLog("天気の取得に失敗しました💦", "❌", 'system'); setIsFetchingWeather(false); }
+    }, [handleWeatherData]);
+
+    const fetchWithLocation = useCallback(() => {
+        setIsFetchingWeather(true);
         if (!navigator.geolocation) { fetchTokyoWeather(); return; }
         const options = { timeout: 10000, maximumAge: 0 };
         navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -143,7 +158,22 @@ const App = () => {
                 handleWeatherData(data.current_weather.temperature, false);
             } catch (e) { fetchTokyoWeather(); }
         }, (err) => { console.warn(`Geolocation Error(${err.code}): ${err.message}`); fetchTokyoWeather(); }, options);
-    }, []);
+    }, [handleWeatherData, fetchTokyoWeather]);
+
+    const handleWeatherButtonPress = () => {
+        playSe('pop');
+        setShowLocationModal(true);
+    };
+
+    const handleLocationAllow = () => {
+        setShowLocationModal(false);
+        fetchWithLocation();
+    };
+
+    const handleLocationDeny = () => {
+        setShowLocationModal(false);
+        fetchTokyoWeather();
+    };
 
     useEffect(() => {
         const load = (k) => localStorage.getItem(k);
@@ -172,8 +202,8 @@ const App = () => {
             const savedWeather = JSON.parse(load(STORAGE_KEY_WEATHER));
             setWeatherData(savedWeather);
             const lastUpdate = new Date(savedWeather.updated);
-            if ((new Date() - lastUpdate) > 1000 * 60 * 60) fetchWeather();
-        } else { fetchWeather(); }
+            if ((new Date() - lastUpdate) > 1000 * 60 * 60) fetchTokyoWeather();
+        } else { fetchTokyoWeather(); }
 
         const ua = navigator.userAgent.toLowerCase();
         if (/line|instagram|twitter|fbav|fban/.test(ua)) { setShowInAppWarning(true); }
@@ -191,7 +221,7 @@ const App = () => {
 
         }
         localStorage.setItem('hq_last_login', now.toISOString());
-    }, [fetchWeather]);
+    }, [fetchTokyoWeather]);
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY_HP, hp.toString());
@@ -394,6 +424,7 @@ const App = () => {
 
             {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
             {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
+            <LocationPermissionModal isOpen={showLocationModal} onAllowLocation={handleLocationAllow} onUseDefault={handleLocationDeny} />
 
             <OutingActionModal isOpen={showOutingActionModal} onClose={() => setShowOutingActionModal(false)} onAction={handleManualDamage} />
             <BathConfirmModal isOpen={showBathConfirmModal} onClose={() => setShowBathConfirmModal(false)} onConfirm={handleBath} />
@@ -422,7 +453,7 @@ const App = () => {
 
                 {/* Weather (Minimal) */}
                 {!weatherData ? (
-                    <button onClick={fetchWeather} disabled={isFetchingWeather} className="text-xs font-bold text-blue-400 bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1 mb-2">
+                    <button onClick={handleWeatherButtonPress} disabled={isFetchingWeather} className="text-xs font-bold text-blue-400 bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1 mb-2">
                         {isFetchingWeather ? "..." : <><Icons.Cloud size={12} /> 天気を取得</>}
                     </button>
                 ) : (

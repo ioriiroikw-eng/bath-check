@@ -97,28 +97,30 @@ const CalendarModal = ({ isOpen, onClose, bathEvents, onDayClick }) => {
                 <div className="flex-grow overflow-y-auto">
                     <div className="grid grid-cols-7 gap-1">
                         {days.map((date, i) => {
-                            if (!date) return <div key={i} className="aspect-square"></div>;
+                            if (!date) return <div key={i} className="h-10"></div>;
                             const dateStr = getLocalDateStr(date);
-                            const hasEntry = historySet.has(dateStr);
                             const s = calculateStreakAtDate(dateStr, historySet);
                             const isToday = date.toDateString() === new Date().toDateString();
                             const eventDetails = bathEventMap.get(dateStr);
+                            const hasStamp = s > 0 || eventDetails;
 
                             return (
                                 <div
                                     key={i}
                                     onClick={eventDetails ? () => onDayClick(eventDetails) : null}
-                                    className={`aspect-square flex flex-col items-center justify-center relative rounded-lg ${isToday ? 'border-2 border-pink-300 bg-pink-50' : ''
+                                    className={`h-10 flex items-center justify-center relative rounded-lg ${isToday ? 'border-2 border-pink-300 bg-pink-50' : ''
                                         } ${eventDetails ? 'cursor-pointer active:scale-95 transition-transform' : ''}`}
                                 >
-                                    <span className={`text-xs ${isToday ? 'text-pink-600 font-bold' : 'text-gray-600'}`}>
+                                    {/* 日付（スタンプがある場合は背景に） */}
+                                    <span className={`text-sm ${isToday ? 'text-pink-600 font-bold' : hasStamp ? 'text-gray-400' : 'text-gray-600'}`}>
                                         {date.getDate()}
                                     </span>
+                                    {/* スタンプを絶対配置で右下に表示 */}
                                     {s > 0 && (
-                                        <span className="text-lg">{getStamp(s)}</span>
+                                        <span className="absolute bottom-0 right-0 text-[10px]">{getStamp(s)}</span>
                                     )}
                                     {eventDetails && !s && (
-                                        <span className="text-sm">
+                                        <span className="absolute bottom-0 right-0 text-[10px]">
                                             {eventDetails.type === 'sleep' ? '💤' : '✨'}
                                         </span>
                                     )}
