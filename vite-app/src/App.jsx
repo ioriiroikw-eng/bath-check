@@ -487,7 +487,7 @@ const App = () => {
                     ></div>
 
                     <div className={`absolute inset-4 rounded-full opacity-40 blur-xl ${status.glow}`}></div>
-                    <img src={status.avatar} alt={status.label} className="relative z-10 w-36 h-36 object-contain drop-shadow-sm pointer-events-none" />
+                    <img src={status.avatar} alt={status.label} className="relative z-10 w-36 h-36 object-contain drop-shadow-sm pointer-events-none animate-float-breathe" />
 
                     {/* Dynamic Speech Bubble */}
                     {showBubble && (

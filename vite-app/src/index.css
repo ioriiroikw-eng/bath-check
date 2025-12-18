@@ -100,6 +100,31 @@
     animation: fade-in 0.5s ease-out;
 }
 
+/* Character Float & Breathe Animation */
+@keyframes float-breathe {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    25% {
+        transform: translateY(-6px) scale(1.02);
+    }
+
+    50% {
+        transform: translateY(-3px) scale(1);
+    }
+
+    75% {
+        transform: translateY(-8px) scale(1.01);
+    }
+}
+
+.animate-float-breathe {
+    animation: float-breathe 4s ease-in-out infinite;
+}
+
 /* 3D Card Flip */
 .perspective-1000 {
     perspective: 1000px;
