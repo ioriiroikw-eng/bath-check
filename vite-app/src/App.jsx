@@ -365,13 +365,24 @@ const App = () => {
         return { ...s, shareMsg: randomMsg };
     }, [Math.floor(hp / 10)]);
 
-    // 経過時間を時間:分形式でフォーマット
+    // 経過時間を時間:分:秒形式でフォーマット
     const elapsedMs = new Date() - lastBathTime;
-    const totalMinutes = Math.floor(elapsedMs / (1000 * 60));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
+    const totalSeconds = Math.floor(elapsedMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
     const elapsedFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    const secondsFormatted = String(seconds).padStart(2, '0');
     const hoursSince = (elapsedMs / (1000 * 60 * 60)).toFixed(1); // 共有用に残す
+
+    // HPに応じたハートアイコン
+    const getHeartEmoji = (hpValue) => {
+        if (hpValue > 80) return '❤️';
+        if (hpValue > 50) return '🧡';
+        if (hpValue > 30) return '💛';
+        if (hpValue > 10) return '💔';
+        return '🖤';
+    };
 
     if (isSleeping) {
         return <SleepModeView onWakeUp={handleWakeUp} savedMinutes={savedMinutes} status={status} sleepType={sleepType} />;
@@ -460,16 +471,37 @@ const App = () => {
 
                 {/* Elapsed Time & HP (The "Truth") */}
                 <div className="w-full">
-                    <p className={`font-black text-gray-900 tracking-tight font-mono text-center ${hours >= 100 ? 'text-4xl' : 'text-5xl'}`}>
-                        {elapsedFormatted}
-                    </p>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 mt-2">
-                    <div className="h-2 w-24 bg-gray-100 rounded-full overflow-hidden">
-                        <div style={{ width: `${hp}%` }} className={`h-full rounded-full ${hp > 50 ? 'bg-pink-400' : hp > 20 ? 'bg-yellow-400' : 'bg-gray-400'}`}></div>
+                    <div className="flex items-baseline justify-center gap-1">
+                        <p className={`font-black text-gray-900 tracking-tight font-mono ${hours >= 100 ? 'text-4xl' : 'text-5xl'}`}>
+                            {elapsedFormatted}
+                        </p>
+                        <p className="text-xl font-bold text-gray-400 font-mono">
+                            :{secondsFormatted}
+                        </p>
                     </div>
-                    <span className={`text-sm font-bold font-pop ${hp > 50 ? 'text-pink-500' : 'text-gray-500'}`}>HP {Math.floor(hp)}%</span>
+                    <p className="text-xs text-gray-400 text-center mt-1">風呂キャンした時間</p>
+                </div>
+                <div className="w-full max-w-xs mx-auto mt-4">
+                    {/* 清潔度ラベルとパーセンテージ */}
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full">清潔度</span>
+                        <span className={`text-3xl font-black ${hp > 50 ? 'text-pink-500' : hp > 20 ? 'text-orange-500' : 'text-gray-500'}`}>{Math.floor(hp)}%</span>
+                    </div>
+
+                    {/* グラデーションバー＋ハートアイコン */}
+                    <div className="relative h-4 w-full bg-gray-200 rounded-full overflow-visible">
+                        <div
+                            style={{ width: `${hp}%` }}
+                            className="h-full rounded-full bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-400"
+                        ></div>
+                        {/* ハートアイコン（バーの先端） */}
+                        <div
+                            className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 text-xl"
+                            style={{ left: `${hp}%` }}
+                        >
+                            {getHeartEmoji(hp)}
+                        </div>
+                    </div>
                 </div>
             </div>
 
