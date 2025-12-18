@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // 各ステップでキャラクターの画像と表情を変化させる
 const TUTORIAL_STEPS = [
@@ -56,7 +56,38 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
     const isFirstStep = currentStep === 0;
     const isLastStep = currentStep === TUTORIAL_STEPS.length - 1;
 
-    // ターゲット要素の位置を取得
+    // ターゲット要素の位置を更新
+    const updateTargetRect = useCallback(() => {
+        if (step.target) {
+            const el = document.getElementById(step.target);
+            if (el) {
+                const rect = el.getBoundingClientRect();
+                setTargetRect({
+                    top: rect.top,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                    centerY: rect.top + rect.height / 2,
+                });
+            } else {
+                setTargetRect(null);
+            }
+        } else {
+            setTargetRect(null);
+        }
+    }, [step.target]);
+
+    // チュートリアル中はユーザーのスクロールを無効化
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+
+    // ステップ変更時にターゲットにスクロール＆位置取得
     useEffect(() => {
         setShowContent(false);
 
@@ -64,26 +95,29 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
             if (step.target) {
                 const el = document.getElementById(step.target);
                 if (el) {
-                    const rect = el.getBoundingClientRect();
-                    setTargetRect({
-                        top: rect.top,
-                        left: rect.left,
-                        width: rect.width,
-                        height: rect.height,
-                        centerY: rect.top + rect.height / 2,
-                    });
+                    // ターゲット要素を画面中央付近にスクロール
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // スクロール完了後に位置を取得（少し遅延）
+                    setTimeout(() => {
+                        updateTargetRect();
+                        setShowContent(true);
+                        setCharacterKey(prev => prev + 1);
+                    }, 300);
                 } else {
                     setTargetRect(null);
+                    setShowContent(true);
+                    setCharacterKey(prev => prev + 1);
                 }
             } else {
                 setTargetRect(null);
+                setShowContent(true);
+                setCharacterKey(prev => prev + 1);
             }
-            setShowContent(true);
-            setCharacterKey(prev => prev + 1);
-        }, 150);
+        }, 100);
 
         return () => clearTimeout(timer);
-    }, [currentStep, step.target]);
+    }, [currentStep, step.target, updateTargetRect]);
 
     const handleNext = () => {
         if (isLastStep) {
@@ -102,68 +136,77 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
     // 画面の中央よりターゲットが上にあればカードを下に、下にあれば上に配置
     const isTargetInUpperHalf = targetRect ? targetRect.centerY < window.innerHeight / 2 : false;
 
+    // カード位置のスタイルを計算
+    const getCardPositionClass = () => {
+        if (!targetRect) {
+            return 'top-[35%] -translate-y-1/2';
+        }
+        if (isTargetInUpperHalf) {
+            // ターゲットが上部にある場合、カードは下部に
+            return 'bottom-[10%]';
+        } else {
+            // ターゲットが下部にある場合、カードは上部に
+            return 'top-[15%]';
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-[100]">
+        <div className="fixed inset-0 z-[100] pointer-events-none">
             {/* オーバーレイ背景 - 4つの長方形で穴を開ける */}
             {targetRect ? (
                 <>
                     {/* 上の暗い部分 */}
                     <div
-                        className="absolute left-0 right-0 top-0 bg-black/60"
-                        style={{ height: Math.max(0, targetRect.top - 12) }}
+                        className="fixed left-0 right-0 top-0 bg-black/60 pointer-events-auto"
+                        style={{ height: Math.max(0, targetRect.top - 8) }}
                     />
                     {/* 左の暗い部分 */}
                     <div
-                        className="absolute bg-black/60"
+                        className="fixed bg-black/60 pointer-events-auto"
                         style={{
-                            top: targetRect.top - 12,
+                            top: targetRect.top - 8,
                             left: 0,
-                            width: Math.max(0, targetRect.left - 12),
-                            height: targetRect.height + 24,
+                            width: Math.max(0, targetRect.left - 8),
+                            height: targetRect.height + 16,
                         }}
                     />
                     {/* 右の暗い部分 */}
                     <div
-                        className="absolute bg-black/60"
+                        className="fixed bg-black/60 pointer-events-auto"
                         style={{
-                            top: targetRect.top - 12,
-                            left: targetRect.left + targetRect.width + 12,
+                            top: targetRect.top - 8,
+                            left: targetRect.left + targetRect.width + 8,
                             right: 0,
-                            height: targetRect.height + 24,
+                            height: targetRect.height + 16,
                         }}
                     />
                     {/* 下の暗い部分 */}
                     <div
-                        className="absolute left-0 right-0 bottom-0 bg-black/60"
-                        style={{ top: targetRect.top + targetRect.height + 12 }}
+                        className="fixed left-0 right-0 bottom-0 bg-black/60 pointer-events-auto"
+                        style={{ top: targetRect.top + targetRect.height + 8 }}
                     />
 
                     {/* ハイライト枠 */}
                     <div
-                        className="absolute rounded-xl pointer-events-none"
+                        className="fixed rounded-xl"
                         style={{
-                            top: targetRect.top - 12,
-                            left: targetRect.left - 12,
-                            width: targetRect.width + 24,
-                            height: targetRect.height + 24,
+                            top: targetRect.top - 8,
+                            left: targetRect.left - 8,
+                            width: targetRect.width + 16,
+                            height: targetRect.height + 16,
                             border: '3px solid #ec4899',
                             boxShadow: '0 0 15px rgba(236, 72, 153, 0.7)',
                         }}
                     />
                 </>
             ) : (
-                <div className="absolute inset-0 bg-black/60" />
+                <div className="fixed inset-0 bg-black/60 pointer-events-auto" />
             )}
 
-            {/* 説明カード - ターゲット位置に応じて上下に配置 */}
+            {/* 説明カード */}
             {showContent && (
                 <div
-                    className={`absolute left-1/2 -translate-x-1/2 w-[92%] max-w-sm animate-fade-in ${!targetRect
-                        ? 'top-[35%] -translate-y-1/2'
-                        : isTargetInUpperHalf
-                            ? 'bottom-[15%]'
-                            : 'top-[25%]'
-                        }`}
+                    className={`fixed left-1/2 -translate-x-1/2 w-[92%] max-w-sm animate-fade-in pointer-events-auto ${getCardPositionClass()}`}
                 >
                     <div className="bg-white rounded-2xl p-4 shadow-2xl relative">
                         {/* キャラクター */}
