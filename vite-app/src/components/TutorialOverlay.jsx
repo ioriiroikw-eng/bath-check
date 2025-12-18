@@ -5,49 +5,43 @@ const TUTORIAL_STEPS = [
     {
         id: 'intro',
         title: 'ようこそ！',
-        description: '「毎日お風呂入らなきゃ...」\nそんなプレッシャーから解放！\nHPが減ったら入る、新しい入浴スタイル✨',
+        description: '「毎日お風呂入らなきゃ...」そんなプレッシャーから解放！HPが減ったら入る、新しい入浴スタイル✨',
         target: null,
-        cardPosition: 'center',
         character: './char_80.png',
     },
     {
         id: 'hp',
         title: 'HP（清潔度）',
-        description: '時間が経つとHPが減るの。\n気温が高いと減りが速くなるよ🥵\nキャラをタップすると喋るよ！',
+        description: '時間経過でHPが減少。気温が高いと速くなるよ🥵',
         target: 'hp-bar',
-        cardPosition: 'bottom', // HPバーは上にあるのでカードは下
         character: './char_50.png',
     },
     {
         id: 'bath',
         title: 'お風呂に入る',
-        description: 'ここをタップするとHP全回復！\nさらにお風呂占いで\n今日の運勢がわかるよ🔮',
+        description: 'タップでHP全回復！お風呂占いで運勢もわかる🔮',
         target: 'bath-button',
-        cardPosition: 'top', // 風呂ボタンは中央なのでカードは上
         character: './char_80.png',
     },
     {
         id: 'sleep',
         title: '今日はもう寝る...',
-        description: '入浴せずに寝てもOK！\n代わりに「ズボラ貯金」で\n30分貯まるよ💰',
+        description: '入浴スキップでもOK！ズボラ貯金で30分貯まる💰',
         target: 'sleep-button',
-        cardPosition: 'top', // 寝るボタンは中央下なのでカードは上
         character: './char_20.png',
     },
     {
         id: 'savings',
         title: 'ズボラ貯金',
-        description: 'サボった時間が貯まって\nレベルアップ！\nサボることも立派な戦略💎',
+        description: 'サボった時間が貯まってレベルアップ💎',
         target: 'savings-button',
-        cardPosition: 'top', // 貯金ボタンは下なのでカードは上
         character: './char_50.png',
     },
     {
         id: 'calendar',
         title: 'カレンダー',
-        description: '入浴・スキップ履歴を\n確認できるよ📅\n続いたら自分を褒めよう！',
+        description: '入浴・スキップ履歴を確認📅',
         target: 'calendar-button',
-        cardPosition: 'center', // カレンダーは上にあるのでカードは中央
         character: './char_80.png',
     },
 ];
@@ -76,6 +70,7 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
                         left: rect.left,
                         width: rect.width,
                         height: rect.height,
+                        centerY: rect.top + rect.height / 2,
                     });
                 } else {
                     setTargetRect(null);
@@ -85,7 +80,7 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
             }
             setShowContent(true);
             setCharacterKey(prev => prev + 1);
-        }, 100);
+        }, 150);
 
         return () => clearTimeout(timer);
     }, [currentStep, step.target]);
@@ -104,32 +99,8 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
         }
     };
 
-    // カードの位置を計算
-    const getCardStyle = () => {
-        if (step.cardPosition === 'center' || !targetRect) {
-            return {
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-            };
-        }
-
-        if (step.cardPosition === 'top') {
-            // 画面上部に配置
-            return {
-                top: '80px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-            };
-        }
-
-        // bottom: 画面下部に配置
-        return {
-            bottom: '80px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-        };
-    };
+    // 画面の中央よりターゲットが上にあればカードを下に、下にあれば上に配置
+    const isTargetInUpperHalf = targetRect ? targetRect.centerY < window.innerHeight / 2 : false;
 
     return (
         <div className="fixed inset-0 z-[100]">
@@ -138,106 +109,105 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
                 <>
                     {/* 上の暗い部分 */}
                     <div
-                        className="absolute left-0 right-0 top-0 bg-black/50"
-                        style={{ height: targetRect.top - 16 }}
+                        className="absolute left-0 right-0 top-0 bg-black/60"
+                        style={{ height: Math.max(0, targetRect.top - 12) }}
                     />
                     {/* 左の暗い部分 */}
                     <div
-                        className="absolute bg-black/50"
+                        className="absolute bg-black/60"
                         style={{
-                            top: targetRect.top - 16,
+                            top: targetRect.top - 12,
                             left: 0,
-                            width: targetRect.left - 16,
-                            height: targetRect.height + 32,
+                            width: Math.max(0, targetRect.left - 12),
+                            height: targetRect.height + 24,
                         }}
                     />
                     {/* 右の暗い部分 */}
                     <div
-                        className="absolute bg-black/50"
+                        className="absolute bg-black/60"
                         style={{
-                            top: targetRect.top - 16,
-                            left: targetRect.left + targetRect.width + 16,
+                            top: targetRect.top - 12,
+                            left: targetRect.left + targetRect.width + 12,
                             right: 0,
-                            height: targetRect.height + 32,
+                            height: targetRect.height + 24,
                         }}
                     />
                     {/* 下の暗い部分 */}
                     <div
-                        className="absolute left-0 right-0 bottom-0 bg-black/50"
-                        style={{ top: targetRect.top + targetRect.height + 16 }}
+                        className="absolute left-0 right-0 bottom-0 bg-black/60"
+                        style={{ top: targetRect.top + targetRect.height + 12 }}
                     />
 
-                    {/* ハイライト枠 - 輝くボーダー */}
+                    {/* ハイライト枠 */}
                     <div
-                        className="absolute rounded-2xl pointer-events-none animate-pulse"
+                        className="absolute rounded-xl pointer-events-none"
                         style={{
-                            top: targetRect.top - 16,
-                            left: targetRect.left - 16,
-                            width: targetRect.width + 32,
-                            height: targetRect.height + 32,
-                            border: '4px solid #ec4899',
-                            boxShadow: '0 0 20px rgba(236, 72, 153, 0.6), 0 0 40px rgba(236, 72, 153, 0.4), inset 0 0 20px rgba(236, 72, 153, 0.1)',
+                            top: targetRect.top - 12,
+                            left: targetRect.left - 12,
+                            width: targetRect.width + 24,
+                            height: targetRect.height + 24,
+                            border: '3px solid #ec4899',
+                            boxShadow: '0 0 15px rgba(236, 72, 153, 0.7)',
                         }}
                     />
                 </>
             ) : (
-                // 対象がない場合は全体を暗く
-                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute inset-0 bg-black/60" />
             )}
 
-            {/* 説明カード */}
+            {/* 説明カード - ターゲット位置に応じて上下に配置 */}
             {showContent && (
                 <div
-                    className="absolute w-[90%] max-w-sm animate-fade-in"
-                    style={getCardStyle()}
+                    className={`absolute left-1/2 -translate-x-1/2 w-[92%] max-w-sm animate-fade-in ${!targetRect
+                        ? 'top-[35%] -translate-y-1/2'
+                        : isTargetInUpperHalf
+                            ? 'bottom-[15%]'
+                            : 'top-[25%]'
+                        }`}
                 >
-                    <div className="bg-white rounded-3xl p-5 shadow-2xl relative">
+                    <div className="bg-white rounded-2xl p-4 shadow-2xl relative">
                         {/* キャラクター */}
-                        <div className="absolute -top-14 left-4">
-                            <img
-                                key={characterKey}
-                                src={step.character}
-                                alt="キャラクター"
-                                className="w-16 h-16 object-contain animate-bounce-in drop-shadow-lg"
-                            />
-                        </div>
+                        <img
+                            key={characterKey}
+                            src={step.character}
+                            alt=""
+                            className="absolute -top-10 left-2 w-14 h-14 object-contain animate-bounce-in drop-shadow-lg"
+                        />
 
                         {/* ステップインジケーター */}
-                        <div className="flex justify-center gap-1.5 mb-3 pt-2">
+                        <div className="flex justify-center gap-1 mb-2 pt-1">
                             {TUTORIAL_STEPS.map((_, idx) => (
                                 <div
                                     key={idx}
-                                    className={`w-2 h-2 rounded-full transition-colors ${idx === currentStep ? 'bg-pink-500' : 'bg-gray-200'
+                                    className={`w-1.5 h-1.5 rounded-full ${idx === currentStep ? 'bg-pink-500' : 'bg-gray-200'
                                         }`}
                                 />
                             ))}
                         </div>
 
                         {/* タイトル */}
-                        <h3 className="text-lg font-black text-gray-800 mb-2 font-pop text-center">
+                        <h3 className="text-base font-black text-gray-800 mb-1 font-pop text-center">
                             {step.title}
                         </h3>
 
                         {/* 説明 */}
-                        <div className="bg-pink-50 rounded-2xl p-4 mb-4">
-                            <p className="text-sm text-gray-700 text-center leading-relaxed whitespace-pre-line font-bold">
-                                {step.description}
-                            </p>
-                        </div>
+                        <p className="text-xs text-gray-600 text-center leading-relaxed mb-3 font-bold">
+                            {step.description}
+                        </p>
 
                         {/* ボタン */}
-                        <div className="flex gap-3">
+                        <div className="flex gap-2">
                             {!isFirstStep && (
                                 <button
                                     onClick={handlePrev}
-                                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl active:scale-95 transition-transform"
+                                    className="flex-1 py-2 px-3 bg-gray-100 text-gray-600 text-sm font-bold rounded-lg active:scale-95"
                                 >
                                     ← 戻る
                                 </button>
                             )}
                             <button
                                 onClick={handleNext}
-                                className="flex-1 py-3 px-4 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-xl shadow-md shadow-pink-300/50 active:scale-95 transition-transform"
+                                className="flex-1 py-2 px-3 bg-gradient-to-r from-pink-400 to-pink-500 text-white text-sm font-bold rounded-lg shadow-md active:scale-95"
                             >
                                 {isLastStep ? '始める！🎉' : '次へ →'}
                             </button>
@@ -247,7 +217,7 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
                         {!isLastStep && (
                             <button
                                 onClick={onSkip}
-                                className="w-full mt-3 py-2 text-xs text-gray-400 font-bold"
+                                className="w-full mt-2 py-1 text-[10px] text-gray-400 font-bold"
                             >
                                 スキップ
                             </button>
@@ -269,20 +239,20 @@ export const TutorialStartModal = ({ onStart, onSkip }) => {
                     <img
                         src="./char_80.png"
                         alt="キャラクター"
-                        className="w-36 h-36 mx-auto mb-4 object-contain animate-float-breathe drop-shadow-lg"
+                        className="w-32 h-32 mx-auto mb-4 object-contain animate-float-breathe drop-shadow-lg"
                     />
-                    <div className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce">
+                    <div className="absolute top-0 right-4 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce">
                         やっほー！
                     </div>
                 </div>
 
                 {/* タイトル */}
-                <h2 className="text-2xl font-black text-gray-800 mb-2 font-pop">
+                <h2 className="text-xl font-black text-gray-800 mb-2 font-pop">
                     はじめまして！
                 </h2>
 
                 {/* 説明 */}
-                <p className="text-sm text-gray-600 leading-relaxed mb-8">
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
                     「フロハイッタ？」は<br />
                     あなたの入浴タイミングを<br />
                     可視化するアプリです✨

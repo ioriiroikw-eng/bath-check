@@ -211,7 +211,8 @@ const App = () => {
         } else { fetchTokyoWeather(); }
 
         const ua = navigator.userAgent.toLowerCase();
-        if (/line|instagram|twitter|fbav|fban/.test(ua)) { setShowInAppWarning(true); }
+        const isInAppBrowser = /line|instagram|twitter|fbav|fban/.test(ua);
+        if (isInAppBrowser) { setShowInAppWarning(true); }
         else {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
             if (!isStandalone) setTimeout(() => setShowInstallGuide(true), 2000);
@@ -229,8 +230,8 @@ const App = () => {
         }
         localStorage.setItem('hq_last_login', now.toISOString());
 
-        // 初回起動時のチュートリアル表示チェック
-        if (!tutorialCompleted) {
+        // 初回起動時のチュートリアル表示チェック（アプリ内ブラウザ警告がない場合のみ）
+        if (!tutorialCompleted && !isInAppBrowser) {
             // スプラッシュ終了後に表示するため、少し遅延
             setTimeout(() => setShowTutorialStart(true), 2500);
         }
@@ -435,8 +436,15 @@ const App = () => {
         <div className="min-h-screen w-full flex flex-col bg-pink-50 relative overflow-hidden text-gray-800 font-sans">
             {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
-            {showInAppWarning && <InAppBrowserWarning onClose={() => setShowInAppWarning(false)} />}
-            {showInstallGuide && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
+            {showInAppWarning && <InAppBrowserWarning onClose={() => {
+                setShowInAppWarning(false);
+                // チュートリアル未完了時はチュートリアルを開始
+                const tutorialCompleted = localStorage.getItem(STORAGE_KEY_TUTORIAL_COMPLETED);
+                if (!tutorialCompleted) {
+                    setTimeout(() => setShowTutorialStart(true), 500);
+                }
+            }} />}
+            {showInstallGuide && !showTutorialStart && !showTutorial && <InstallGuide onClose={() => setShowInstallGuide(false)} />}
             <LocationPermissionModal isOpen={showLocationModal} onAllowLocation={handleLocationAllow} onUseDefault={handleLocationDeny} />
 
             <OutingActionModal isOpen={showOutingActionModal} onClose={() => setShowOutingActionModal(false)} onAction={handleManualDamage} />
