@@ -100,6 +100,32 @@
     animation: fade-in 0.5s ease-out;
 }
 
+/* Character Bounce In - ポップな登場 */
+@keyframes character-bounce-in {
+    0% {
+        transform: scale(0) rotate(-10deg);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(5deg);
+        opacity: 1;
+    }
+
+    70% {
+        transform: scale(0.9) rotate(-3deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.animate-bounce-in {
+    animation: character-bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 /* Character Float & Breathe Animation */
 @keyframes float-breathe {
 

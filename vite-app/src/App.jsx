@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Icons } from './components/Icons';
-import { STATUS_MESSAGES, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
+import { STATUS_MESSAGES, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
 import { generateFortune, getLocalDateStr, calculateLevel } from './utils';
 
 
@@ -19,6 +19,7 @@ import LocationPermissionModal from './components/modals/LocationPermissionModal
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
 import ActionButton from './components/ActionButton';
+import TutorialOverlay, { TutorialStartModal } from './components/TutorialOverlay';
 
 const App = () => {
     const [hp, setHp] = useState(100);
@@ -60,6 +61,10 @@ const App = () => {
     const sePopRef = useRef(null);
     const seKiraRef = useRef(null);
     const [showSplash, setShowSplash] = useState(true);
+
+    // チュートリアル用State
+    const [showTutorialStart, setShowTutorialStart] = useState(false);
+    const [showTutorial, setShowTutorial] = useState(false);
 
     // Plan C: Tap-to-Speak State
     const [showBubble, setShowBubble] = useState(false);
@@ -212,8 +217,10 @@ const App = () => {
             if (!isStandalone) setTimeout(() => setShowInstallGuide(true), 2000);
         }
         const lastLogin = localStorage.getItem('hq_last_login');
+        const tutorialCompleted = localStorage.getItem(STORAGE_KEY_TUTORIAL_COMPLETED);
         const now = new Date();
-        if (lastLogin && !isSleeping) { // 睡眠中は帰宅モーダルを出さない
+        // チュートリアル完了済みで、睡眠中でない場合のみ外出モーダルを表示
+        if (lastLogin && !isSleeping && tutorialCompleted) {
             const diff = (now - new Date(lastLogin)) / (1000 * 60 * 60);
             if (diff >= 1) { // 1時間以上ぶりなら外出アクション確認
                 setShowOutingActionModal(true);
@@ -221,6 +228,12 @@ const App = () => {
 
         }
         localStorage.setItem('hq_last_login', now.toISOString());
+
+        // 初回起動時のチュートリアル表示チェック
+        if (!tutorialCompleted) {
+            // スプラッシュ終了後に表示するため、少し遅延
+            setTimeout(() => setShowTutorialStart(true), 2500);
+        }
     }, [fetchTokyoWeather]);
 
     useEffect(() => {
@@ -437,7 +450,7 @@ const App = () => {
                     startSleep('normal'); // その後通常睡眠へ
                 }}
             />
-            <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} />
+            <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} />
             <FortuneModal isOpen={isFortuneOpen} onClose={() => setIsFortuneOpen(false)} result={fortuneResult} />
             <DayDetailModal isOpen={!!selectedDateDetails} onClose={() => setSelectedDateDetails(null)} details={selectedDateDetails} logs={logs} onOpenFortune={(result) => { setFortuneResult(result); setIsFortuneOpen(true); }} />
 
@@ -447,7 +460,7 @@ const App = () => {
             <div className="flex-none pt-safe px-6 pb-4 flex flex-col items-center relative z-10 w-full mt-4">
                 {/* Helper ButtonsRow */}
                 <div className="w-full flex justify-between items-center mb-6 px-2">
-                    <button onClick={() => { playSe('pop'); setIsCalendarOpen(true); }} className="text-gray-400 p-2 hover:bg-gray-100 rounded-full transition-colors"><Icons.Calendar size={20} /></button>
+                    <button id="calendar-button" onClick={() => { playSe('pop'); setIsCalendarOpen(true); }} className="text-gray-400 p-2 hover:bg-gray-100 rounded-full transition-colors"><Icons.Calendar size={20} /></button>
                     <button onClick={toggleBgm} className={`p-2 rounded-full transition-colors ${isBgmPlaying ? 'text-pink-500' : 'text-gray-300'}`}><Icons.Music size={20} /></button>
                 </div>
 
@@ -512,7 +525,7 @@ const App = () => {
                     </div>
                     <p className="text-xs text-gray-400 text-center mt-1">風呂キャンした時間</p>
                 </div>
-                <div className="w-full max-w-xs mx-auto mt-4">
+                <div id="hp-bar" className="w-full max-w-xs mx-auto mt-4">
                     {/* 清潔度ラベルとパーセンテージ */}
                     <div className="flex items-center justify-between mb-2">
                         <span className="bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full">清潔度</span>
@@ -540,6 +553,7 @@ const App = () => {
             <div className="flex-none flex flex-col items-center px-6 gap-4 relative z-20 w-full mt-8">
                 {/* Main Action: Bath */}
                 <button
+                    id="bath-button"
                     onClick={() => { playSe('pop'); setShowBathConfirmModal(true); }}
                     className="w-full max-w-xs active:scale-95 transition-transform"
                 >
@@ -551,6 +565,7 @@ const App = () => {
 
                 {/* Secondary Action: Sleep */}
                 <button
+                    id="sleep-button"
                     onClick={handleSleepButtonPress}
                     className={`flex items-center justify-center gap-2 font-bold py-3 px-6 active:scale-95 transition-transform rounded-full ${hp > 40
                         ? 'bg-indigo-500 text-white shadow-md shadow-indigo-300/50'
@@ -566,6 +581,7 @@ const App = () => {
             <div className="flex-none px-6 pt-2 pb-4 flex flex-col items-center gap-3 w-full">
                 {/* Zubora Savings */}
                 <button
+                    id="savings-button"
                     onClick={() => { playSe('pop'); setIsSavingsModalOpen(true); }}
                     className="flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-50 text-indigo-500 hover:bg-indigo-100 transition-colors"
                 >
@@ -591,6 +607,32 @@ const App = () => {
 
             <CalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} bathEvents={bathEvents} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsCalendarOpen(false); }} />
             {generatedImage && (<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}> <div className="bg-transparent w-full max-w-sm relative" onClick={e => e.stopPropagation()}> <img src={generatedImage} alt="Share" className="w-full rounded-xl shadow-2xl" /> <div className="text-center mt-4 text-white font-bold text-sm opacity-80">長押しして保存</div></div> </div>)}
+
+            {/* チュートリアル */}
+            {showTutorialStart && (
+                <TutorialStartModal
+                    onStart={() => {
+                        setShowTutorialStart(false);
+                        setShowTutorial(true);
+                    }}
+                    onSkip={() => {
+                        setShowTutorialStart(false);
+                        localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                    }}
+                />
+            )}
+            {showTutorial && (
+                <TutorialOverlay
+                    onComplete={() => {
+                        setShowTutorial(false);
+                        localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                    }}
+                    onSkip={() => {
+                        setShowTutorial(false);
+                        localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                    }}
+                />
+            )}
         </div>
     );
 };

@@ -68,6 +68,7 @@ export const STORAGE_KEY_IS_SLEEPING = 'hq_is_sleeping';
 export const STORAGE_KEY_SLEEP_TYPE = 'hq_sleep_type'; // 'normal' or 'skip'
 export const STORAGE_KEY_SLEEP_START = 'hq_sleep_start';
 export const STORAGE_KEY_SAVED_MINUTES = 'hq_saved_minutes';
+export const STORAGE_KEY_TUTORIAL_COMPLETED = 'hq_tutorial_completed';
 
 export const SE_POP_URL = "./audio/se_pop.mp3";
 export const SE_KIRA_URL = "./audio/se_kira.mp3";
