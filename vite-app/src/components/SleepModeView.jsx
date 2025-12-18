@@ -44,8 +44,8 @@ const SleepModeView = ({ onWakeUp, savedMinutes, status, sleepType }) => {
                 </div>
 
                 {/* 励ましの言葉 */}
-                <div className="bg-indigo-900/50 backdrop-blur-md border border-indigo-700/50 rounded-2xl p-6 mb-6">
-                    <p className="text-xl font-bold text-white leading-relaxed">
+                <div className="bg-indigo-900/50 backdrop-blur-md border border-indigo-700/50 rounded-2xl px-4 py-5 mb-6">
+                    <p className="text-lg font-bold text-white whitespace-nowrap">
                         {encouragement}
                     </p>
                 </div>
