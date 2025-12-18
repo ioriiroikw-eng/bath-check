@@ -1,36 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icons } from './Icons';
 
+// 励ましの言葉
+const ENCOURAGEMENTS = [
+    "今日も1日頑張ってえらい！",
+    "自分を大切にできてすごい✨",
+    "ゆっくり休んでね、おやすみ💤",
+    "明日もきっといい日になるよ",
+    "今日の疲れ、お風呂で癒せたね",
+    "よく頑張った！ぐっすり眠れますように",
+    "お疲れさま、明日も応援してるよ",
+    "ちゃんと休むのも大事なこと🌙",
+];
+
 const SleepModeView = ({ onWakeUp, savedMinutes, status, sleepType }) => {
+    const [encouragement, setEncouragement] = useState("");
+
+    useEffect(() => {
+        // ランダムに励ましの言葉を選ぶ
+        const msg = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+        setEncouragement(msg);
+    }, []);
+
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-white sleep-overlay">
-            <div className="text-center mb-10">
-                <div className="w-40 h-40 mx-auto mb-6 relative purupuru select-none flex items-center justify-center">
-                    <img src={status.avatar} alt="睡眠中..." className="relative z-10 w-32 h-32 object-contain drop-shadow-md" />
+        <div className="min-h-screen w-full bg-indigo-950 flex flex-col items-center justify-center relative overflow-hidden text-white px-6">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 animate-pulse"></div>
+
+            {/* Stars */}
+            {[...Array(20)].map((_, i) => (
+                <div key={i} className="absolute bg-white rounded-full animate-twinkle" style={{
+                    width: Math.random() * 3 + 'px',
+                    height: Math.random() * 3 + 'px',
+                    top: Math.random() * 100 + '%',
+                    left: Math.random() * 100 + '%',
+                    animationDelay: Math.random() * 5 + 's'
+                }}></div>
+            ))}
+
+            <div className="z-10 text-center w-full max-w-sm">
+                {/* キャラクター */}
+                <div className="mb-8">
+                    <img src={status.avatar} alt="Sleeping" className="w-32 h-32 mx-auto object-contain drop-shadow-lg mb-4" />
                 </div>
-                <h2 className="text-3xl font-black font-pop mb-2 text-indigo-300">
-                    {sleepType === 'skip' ? '戦略的睡眠中...' : 'おやすみ中...'}
-                </h2>
-                <p className="text-sm font-bold text-indigo-100">
-                    {sleepType === 'skip' ? 'アプリをロックしてデトックス中' : '良い夢を...💤'}
-                </p>
+
+                {/* 励ましの言葉 */}
+                <div className="bg-indigo-900/50 backdrop-blur-md border border-indigo-700/50 rounded-2xl p-6 mb-6">
+                    <p className="text-xl font-bold text-white leading-relaxed">
+                        {encouragement}
+                    </p>
+                </div>
+
+                {/* ズボラ貯金表示 */}
+                {sleepType === 'skip' && (
+                    <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-3 mb-6 flex items-center justify-center gap-2">
+                        <Icons.Gem size={16} className="text-yellow-400" />
+                        <span className="text-yellow-200 font-bold text-sm">貯金 +30分 獲得済み</span>
+                    </div>
+                )}
+
+                {/* おはようボタン */}
+                <button
+                    onClick={onWakeUp}
+                    className="w-full bg-white text-indigo-900 font-black py-4 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] active:scale-95 transition-all text-xl flex items-center justify-center gap-2"
+                >
+                    <Icons.Sun size={24} />
+                    <span>おはよう！</span>
+                </button>
             </div>
-
-            {sleepType === 'skip' && (
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 mb-10 text-center w-full max-w-xs">
-                    <div className="text-xs font-bold text-indigo-200 mb-2">💎 今回のズボラ成果</div>
-                    <div className="text-4xl font-black font-pop text-yellow-300 drop-shadow-md">+30<span className="text-sm ml-1">分</span></div>
-                    <p className="text-xs text-indigo-200 mt-2">合計貯金: {savedMinutes}分</p>
-                </div>
-            )}
-
-            <button
-                onClick={onWakeUp}
-                className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-300 hover:to-orange-300 text-white font-black py-4 rounded-full shadow-lg border-4 border-white active:scale-95 transition-all flex items-center justify-center gap-2 text-lg font-pop"
-            >
-                <Icons.Sun size={24} /> <span>おはよう！起きた☀️</span>
-            </button>
-            <p className="text-[10px] text-gray-400 mt-4 opacity-50">起きたら汚れを計算します...</p>
         </div>
     );
 };

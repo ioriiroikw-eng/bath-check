@@ -8,7 +8,20 @@ export const generateFortune = () => {
     const messages = FORTUNE_MESSAGES[selectedRank.id];
     const message = messages[Math.floor(Math.random() * messages.length)];
     const getStar = (min) => Math.min(5, Math.max(1, min + Math.floor(Math.random() * 3)));
-    return { rank: selectedRank.name, read: selectedRank.read, title: message.title, desc: message.desc, color: selectedRank.color, bg: selectedRank.bg, love: getStar(selectedRank.minStar - 1), money: getStar(selectedRank.minStar - 1), health: getStar(selectedRank.minStar), action: FORTUNE_ACTIONS[Math.floor(Math.random() * FORTUNE_ACTIONS.length)] };
+    return {
+        rank: selectedRank.name,
+        read: selectedRank.read,
+        title: message.title,
+        desc: message.desc,
+        color: selectedRank.color,
+        bg: selectedRank.bg,
+        stars: {
+            love: getStar(selectedRank.minStar - 1),
+            money: getStar(selectedRank.minStar - 1),
+            health: getStar(selectedRank.minStar)
+        },
+        action: FORTUNE_ACTIONS[Math.floor(Math.random() * FORTUNE_ACTIONS.length)]
+    };
 };
 
 export const getLocalDateStr = (date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
