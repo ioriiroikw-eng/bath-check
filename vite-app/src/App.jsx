@@ -433,6 +433,15 @@ const App = () => {
         return { ...s, shareMsg: randomMsg };
     }, [Math.floor(hp / 10)]);
 
+    // 昨日の風呂キャン推定人数（useMemoを早期リターン前に移動）
+    const saboriCount = useMemo(() => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const seed = yesterday.getFullYear() * 10000 + (yesterday.getMonth() + 1) * 100 + yesterday.getDate();
+        const pseudoRandom = ((seed * 9301 + 49297) % 233280) / 233280;
+        return Math.floor(100 + pseudoRandom * 900);
+    }, []);
+
     // 経過時間を時間:分:秒形式でフォーマット
     const elapsedMs = new Date() - lastBathTime;
     const totalSeconds = Math.floor(elapsedMs / 1000);
@@ -515,16 +524,7 @@ const App = () => {
                 <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
                     <span>👥</span>
                     <span className="font-bold">
-                        昨日の風呂キャン推定人数: {useMemo(() => {
-                            // 昨日の日付をシードにして決定論的に生成
-                            const yesterday = new Date();
-                            yesterday.setDate(yesterday.getDate() - 1);
-                            const seed = yesterday.getFullYear() * 10000 + (yesterday.getMonth() + 1) * 100 + yesterday.getDate();
-                            // 簡易的な疑似乱数（シードから決定論的に生成）
-                            const pseudoRandom = ((seed * 9301 + 49297) % 233280) / 233280;
-                            const value = Math.floor(100 + pseudoRandom * 900);
-                            return value.toLocaleString();
-                        }, [])}人
+                        昨日の風呂キャン推定人数: {saboriCount.toLocaleString()}人
                     </span>
                 </div>
 

@@ -18,19 +18,19 @@ export const DAILY_GREETINGS = [
 ];
 
 export const ZUBORA_CONVERSIONS = [
+    // SNS・動画系（時間換算）
     { type: 'time', min: 30, text: 'TikTok 60本分', icon: '📱' },
     { type: 'time', min: 30, text: '推しのMV 7回再生', icon: '🎵' },
-    { type: 'time', min: 30, text: 'LINE未読 20件消化', icon: '💬' },
-    { type: 'time', min: 30, text: '前髪セット 3回やり直し', icon: '💇‍♀️' },
-    { type: 'time', min: 30, text: '至福の二度寝 3セット', icon: '🛌' },
-    { type: 'time', min: 30, text: 'ペットを吸う時間', icon: '🐈' },
-    { type: 'time', min: 30, text: '天井のシミを数える虚無', icon: '😶' },
+    { type: 'time', min: 30, text: 'Youtubeショート 90本分', icon: '▶️' },
+    { type: 'time', min: 30, text: 'インスタリール 50本分', icon: '📸' },
+    { type: 'time', min: 60, text: 'Netflix 1エピソード', icon: '🍿' },
     { type: 'time', min: 60, text: '推しの配信アーカイブ', icon: '📺' },
-    { type: 'time', min: 120, text: '映画1本', icon: '🎬' },
-    { type: 'money', min: 30, text: 'スタバのトッピング1つ', icon: '☕️' },
-    { type: 'money', min: 60, text: 'コンビニのおにぎり1個', icon: '🍙' },
-    { type: 'money', min: 150, text: 'キャンメイクの新作コスメ', icon: '💄' },
-    { type: 'money', min: 180, text: 'マックのセット', icon: '🍔' },
+    { type: 'time', min: 60, text: 'Spotify 15曲分', icon: '🎧' },
+    { type: 'time', min: 90, text: 'アマプラで映画1本', icon: '🎬' },
+    { type: 'time', min: 120, text: 'ゲーム実況 2本分', icon: '🎮' },
+    { type: 'time', min: 30, text: 'X(Twitter)無限スクロール', icon: '🐦' },
+    { type: 'time', min: 30, text: 'LINE未読 20件消化', icon: '💬' },
+    { type: 'time', min: 30, text: 'ペットを吸う時間', icon: '🐈' },
 ];
 
 export const RANK_TITLES = [

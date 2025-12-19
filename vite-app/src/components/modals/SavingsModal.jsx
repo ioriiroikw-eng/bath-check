@@ -4,20 +4,19 @@ import { RANK_TITLES, ZUBORA_CONVERSIONS } from '../../constants';
 import { calculateLevel, getNextLevelMinutes } from '../../utils';
 
 const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
-    if (!isOpen) return null;
-
     // レベル計算
     const level = calculateLevel(savedMinutes);
     const nextLevelMinutes = getNextLevelMinutes(level);
 
     // ランク称号
-    let rankTitle = RANK_TITLES[0].title;
-    for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
-        if (level >= RANK_TITLES[i].lv) {
-            rankTitle = RANK_TITLES[i].title;
-            break;
+    const rankTitle = useMemo(() => {
+        for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
+            if (level >= RANK_TITLES[i].lv) {
+                return RANK_TITLES[i].title;
+            }
         }
-    }
+        return RANK_TITLES[0].title;
+    }, [level]);
 
     // ランダム提案 (3つ選出)
     const suggestions = useMemo(() => {
@@ -26,6 +25,9 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
         const shuffled = [...affordable].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, 3);
     }, [savedMinutes, isOpen]);
+
+    // 早期リターン（すべてのhookの後）
+    if (!isOpen) return null;
 
     const savedYen = Math.floor(savedMinutes / 30 * 80); // 30分=80円計算
 
@@ -68,7 +70,7 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                                     <div className="text-2xl">{item.icon}</div>
                                     <div className="flex-1">
                                         <div className="text-xs font-bold text-gray-600">{item.text}</div>
-                                        <div className="text-[10px] text-gray-400">{item.type === 'money' ? '💰 お金換算' : '⏳ 時間換算'}</div>
+                                        <div className="text-[10px] text-gray-400">⏳ この時間で見れる！</div>
                                     </div>
                                 </div>
                             ))}
