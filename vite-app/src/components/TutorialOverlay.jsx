@@ -291,14 +291,13 @@ export const TutorialStartModal = ({ onStart, onSkip }) => {
 
                 {/* タイトル */}
                 <h2 className="text-xl font-black text-gray-800 mb-2 font-pop">
-                    はじめまして！
+                    「お風呂めんどくさい…」
                 </h2>
 
                 {/* 説明 */}
                 <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                    「フロハイッタ？」は<br />
-                    あなたの入浴タイミングを<br />
-                    可視化するアプリです✨
+                    それ、全人類の本音です🛁<br />
+                    一緒にサボろ？
                 </p>
 
                 {/* 使い方を見るボタン */}

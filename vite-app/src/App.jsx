@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Icons } from './components/Icons';
-import { STATUS_MESSAGES, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
+import { STATUS_MESSAGES, DAILY_GREETINGS, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
 import { generateFortune, getLocalDateStr, calculateLevel } from './utils';
 
 
@@ -376,14 +376,38 @@ const App = () => {
                 const drawW = img.naturalWidth * scale; const drawH = img.naturalHeight * scale;
                 ctx.drawImage(img, cx - drawW / 2, imgY + (maxImgH - drawH) / 2, drawW, drawH);
             } catch (e) { ctx.font = '200px sans-serif'; ctx.fillText('🛁', cx, cardY + 250); }
-            const infoStartY = cardY + 480;
-            ctx.fillStyle = '#db2777'; ctx.font = 'bold 30px "Zen Maru Gothic"'; ctx.fillText('現在の清潔度', cx, infoStartY);
-            ctx.fillStyle = '#ec4899'; ctx.font = '900 120px "Mochiy Pop One"'; ctx.fillText(`${Math.floor(hp)}%`, cx, infoStartY + 110);
-            const badgeY = infoStartY + 160;
-            ctx.fillStyle = '#fce7f3'; drawRoundedRect(ctx, cx - 180, badgeY, 360, 60, 30); ctx.fill();
-            ctx.fillStyle = '#be185d'; ctx.font = 'bold 32px "Zen Maru Gothic"'; ctx.fillText(`お風呂に入らず ${hoursSince} 時間`, cx, badgeY + 42);
-            ctx.fillStyle = '#374151'; ctx.font = 'bold 40px "Yomogi"'; ctx.fillText(`「${status.shareMsg}」`, W / 2, 1080);
-            ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Mochiy Pop One"'; ctx.fillText('#入浴タイミング可視化中', W / 2, 1150);
+            const infoStartY = cardY + 510;
+            // 時間表示（ホーム画面スタイル - font-mono）
+            ctx.fillStyle = '#111827'; ctx.font = '900 80px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'; ctx.fillText(elapsedFormatted, cx, infoStartY);
+            ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 24px "Zen Maru Gothic"'; ctx.fillText('風呂キャンした時間', cx, infoStartY + 35);
+
+            // 清潔度ラベルとパーセント（ホーム画面スタイル）
+            const hpBarY = infoStartY + 90;
+            // 清潔度ラベル（左）
+            ctx.fillStyle = '#ec4899';
+            drawRoundedRect(ctx, cx - 200, hpBarY, 100, 36, 18); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 20px "Zen Maru Gothic"'; ctx.fillText('清潔度', cx - 150, hpBarY + 25);
+            // パーセント（右）
+            ctx.fillStyle = hp > 50 ? '#ec4899' : hp > 20 ? '#f97316' : '#6b7280';
+            ctx.font = '900 50px "Mochiy Pop One"'; ctx.textAlign = 'right'; ctx.fillText(`${Math.floor(hp)}%`, cx + 200, hpBarY + 40);
+            ctx.textAlign = 'center';
+
+            // HPバー
+            const barY = hpBarY + 55;
+            const barW = 400; const barH = 24;
+            ctx.fillStyle = '#e5e7eb'; drawRoundedRect(ctx, cx - barW / 2, barY, barW, barH, 12); ctx.fill();
+            // グラデーションバー
+            const barGrad = ctx.createLinearGradient(cx - barW / 2, 0, cx + barW / 2, 0);
+            barGrad.addColorStop(0, '#ec4899'); barGrad.addColorStop(0.5, '#fb923c'); barGrad.addColorStop(1, '#facc15');
+            ctx.fillStyle = barGrad;
+            drawRoundedRect(ctx, cx - barW / 2, barY, barW * (hp / 100), barH, 12); ctx.fill();
+            // ハートアイコン
+            const heartX = cx - barW / 2 + barW * (hp / 100);
+            ctx.font = '28px sans-serif'; ctx.fillText(hp > 80 ? '❤️' : hp > 50 ? '🧡' : hp > 30 ? '💛' : hp > 10 ? '💔' : '🖤', heartX, barY + 8);
+
+            ctx.fillStyle = '#374151'; ctx.font = 'bold 36px "Yomogi"'; ctx.fillText(`「${status.shareMsg}」`, W / 2, 1070);
+            ctx.fillStyle = '#ec4899'; ctx.font = 'bold 28px "Mochiy Pop One"'; ctx.fillText('#フロハイッタ', W / 2, 1130);
+            ctx.fillStyle = '#9ca3af'; ctx.font = '20px "Zen Maru Gothic"'; ctx.fillText('bath-check.com', W / 2, 1170);
             canvas.toBlob(async (blob) => {
                 if (!blob) throw new Error("Canvas Error");
                 const file = new File([blob], "share.png", { type: "image/png" });
@@ -487,16 +511,36 @@ const App = () => {
                     </div>
                 )}
 
+                {/* 昨日の風呂キャン人数 */}
+                <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+                    <span>👥</span>
+                    <span className="font-bold">
+                        昨日の風呂キャン推定人数: {useMemo(() => {
+                            // 昨日の日付をシードにして決定論的に生成
+                            const yesterday = new Date();
+                            yesterday.setDate(yesterday.getDate() - 1);
+                            const seed = yesterday.getFullYear() * 10000 + (yesterday.getMonth() + 1) * 100 + yesterday.getDate();
+                            // 簡易的な疑似乱数（シードから決定論的に生成）
+                            const pseudoRandom = ((seed * 9301 + 49297) % 233280) / 233280;
+                            const value = Math.floor(100 + pseudoRandom * 900);
+                            return value.toLocaleString();
+                        }, [])}人
+                    </span>
+                </div>
+
+
                 {/* Status Avatar (The "Subject") & Tap-to-Speak (Plan C) */}
                 <div className="relative w-40 h-40 flex items-center justify-center mb-2 z-30">
                     {/* Tap Area */}
                     <div
                         onClick={() => {
                             const s = getStatus(hp);
-                            // Pick a random message
-                            const msgs = s.msgList;
-                            // Simple random for now, can be improved to avoid repeats later if needed
-                            const msg = msgs[Math.floor(Math.random() * msgs.length)];
+                            // 30%の確率で曜日別セリフ、70%でHP別セリフ
+                            const dayOfWeek = new Date().getDay();
+                            const useDailyGreeting = Math.random() < 0.3;
+                            const msg = useDailyGreeting
+                                ? DAILY_GREETINGS[dayOfWeek]
+                                : s.msgList[Math.floor(Math.random() * s.msgList.length)];
                             setBubbleText(msg);
                             setShowBubble(true);
                             playSe('pop');
