@@ -23,4 +23,5 @@ export const Icons = {
     XLogo: (p) => <Icon {...p} path={<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />} />,
     Zzz: (p) => <Icon {...p} path={<><path d="M2 4v16" /><path d="M2 8h18a2 2 0 0 1 2 2v10" /><path d="M2 17h20" /><path d="M6 8v9" /></>} />,
     Gem: (p) => <Icon {...p} path={<path d="M6 3h12l4 6-10 13L2 9z" />} />,
+    ArrowRight: (p) => <Icon {...p} path={<><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></>} />,
 };

@@ -72,3 +72,4 @@ const SleepModeView = ({ onWakeUp, savedMinutes, status, sleepType }) => {
 };
 
 export default SleepModeView;
+

@@ -83,4 +83,117 @@ export const STORAGE_KEY_TUTORIAL_COMPLETED = 'hq_tutorial_completed';
 
 export const SE_POP_URL = "./audio/se_pop.mp3";
 export const SE_KIRA_URL = "./audio/se_kira.mp3";
-export const BGM_URL = "./audio/bgm.mp3"; 
+export const BGM_URL = "./audio/bgm.mp3";
+
+// お金換算の提案（節約金額で何が買えるか）
+export const MONEY_CONVERSIONS = [
+    // 〜100円
+    { type: 'money', minYen: 0, text: 'うまい棒 1本', icon: '🍫' },
+    { type: 'money', minYen: 80, text: 'ガム 1個', icon: '🫧' },
+    { type: 'money', minYen: 100, text: '自販機の水 1本', icon: '💧' },
+    // 100〜300円
+    { type: 'money', minYen: 150, text: 'コンビニおにぎり', icon: '🍙' },
+    { type: 'money', minYen: 150, text: 'セブンのアイス', icon: '🍨' },
+    { type: 'money', minYen: 200, text: 'コンビニスイーツ', icon: '🍰' },
+    { type: 'money', minYen: 250, text: 'スタバのドリップコーヒー', icon: '☕' },
+    // 300〜500円
+    { type: 'money', minYen: 300, text: 'マックのバーガーセット', icon: '🍔' },
+    { type: 'money', minYen: 350, text: '牛丼並盛り', icon: '🥡' },
+    { type: 'money', minYen: 400, text: 'コンビニ弁当', icon: '🍱' },
+    { type: 'money', minYen: 500, text: 'スタバのフラペチーノ', icon: '🧋' },
+    // 500〜1000円
+    { type: 'money', minYen: 600, text: 'ラーメン一杯', icon: '🍜' },
+    { type: 'money', minYen: 700, text: 'ファミレスのランチ', icon: '🍽️' },
+    { type: 'money', minYen: 800, text: 'タピオカドリンク', icon: '🧋' },
+    { type: 'money', minYen: 1000, text: '映画館のポップコーン', icon: '🍿' },
+    // 1000円〜
+    { type: 'money', minYen: 1200, text: '回転寿司ランチ', icon: '🍣' },
+    { type: 'money', minYen: 1500, text: 'カフェでケーキセット', icon: '🎂' },
+    { type: 'money', minYen: 1800, text: '映画チケット（一般）', icon: '🎬' },
+    { type: 'money', minYen: 2000, text: 'ネイルサロン（ケアのみ）', icon: '💅' },
+    { type: 'money', minYen: 2500, text: 'アマプラ会員6ヶ月分', icon: '📺' },
+    { type: 'money', minYen: 3000, text: 'ユニクロTシャツ 2枚', icon: '👕' },
+    { type: 'money', minYen: 5000, text: '美容室カット', icon: '💇' },
+    { type: 'money', minYen: 8000, text: 'ちょっといいディナー', icon: '🥂' },
+    { type: 'money', minYen: 10000, text: '日帰り温泉旅行', icon: '♨️' },
+];
+
+// Amazonアソシエイト アフィリエイト提案
+export const AFFILIATE_SUGGESTIONS = [
+    // 無料体験系（0円〜500円）- 優先度高
+    {
+        type: 'affiliate',
+        minYen: 0,
+        maxYen: 500,
+        icon: '🎧',
+        title: 'Audible無料体験',
+        description: 'サボった30分、耳から読書しませんか？',
+        subtext: '今なら無料で1冊聴けます',
+        url: 'https://www.amazon.co.jp/hz/audible/mlp?tag=noteshuekika1-22',
+        bannerImage: './banner_audible.png',
+        skipMessages: [
+            '今日得した30分で、耳から読書してみませんか？',
+            '浮いた30分、通勤時間にも使える"聴く読書"はいかが？',
+            'ゴロゴロしながら30分、声優さんの朗読で癒されませんか？',
+        ],
+        priority: 1,
+    },
+    {
+        type: 'affiliate',
+        minYen: 0,
+        maxYen: 500,
+        icon: '📚',
+        title: 'Kindle Unlimited',
+        description: '浮いた時間でスキルアップ',
+        subtext: '30分で読める本が0円で読み放題',
+        url: 'https://www.amazon.co.jp/kindle-dbs/hz/signup?tag=noteshuekika1-22',
+        bannerImage: './banner_kindle.png',
+        skipMessages: [
+            '今日得した30分で、好きな漫画・本を読みませんか？',
+            '布団の中で30分、話題のビジネス書をサクッと読もう',
+            '浮いた時間でスキルアップ！時短術の本が読み放題✨',
+        ],
+        priority: 2,
+    },
+    // 500円〜2,000円クラス
+    {
+        type: 'affiliate',
+        minYen: 500,
+        maxYen: 2000,
+        icon: '📖',
+        title: '人気のビジネス書',
+        description: '浮いたお金で自己投資',
+        subtext: '980円〜で買える話題の本',
+        url: 'https://www.amazon.co.jp/s?k=%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E6%9B%B8+%E3%83%99%E3%82%B9%E3%83%88%E3%82%BB%E3%83%A9%E3%83%BC&tag=noteshuekika1-22',
+        bannerImage: null,
+        skipMessages: null,
+        priority: 3,
+    },
+    {
+        type: 'affiliate',
+        minYen: 500,
+        maxYen: 2000,
+        icon: '⏰',
+        title: '時短術の本',
+        description: '効率アップで更に時間を貯金',
+        subtext: 'ズボラさん向けライフハック本',
+        url: 'https://www.amazon.co.jp/s?k=%E6%99%82%E7%9F%AD%E8%A1%93+%E6%9C%AC&tag=noteshuekika1-22',
+        bannerImage: null,
+        skipMessages: null,
+        priority: 4,
+    },
+    // 2,000円〜 高額クラス
+    {
+        type: 'affiliate',
+        minYen: 2000,
+        maxYen: 999999,
+        icon: '💰',
+        title: '資産運用の入門書',
+        description: '貯金を増やすコツを学ぼう',
+        subtext: '話題のマネー本',
+        url: 'https://www.amazon.co.jp/s?k=%E8%B3%87%E7%94%A3%E9%81%8B%E7%94%A8+%E5%85%A5%E9%96%80&tag=noteshuekika1-22',
+        bannerImage: null,
+        skipMessages: null,
+        priority: 5,
+    },
+];

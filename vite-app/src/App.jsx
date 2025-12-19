@@ -15,6 +15,7 @@ import SavingsModal from './components/modals/SavingsModal';
 import InAppBrowserWarning from './components/modals/InAppBrowserWarning';
 import InstallGuide from './components/modals/InstallGuide';
 import LocationPermissionModal from './components/modals/LocationPermissionModal';
+import AffiliateAdModal from './components/modals/AffiliateAdModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
@@ -38,6 +39,7 @@ const App = () => {
     const [savedMinutes, setSavedMinutes] = useState(0);
     const [isSavingsModalOpen, setIsSavingsModalOpen] = useState(false);
     const [showSleepConfirmModal, setShowSleepConfirmModal] = useState(false); // 寝る確認用
+    const [showAffiliateAdModal, setShowAffiliateAdModal] = useState(false); // スキップ時の広告モーダル
 
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -257,16 +259,22 @@ const App = () => {
 
     // --- 睡眠機能の実装 ---
     const handleSleepButtonPress = () => {
-        // 直近3時間以内に入浴記録があるかチェック
+        // 直近3時間以内に入浴記録（お風呂に入った記録、sleepタイプではないもの）があるかチェック
         const now = new Date();
-        const diffMs = now - lastBathTime;
-        const hoursSince = diffMs / (1000 * 60 * 60);
+        const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
 
-        if (hoursSince < 3) {
-            // 直近で入ってるなら即座に通常睡眠
+        // bathEventsから実際のお風呂記録を探す（type !== 'sleep'）
+        const recentBathRecord = bathEvents.find(event => {
+            if (!event.time || event.type === 'sleep') return false;
+            const eventTime = new Date(event.time);
+            return eventTime > threeHoursAgo;
+        });
+
+        if (recentBathRecord) {
+            // 直近3時間以内にお風呂に入っているなら即座に通常睡眠
             startSleep('normal');
         } else {
-            // 入ってないなら確認
+            // 入ってないなら確認モーダルを表示
             setShowSleepConfirmModal(true);
         }
     };
@@ -485,10 +493,20 @@ const App = () => {
             <SleepConfirmModal
                 isOpen={showSleepConfirmModal}
                 onClose={() => setShowSleepConfirmModal(false)}
-                onConfirm={() => startSleep('skip')}
+                onConfirm={() => {
+                    setShowSleepConfirmModal(false);
+                    setShowAffiliateAdModal(true); // まず広告モーダルを表示
+                }}
                 onForgot={() => {
                     handleBath(); // 入浴処理を実行
                     startSleep('normal'); // その後通常睡眠へ
+                }}
+            />
+            <AffiliateAdModal
+                isOpen={showAffiliateAdModal}
+                onClose={() => {
+                    setShowAffiliateAdModal(false);
+                    startSleep('skip'); // 広告モーダルを閉じたらスリープ開始
                 }}
             />
             <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} />
