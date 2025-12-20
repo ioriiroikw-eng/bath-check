@@ -2,14 +2,14 @@ import React, { useMemo } from 'react';
 import { AFFILIATE_SUGGESTIONS } from '../../constants';
 
 const AffiliateAdModal = ({ isOpen, onClose }) => {
-    // ランダムにアフィリエイト提案を選択（無料体験系のみ）
+    // ランダムにアフィリエイト提案を選択（バナー画像があるもののみ）
     const affiliate = useMemo(() => {
-        const freeTrials = AFFILIATE_SUGGESTIONS.filter(
-            item => item.minYen === 0 && item.maxYen <= 500 && item.bannerImage
+        const withBanners = AFFILIATE_SUGGESTIONS.filter(
+            item => item.bannerImage && item.skipMessages
         );
-        if (freeTrials.length === 0) return null;
-        const randomIndex = Math.floor(Math.random() * freeTrials.length);
-        return freeTrials[randomIndex];
+        if (withBanners.length === 0) return null;
+        const randomIndex = Math.floor(Math.random() * withBanners.length);
+        return withBanners[randomIndex];
     }, [isOpen]);
 
     // スキップ時のメッセージをランダムに選択

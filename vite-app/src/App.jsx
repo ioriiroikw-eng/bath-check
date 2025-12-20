@@ -17,6 +17,7 @@ import InstallGuide from './components/modals/InstallGuide';
 import LocationPermissionModal from './components/modals/LocationPermissionModal';
 import AffiliateAdModal from './components/modals/AffiliateAdModal';
 import LevelUpShareModal from './components/modals/LevelUpShareModal';
+import SkipShareModal from './components/modals/SkipShareModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
@@ -43,6 +44,8 @@ const App = () => {
     const [showAffiliateAdModal, setShowAffiliateAdModal] = useState(false); // スキップ時の広告モーダル
     const [showLevelUpModal, setShowLevelUpModal] = useState(false); // レベルアップ時のモーダル
     const [newLevel, setNewLevel] = useState(null); // 新しいレベル
+    const [showSkipShareModal, setShowSkipShareModal] = useState(false); // サボリシェアモーダル
+    const [sleepHoursForShare, setSleepHoursForShare] = useState(0); // シェア用の睡眠時間
 
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -316,18 +319,27 @@ const App = () => {
 
     const handleWakeUp = () => {
         const now = new Date();
+        const wasSkip = sleepType === 'skip'; // スキップだったかどうか保存
+        let sleepHours = 0;
+
         setIsSleeping(false);
 
         // ダメージ計算: (経過時間 * 基本ダメージ * 天候倍率)
         if (sleepStartTime) {
             const diffMs = now - new Date(sleepStartTime);
-            const hours = diffMs / (1000 * 60 * 60);
-            const damage = Math.floor(hours * BASE_SLEEP_DAMAGE * weatherRate); // 天候倍率を適用
+            sleepHours = diffMs / (1000 * 60 * 60);
+            const damage = Math.floor(sleepHours * BASE_SLEEP_DAMAGE * weatherRate); // 天候倍率を適用
             setEventDamageTotal(prev => prev + damage);
             addLog(`おはよう！よく寝たね✨ (睡眠ダメージ: -${damage})`, "☀️", 'action');
         }
         setSleepStartTime(null);
         playSe('kira');
+
+        // スキップだった場合、サボリシェアモーダルを表示
+        if (wasSkip) {
+            setSleepHoursForShare(sleepHours);
+            setTimeout(() => setShowSkipShareModal(true), 300);
+        }
     };
 
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -529,6 +541,7 @@ const App = () => {
 
             <SavingsModal isOpen={isSavingsModalOpen} onClose={() => setIsSavingsModalOpen(false)} savedMinutes={savedMinutes} />
             <LevelUpShareModal isOpen={showLevelUpModal} onClose={() => setShowLevelUpModal(false)} newLevel={newLevel} savedMinutes={savedMinutes} />
+            <SkipShareModal isOpen={showSkipShareModal} onClose={() => setShowSkipShareModal(false)} sleepHours={sleepHoursForShare} />
 
             {/* --- TOP: Past / Premise (突きつける) --- */}
             <div className="flex-none pt-safe px-6 pb-4 flex flex-col items-center relative z-10 w-full mt-4">
