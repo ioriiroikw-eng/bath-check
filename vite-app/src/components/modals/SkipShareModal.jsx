@@ -1,6 +1,8 @@
 import React from 'react';
 import { Icons } from '../Icons';
 
+const COMMUNITY_URL = 'https://x.com/i/communities/2002271224563736624';
+
 const SkipShareModal = ({ isOpen, onClose, sleepHours }) => {
     if (!isOpen) return null;
 
@@ -24,6 +26,10 @@ const SkipShareModal = ({ isOpen, onClose, sleepHours }) => {
         const text = generateShareMessage();
         const url = "https://app.bath-check.com/";
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    };
+
+    const handleJoinCommunity = () => {
+        window.open(COMMUNITY_URL, '_blank');
     };
 
     return (
@@ -71,6 +77,15 @@ const SkipShareModal = ({ isOpen, onClose, sleepHours }) => {
                     >
                         <Icons.XLogo size={18} />
                         <span>風呂キャンセルをシェア</span>
+                    </button>
+
+                    {/* コミュニティ参加ボタン */}
+                    <button
+                        onClick={handleJoinCommunity}
+                        className="w-full bg-indigo-50 text-indigo-600 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-all mb-2"
+                    >
+                        <span>📢</span>
+                        <span>風呂キャンセル界隈を覗く</span>
                     </button>
 
                     <button

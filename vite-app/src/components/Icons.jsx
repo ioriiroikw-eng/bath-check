@@ -24,4 +24,5 @@ export const Icons = {
     Zzz: (p) => <Icon {...p} path={<><path d="M2 4v16" /><path d="M2 8h18a2 2 0 0 1 2 2v10" /><path d="M2 17h20" /><path d="M6 8v9" /></>} />,
     Gem: (p) => <Icon {...p} path={<path d="M6 3h12l4 6-10 13L2 9z" />} />,
     ArrowRight: (p) => <Icon {...p} path={<><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></>} />,
+    MessageCircle: (p) => <Icon {...p} path={<><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></>} />,
 };

@@ -18,10 +18,12 @@ import LocationPermissionModal from './components/modals/LocationPermissionModal
 import AffiliateAdModal from './components/modals/AffiliateAdModal';
 import LevelUpShareModal from './components/modals/LevelUpShareModal';
 import SkipShareModal from './components/modals/SkipShareModal';
+import CommunityModal from './components/modals/CommunityModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
 import ActionButton from './components/ActionButton';
+import CommunityBanner from './components/CommunityBanner';
 import TutorialOverlay, { TutorialStartModal } from './components/TutorialOverlay';
 
 const App = () => {
@@ -47,6 +49,7 @@ const App = () => {
     const [showSkipShareModal, setShowSkipShareModal] = useState(false); // サボリシェアモーダル
     const [sleepHoursForShare, setSleepHoursForShare] = useState(0); // シェア用の睡眠時間
     const [pendingSleepAfterFortune, setPendingSleepAfterFortune] = useState(false); // 占い後にスリープに入るフラグ
+    const [showCommunityModal, setShowCommunityModal] = useState(false); // コミュニティモーダル
 
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -723,9 +726,9 @@ const App = () => {
 
                 {/* Tools Row */}
                 <div className="flex gap-6 mt-2 mb-4">
-                    {/* Share Button (Action) */}
-                    <button onClick={() => { const text = `現在の清潔度: ${Math.floor(hp)}%\n経過時間: ${hoursSince}時間\n\n#フロハイッタ`; const url = "https://app.bath-check.com/"; window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank'); }} className="text-gray-400 hover:text-pink-400 transition-colors">
-                        <Icons.XLogo size={20} />
+                    {/* Community Button (掲示板) */}
+                    <button onClick={() => { playSe('pop'); setShowCommunityModal(true); }} className="text-gray-400 hover:text-purple-400 transition-colors">
+                        <Icons.MessageCircle size={20} />
                     </button>
                     {/* Camera Button (Action) */}
                     <button onClick={() => generateShareImage()} disabled={isGenerating} className="text-gray-400 hover:text-pink-400 transition-colors disabled:opacity-30">
@@ -736,6 +739,8 @@ const App = () => {
                 </div>
             </div>
 
+            <CommunityBanner showInstallGuide={showInstallGuide} showTutorial={showTutorial || showTutorialStart} />
+            <CommunityModal isOpen={showCommunityModal} onClose={() => setShowCommunityModal(false)} />
             <CalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} bathEvents={bathEvents} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsCalendarOpen(false); }} />
             {generatedImage && (<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}> <div className="bg-transparent w-full max-w-sm relative" onClick={e => e.stopPropagation()}> <img src={generatedImage} alt="Share" className="w-full rounded-xl shadow-2xl" /> <div className="text-center mt-4 text-white font-bold text-sm opacity-80">長押しして保存</div></div> </div>)}
 
