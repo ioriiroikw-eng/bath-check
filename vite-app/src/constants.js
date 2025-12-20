@@ -134,11 +134,11 @@ export const GIFT_CARD_AD = {
 
 // Amazonアソシエイト アフィリエイト提案
 export const AFFILIATE_SUGGESTIONS = [
-    // 無料体験系（0円〜500円）- 優先度高
+    // 無料体験系（全金額帯で表示）- 優先度高
     {
         type: 'affiliate',
         minYen: 0,
-        maxYen: 500,
+        maxYen: 999999,
         icon: '🎧',
         title: 'Audible無料体験',
         description: 'サボった30分、耳から読書しませんか？',
@@ -155,7 +155,7 @@ export const AFFILIATE_SUGGESTIONS = [
     {
         type: 'affiliate',
         minYen: 0,
-        maxYen: 500,
+        maxYen: 999999,
         icon: '📚',
         title: 'Kindle Unlimited',
         description: '浮いた時間でスキルアップ',
@@ -168,46 +168,5 @@ export const AFFILIATE_SUGGESTIONS = [
             '浮いた時間でスキルアップ！時短術の本が読み放題✨',
         ],
         priority: 2,
-    },
-    // 500円〜2,000円クラス
-    {
-        type: 'affiliate',
-        minYen: 500,
-        maxYen: 2000,
-        icon: '📖',
-        title: '人気のビジネス書',
-        description: '浮いたお金で自己投資',
-        subtext: '980円〜で買える話題の本',
-        url: 'https://www.amazon.co.jp/s?k=%E3%83%93%E3%82%B8%E3%83%8D%E3%82%B9%E6%9B%B8+%E3%83%99%E3%82%B9%E3%83%88%E3%82%BB%E3%83%A9%E3%83%BC&tag=noteshuekika1-22',
-        bannerImage: null,
-        skipMessages: null,
-        priority: 3,
-    },
-    {
-        type: 'affiliate',
-        minYen: 500,
-        maxYen: 2000,
-        icon: '⏰',
-        title: '時短術の本',
-        description: '効率アップで更に時間を貯金',
-        subtext: 'ズボラさん向けライフハック本',
-        url: 'https://www.amazon.co.jp/s?k=%E6%99%82%E7%9F%AD%E8%A1%93+%E6%9C%AC&tag=noteshuekika1-22',
-        bannerImage: null,
-        skipMessages: null,
-        priority: 4,
-    },
-    // 2,000円〜 高額クラス
-    {
-        type: 'affiliate',
-        minYen: 2000,
-        maxYen: 999999,
-        icon: '💰',
-        title: '資産運用の入門書',
-        description: '貯金を増やすコツを学ぼう',
-        subtext: '話題のマネー本',
-        url: 'https://www.amazon.co.jp/s?k=%E8%B3%87%E7%94%A3%E9%81%8B%E7%94%A8+%E5%85%A5%E9%96%80&tag=noteshuekika1-22',
-        bannerImage: null,
-        skipMessages: null,
-        priority: 5,
     },
 ];
