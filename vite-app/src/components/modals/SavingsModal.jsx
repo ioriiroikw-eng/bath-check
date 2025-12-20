@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Icons } from '../Icons';
-import { RANK_TITLES, MONEY_CONVERSIONS, AFFILIATE_SUGGESTIONS } from '../../constants';
+import { RANK_TITLES, MONEY_CONVERSIONS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD } from '../../constants';
 import { calculateLevel, getNextLevelMinutes } from '../../utils';
 
 const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
@@ -36,6 +36,12 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
             .sort((a, b) => a.priority - b.priority)
             .slice(0, 2);
     }, [savedYen, isOpen]);
+
+    // ギフトカード広告のメッセージをランダムに選択
+    const giftCardMessage = useMemo(() => {
+        const randomIndex = Math.floor(Math.random() * GIFT_CARD_AD.messages.length);
+        return GIFT_CARD_AD.messages[randomIndex];
+    }, [isOpen]);
 
     // 早期リターン（すべてのhookの後）
     if (!isOpen) return null;
@@ -168,6 +174,29 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                                 <div className="text-xs text-green-500 font-bold">まだ貯金が足りないみたい...<br />お風呂をスキップして貯めよう！</div>
                             </div>
                         )}
+
+                        {/* Amazonギフトカード広告 */}
+                        <div className="mt-4">
+                            <p className="text-sm font-bold text-amber-600 text-center mb-2">
+                                {giftCardMessage}
+                            </p>
+                            <a
+                                href={GIFT_CARD_AD.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all active:scale-[0.98] border border-amber-200"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <img
+                                    src={GIFT_CARD_AD.bannerImage}
+                                    alt="Amazonギフトカード"
+                                    className="w-full h-auto"
+                                />
+                            </a>
+                            <p className="text-[9px] text-gray-400 text-center mt-2">
+                                ※ 広告を含みます
+                            </p>
+                        </div>
                     </div>
                 )}
 

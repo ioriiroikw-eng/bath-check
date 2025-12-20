@@ -118,6 +118,20 @@ export const MONEY_CONVERSIONS = [
     { type: 'money', minYen: 10000, text: '日帰り温泉旅行', icon: '♨️' },
 ];
 
+// Amazonギフトカード広告（お金タブ用）
+export const GIFT_CARD_AD = {
+    url: 'https://www.amazon.co.jp/b?_encoding=UTF8&node=3131877051&pf_rd_p=baf486ea-77d6-4464-bc6e-61e5eea6c995&pf_rd_r=6M68EF1K1Q71X27Y93Y5&linkCode=ll2&tag=noteshuekika1-22&linkId=3f6418ee42fa12503be9b6141f26240e&language=ja_JP&ref_=as_li_ss_tl',
+    bannerImage: './banner_giftcard.png',
+    messages: [
+        '浮いたお金で、自分にご褒美をあげませんか？',
+        '節約したお金を、大切な人へのギフトに✨',
+        '貯まったお金で、ちょっといいものを買おう！',
+        '自分へのご褒美、たまには良いよね🎁',
+        'これだけ貯まった！自分にプレゼントしよう',
+        '頑張った自分にAmazonギフトでご褒美を💝',
+    ],
+};
+
 // Amazonアソシエイト アフィリエイト提案
 export const AFFILIATE_SUGGESTIONS = [
     // 無料体験系（0円〜500円）- 優先度高
