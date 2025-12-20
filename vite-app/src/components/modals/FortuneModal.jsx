@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Icons } from '../Icons';
 
-const FortuneModal = ({ isOpen, onClose, result }) => {
+const FortuneModal = ({ isOpen, onClose, result, hoursSince }) => {
     const [isFlipped, setIsFlipped] = useState(false);
     useEffect(() => {
         if (isOpen) {
@@ -27,10 +27,24 @@ const FortuneModal = ({ isOpen, onClose, result }) => {
         ));
     };
 
+    // シェアメッセージを生成
+    const generateShareMessage = () => {
+        const hoursText = parseFloat(hoursSince) >= 1
+            ? `${Math.floor(parseFloat(hoursSince))}時間ぶり`
+            : `${Math.floor(parseFloat(hoursSince) * 60)}分ぶり`;
+        return `${hoursText}にフロに入って復活しました！清潔度100%！✨\n\n運勢: ${result.rank}（${result.read}）\n「${result.title}」\n\n#フロハイッタ`;
+    };
+
+    const handleShare = () => {
+        const text = generateShareMessage();
+        const url = "https://app.bath-check.com/";
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    };
+
     return (
         <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-3" onClick={isFlipped ? onClose : null}>
             <div className="w-full max-w-xs perspective-1000" onClick={e => e.stopPropagation()}>
-                <div className={`card-inner relative w-full h-[420px] duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'flipped' : ''}`} onClick={() => !isFlipped && setIsFlipped(true)}>
+                <div className={`card-inner relative w-full h-[480px] duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'flipped' : ''}`} onClick={() => !isFlipped && setIsFlipped(true)}>
 
                     {/* FRONT: 水晶玉デザイン */}
                     <div className="card-front bg-pink-50 rounded-2xl flex flex-col items-center justify-center shadow-2xl">
@@ -50,31 +64,31 @@ const FortuneModal = ({ isOpen, onClose, result }) => {
 
                             {/* ランク名 */}
                             <h2 className={`text-5xl font-black ${result.color} tracking-wider`}>{result.rank}</h2>
-                            <p className="text-xs font-bold text-gray-400 mb-3">- {result.read} -</p>
+                            <p className="text-xs font-bold text-gray-400 mb-2">- {result.read} -</p>
 
                             {/* タイトル */}
-                            <div className="w-full bg-gray-50 rounded-lg px-3 py-2 mb-2">
+                            <div className="w-full bg-gray-50 rounded-lg px-3 py-1.5 mb-2">
                                 <p className="text-sm font-bold text-gray-700">「{result.title}」</p>
                             </div>
 
                             {/* 説明文 */}
-                            <p className="text-[11px] text-gray-600 leading-snug mb-3 px-1">
+                            <p className="text-[10px] text-gray-600 leading-snug mb-2 px-1">
                                 {result.desc}
                             </p>
 
                             {/* 星評価 */}
-                            <div className="w-full space-y-1 mb-3">
-                                <div className="flex items-center justify-between bg-pink-50 rounded-md px-3 py-1.5">
+                            <div className="w-full space-y-1 mb-2">
+                                <div className="flex items-center justify-between bg-pink-50 rounded-md px-3 py-1">
                                     <span className="text-xs font-bold text-pink-500">恋愛運</span>
-                                    <div className="text-sm">{renderStars(getStars('love'))}</div>
+                                    <div className="text-xs">{renderStars(getStars('love'))}</div>
                                 </div>
-                                <div className="flex items-center justify-between bg-yellow-50 rounded-md px-3 py-1.5">
+                                <div className="flex items-center justify-between bg-yellow-50 rounded-md px-3 py-1">
                                     <span className="text-xs font-bold text-yellow-600">金運</span>
-                                    <div className="text-sm">{renderStars(getStars('money'))}</div>
+                                    <div className="text-xs">{renderStars(getStars('money'))}</div>
                                 </div>
-                                <div className="flex items-center justify-between bg-green-50 rounded-md px-3 py-1.5">
+                                <div className="flex items-center justify-between bg-green-50 rounded-md px-3 py-1">
                                     <span className="text-xs font-bold text-green-600">健康運</span>
-                                    <div className="text-sm">{renderStars(getStars('health'))}</div>
+                                    <div className="text-xs">{renderStars(getStars('health'))}</div>
                                 </div>
                             </div>
 
@@ -84,8 +98,20 @@ const FortuneModal = ({ isOpen, onClose, result }) => {
                                 <p className="text-xs font-bold text-purple-600">{result.action}</p>
                             </div>
 
+                            {/* シェアセクション */}
+                            <div className="w-full bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-2 mb-2">
+                                <p className="text-[10px] font-bold text-gray-500 mb-1">🛁 復活をシェア！</p>
+                                <button
+                                    onClick={handleShare}
+                                    className="w-full bg-black text-white font-bold py-2 px-4 rounded-lg text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                                >
+                                    <Icons.XLogo size={14} />
+                                    <span>Xでシェア</span>
+                                </button>
+                            </div>
+
                             {/* 閉じるボタン */}
-                            <button onClick={onClose} className="text-gray-400 text-[10px] font-bold underline mt-1">
+                            <button onClick={onClose} className="text-gray-400 text-[10px] font-bold underline">
                                 閉じる
                             </button>
                         </div>
@@ -97,3 +123,4 @@ const FortuneModal = ({ isOpen, onClose, result }) => {
 };
 
 export default FortuneModal;
+

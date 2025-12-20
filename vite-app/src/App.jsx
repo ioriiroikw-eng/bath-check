@@ -16,6 +16,7 @@ import InAppBrowserWarning from './components/modals/InAppBrowserWarning';
 import InstallGuide from './components/modals/InstallGuide';
 import LocationPermissionModal from './components/modals/LocationPermissionModal';
 import AffiliateAdModal from './components/modals/AffiliateAdModal';
+import LevelUpShareModal from './components/modals/LevelUpShareModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
@@ -40,6 +41,8 @@ const App = () => {
     const [isSavingsModalOpen, setIsSavingsModalOpen] = useState(false);
     const [showSleepConfirmModal, setShowSleepConfirmModal] = useState(false); // 寝る確認用
     const [showAffiliateAdModal, setShowAffiliateAdModal] = useState(false); // スキップ時の広告モーダル
+    const [showLevelUpModal, setShowLevelUpModal] = useState(false); // レベルアップ時のモーダル
+    const [newLevel, setNewLevel] = useState(null); // 新しいレベル
 
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -287,11 +290,22 @@ const App = () => {
         setShowSleepConfirmModal(false);
 
         if (type === 'skip') {
-            setSavedMinutes(prev => prev + 30); // 30分貯金
+            // レベルアップ検知のため、事前にレベルを計算
+            const oldLevel = calculateLevel(savedMinutes);
+            const newMinutes = savedMinutes + 30;
+            const newLevelValue = calculateLevel(newMinutes);
+
+            setSavedMinutes(newMinutes); // 30分貯金
             // 履歴に追加 (type: 'sleep')
             const newEvent = { dateStr: getLocalDateStr(now), time: now.toISOString(), hoursSince: '-', preBathHp: '-', fortune: null, type: 'sleep' };
             setBathEvents(prev => [newEvent, ...prev]);
             addLog("今日は寝る！（スキップ）30分貯金しました💰", "💤", 'action');
+
+            // レベルアップしたらモーダル表示
+            if (newLevelValue > oldLevel) {
+                setNewLevel(newLevelValue);
+                setTimeout(() => setShowLevelUpModal(true), 500);
+            }
         } else {
             addLog("おやすみモードを開始しました💤", "🛌", 'system');
         }
@@ -510,10 +524,11 @@ const App = () => {
                 }}
             />
             <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} />
-            <FortuneModal isOpen={isFortuneOpen} onClose={() => setIsFortuneOpen(false)} result={fortuneResult} />
+            <FortuneModal isOpen={isFortuneOpen} onClose={() => setIsFortuneOpen(false)} result={fortuneResult} hoursSince={hoursSince} />
             <DayDetailModal isOpen={!!selectedDateDetails} onClose={() => setSelectedDateDetails(null)} details={selectedDateDetails} logs={logs} onOpenFortune={(result) => { setFortuneResult(result); setIsFortuneOpen(true); }} />
 
             <SavingsModal isOpen={isSavingsModalOpen} onClose={() => setIsSavingsModalOpen(false)} savedMinutes={savedMinutes} />
+            <LevelUpShareModal isOpen={showLevelUpModal} onClose={() => setShowLevelUpModal(false)} newLevel={newLevel} savedMinutes={savedMinutes} />
 
             {/* --- TOP: Past / Premise (突きつける) --- */}
             <div className="flex-none pt-safe px-6 pb-4 flex flex-col items-center relative z-10 w-full mt-4">
