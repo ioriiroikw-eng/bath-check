@@ -46,6 +46,7 @@ const App = () => {
     const [newLevel, setNewLevel] = useState(null); // 新しいレベル
     const [showSkipShareModal, setShowSkipShareModal] = useState(false); // サボリシェアモーダル
     const [sleepHoursForShare, setSleepHoursForShare] = useState(0); // シェア用の睡眠時間
+    const [pendingSleepAfterFortune, setPendingSleepAfterFortune] = useState(false); // 占い後にスリープに入るフラグ
 
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -524,8 +525,9 @@ const App = () => {
                     setShowAffiliateAdModal(true); // まず広告モーダルを表示
                 }}
                 onForgot={() => {
-                    handleBath(); // 入浴処理を実行
-                    startSleep('normal'); // その後通常睡眠へ
+                    setShowSleepConfirmModal(false);
+                    setPendingSleepAfterFortune(true); // 占い後にスリープに入るフラグをセット
+                    handleBath(); // 入浴処理を実行（占いモーダルが開く）
                 }}
             />
             <AffiliateAdModal
@@ -536,7 +538,14 @@ const App = () => {
                 }}
             />
             <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} />
-            <FortuneModal isOpen={isFortuneOpen} onClose={() => setIsFortuneOpen(false)} result={fortuneResult} hoursSince={hoursSince} />
+            <FortuneModal isOpen={isFortuneOpen} onClose={() => {
+                setIsFortuneOpen(false);
+                // 記録忘れフローの場合、占い後にスリープに入る
+                if (pendingSleepAfterFortune) {
+                    setPendingSleepAfterFortune(false);
+                    startSleep('normal');
+                }
+            }} result={fortuneResult} hoursSince={hoursSince} />
             <DayDetailModal isOpen={!!selectedDateDetails} onClose={() => setSelectedDateDetails(null)} details={selectedDateDetails} logs={logs} onOpenFortune={(result) => { setFortuneResult(result); setIsFortuneOpen(true); }} />
 
             <SavingsModal isOpen={isSavingsModalOpen} onClose={() => setIsSavingsModalOpen(false)} savedMinutes={savedMinutes} />
@@ -649,30 +658,54 @@ const App = () => {
 
             {/* --- CENTER: Present / Action (促す) --- */}
             <div className="flex-none flex flex-col items-center px-6 gap-4 relative z-20 w-full mt-8">
-                {/* Main Action: Bath */}
-                <button
-                    id="bath-button"
-                    onClick={() => { playSe('pop'); setShowBathConfirmModal(true); }}
-                    className="w-full max-w-xs active:scale-95 transition-transform"
-                >
-                    <div className="bg-gradient-to-br from-pink-400 to-pink-600 text-white rounded-full py-5 px-8 flex items-center justify-center gap-3 shadow-lg shadow-pink-300/50">
-                        <Icons.Bath size={28} />
-                        <span className="text-xl font-black tracking-wide">お風呂に入る</span>
-                    </div>
-                </button>
-
-                {/* Secondary Action: Sleep */}
-                <button
-                    id="sleep-button"
-                    onClick={handleSleepButtonPress}
-                    className={`flex items-center justify-center gap-2 font-bold py-3 px-6 active:scale-95 transition-transform rounded-full ${hp > 40
-                        ? 'bg-indigo-500 text-white shadow-md shadow-indigo-300/50'
-                        : 'text-indigo-400 bg-indigo-50'
-                        }`}
-                >
-                    <Icons.Zzz size={16} />
-                    <span className="text-sm">今日はもう寝る...</span>
-                </button>
+                {/* HP > 40% の場合は寝るボタンを先に表示 */}
+                {hp > 40 ? (
+                    <>
+                        {/* Primary: Sleep (HP高い時) */}
+                        <button
+                            id="sleep-button"
+                            onClick={handleSleepButtonPress}
+                            className="w-full max-w-xs active:scale-95 transition-transform"
+                        >
+                            <div className="bg-gradient-to-br from-indigo-400 to-indigo-600 text-white rounded-full py-5 px-8 flex items-center justify-center gap-3 shadow-lg shadow-indigo-300/50">
+                                <Icons.Zzz size={24} />
+                                <span className="text-xl font-black tracking-wide">今日はもう寝る...</span>
+                            </div>
+                        </button>
+                        {/* Secondary: Bath */}
+                        <button
+                            id="bath-button"
+                            onClick={() => { playSe('pop'); setShowBathConfirmModal(true); }}
+                            className="flex items-center justify-center gap-2 font-bold py-3 px-6 active:scale-95 transition-transform rounded-full text-pink-400 bg-pink-50"
+                        >
+                            <Icons.Bath size={16} />
+                            <span className="text-sm">お風呂に入る</span>
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        {/* Primary: Bath (HP低い時) */}
+                        <button
+                            id="bath-button"
+                            onClick={() => { playSe('pop'); setShowBathConfirmModal(true); }}
+                            className="w-full max-w-xs active:scale-95 transition-transform"
+                        >
+                            <div className="bg-gradient-to-br from-pink-400 to-pink-600 text-white rounded-full py-5 px-8 flex items-center justify-center gap-3 shadow-lg shadow-pink-300/50">
+                                <Icons.Bath size={28} />
+                                <span className="text-xl font-black tracking-wide">お風呂に入る</span>
+                            </div>
+                        </button>
+                        {/* Secondary: Sleep */}
+                        <button
+                            id="sleep-button"
+                            onClick={handleSleepButtonPress}
+                            className="flex items-center justify-center gap-2 font-bold py-3 px-6 active:scale-95 transition-transform rounded-full text-indigo-400 bg-indigo-50"
+                        >
+                            <Icons.Zzz size={16} />
+                            <span className="text-sm">今日はもう寝る...</span>
+                        </button>
+                    </>
+                )}
             </div>
 
             {/* --- BOTTOM: Future / Exit (繋げる) --- */}

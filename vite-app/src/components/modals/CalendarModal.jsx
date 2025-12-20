@@ -97,33 +97,36 @@ const CalendarModal = ({ isOpen, onClose, bathEvents, onDayClick }) => {
                 <div className="flex-grow overflow-y-auto">
                     <div className="grid grid-cols-7 gap-1">
                         {days.map((date, i) => {
-                            if (!date) return <div key={i} className="h-10"></div>;
+                            if (!date) return <div key={i} className="h-12"></div>;
                             const dateStr = getLocalDateStr(date);
                             const s = calculateStreakAtDate(dateStr, historySet);
                             const isToday = date.toDateString() === new Date().toDateString();
                             const eventDetails = bathEventMap.get(dateStr);
                             const hasStamp = s > 0 || eventDetails;
 
+                            // スタンプの種類を決定
+                            let stampEmoji = null;
+                            if (s > 0) {
+                                stampEmoji = getStamp(s);
+                            } else if (eventDetails) {
+                                stampEmoji = eventDetails.type === 'sleep' ? '💤' : '✨';
+                            }
+
                             return (
                                 <div
                                     key={i}
                                     onClick={eventDetails ? () => onDayClick(eventDetails) : null}
-                                    className={`h-10 flex items-center justify-center relative rounded-lg ${isToday ? 'border-2 border-pink-300 bg-pink-50' : ''
+                                    className={`h-12 flex flex-col items-center justify-start pt-1 rounded-lg ${isToday ? 'border-2 border-pink-300 bg-pink-50' : ''
                                         } ${eventDetails ? 'cursor-pointer active:scale-95 transition-transform' : ''}`}
                                 >
-                                    {/* 日付（スタンプがある場合は背景に） */}
-                                    <span className={`text-sm ${isToday ? 'text-pink-600 font-bold' : hasStamp ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {/* 日付 */}
+                                    <span className={`text-sm leading-none ${isToday ? 'text-pink-600 font-bold' : hasStamp ? 'text-gray-400' : 'text-gray-600'}`}>
                                         {date.getDate()}
                                     </span>
-                                    {/* スタンプを絶対配置で右下に表示 */}
-                                    {s > 0 && (
-                                        <span className="absolute bottom-0 right-0 text-[10px]">{getStamp(s)}</span>
-                                    )}
-                                    {eventDetails && !s && (
-                                        <span className="absolute bottom-0 right-0 text-[10px]">
-                                            {eventDetails.type === 'sleep' ? '💤' : '✨'}
-                                        </span>
-                                    )}
+                                    {/* スタンプを日付の下に表示（常に高さを確保） */}
+                                    <span className="text-[10px] leading-none mt-1 h-3">
+                                        {stampEmoji || ''}
+                                    </span>
                                 </div>
                             );
                         })}
