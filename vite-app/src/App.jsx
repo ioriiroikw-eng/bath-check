@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Icons } from './components/Icons';
-import { STATUS_MESSAGES, DAILY_GREETINGS, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
+import { STATUS_MESSAGES, DAILY_GREETINGS, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, STORAGE_KEY_SKIN_TYPE, SKIN_TYPES, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
 import { generateFortune, getLocalDateStr, calculateLevel } from './utils';
 
 
@@ -19,6 +19,7 @@ import AffiliateAdModal from './components/modals/AffiliateAdModal';
 import LevelUpShareModal from './components/modals/LevelUpShareModal';
 import SkipShareModal from './components/modals/SkipShareModal';
 import CommunityModal from './components/modals/CommunityModal';
+import SkinTypeInputModal from './components/modals/SkinTypeInputModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
@@ -77,6 +78,10 @@ const App = () => {
     // チュートリアル用State
     const [showTutorialStart, setShowTutorialStart] = useState(false);
     const [showTutorial, setShowTutorial] = useState(false);
+
+    // 肌タイプ用State
+    const [skinType, setSkinType] = useState(null);
+    const [showSkinTypeModal, setShowSkinTypeModal] = useState(false);
 
     // Plan C: Tap-to-Speak State
     const [showBubble, setShowBubble] = useState(false);
@@ -205,6 +210,9 @@ const App = () => {
         if (load(STORAGE_KEY_SLEEP_START)) setSleepStartTime(new Date(load(STORAGE_KEY_SLEEP_START)));
         if (load(STORAGE_KEY_SAVED_MINUTES)) setSavedMinutes(parseInt(load(STORAGE_KEY_SAVED_MINUTES), 10));
 
+        // 肌タイプのロード
+        if (load(STORAGE_KEY_SKIN_TYPE)) setSkinType(load(STORAGE_KEY_SKIN_TYPE));
+
         if (load(STORAGE_KEY_HISTORY)) {
             const loadedHistory = JSON.parse(load(STORAGE_KEY_HISTORY));
             if (Array.isArray(loadedHistory)) {
@@ -262,10 +270,20 @@ const App = () => {
         localStorage.setItem(STORAGE_KEY_SLEEP_TYPE, sleepType);
         if (sleepStartTime) localStorage.setItem(STORAGE_KEY_SLEEP_START, sleepStartTime.toISOString());
         localStorage.setItem(STORAGE_KEY_SAVED_MINUTES, savedMinutes.toString());
-    }, [hp, lastBathTime, eventDamageTotal, logs, bathEvents, weatherData, isSleeping, sleepType, sleepStartTime, savedMinutes]);
+        // 肌タイプのセーブ
+        if (skinType) localStorage.setItem(STORAGE_KEY_SKIN_TYPE, skinType);
+    }, [hp, lastBathTime, eventDamageTotal, logs, bathEvents, weatherData, isSleeping, sleepType, sleepStartTime, savedMinutes, skinType]);
 
     const getWeatherDamageRate = () => { if (!weatherData) return 1.0; const t = weatherData.temperature; if (t >= 30) return 1.5; if (t >= 25) return 1.2; if (t <= 10) return 0.8; return 1.0; };
     const weatherRate = getWeatherDamageRate();
+
+    // 肌タイプによるダメージ倍率
+    const getSkinDamageRate = () => {
+        if (!skinType) return 1.0;
+        const type = SKIN_TYPES.find(t => t.id === skinType);
+        return type ? type.damageRate : 1.0;
+    };
+    const skinDamageRate = getSkinDamageRate();
 
     // --- 睡眠機能の実装 ---
     const handleSleepButtonPress = () => {
@@ -353,10 +371,10 @@ const App = () => {
         if (isSleeping) return; // 睡眠中はHPの自動減少を行わない（起きた時にまとめて計算）
         const diffMs = new Date() - lastBathTime;
         const hours = diffMs / (1000 * 60 * 60);
-        const timeDamage = hours * BASE_RATE_PER_HOUR * weatherRate;
+        const timeDamage = hours * BASE_RATE_PER_HOUR * weatherRate * skinDamageRate;
         const totalDamage = timeDamage + eventDamageTotal;
         setHp(Math.max(0, Math.min(100, 100 - totalDamage)));
-    }, [currentTime, lastBathTime, eventDamageTotal, weatherRate, isSleeping]);
+    }, [currentTime, lastBathTime, eventDamageTotal, weatherRate, skinDamageRate, isSleeping]);
 
     const handleManualDamage = (damage, logText, icon) => {
         setEventDamageTotal(prev => prev + damage);
@@ -540,7 +558,7 @@ const App = () => {
                     startSleep('skip'); // 広告モーダルを閉じたらスリープ開始
                 }}
             />
-            <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} />
+            <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} onChangeSkinType={() => { setIsHelp(false); setShowSkinTypeModal(true); }} />
             <FortuneModal isOpen={isFortuneOpen} onClose={() => {
                 setIsFortuneOpen(false);
                 // 記録忘れフローの場合、占い後にスリープに入る
@@ -554,6 +572,17 @@ const App = () => {
             <SavingsModal isOpen={isSavingsModalOpen} onClose={() => setIsSavingsModalOpen(false)} savedMinutes={savedMinutes} />
             <LevelUpShareModal isOpen={showLevelUpModal} onClose={() => setShowLevelUpModal(false)} newLevel={newLevel} savedMinutes={savedMinutes} />
             <SkipShareModal isOpen={showSkipShareModal} onClose={() => setShowSkipShareModal(false)} sleepHours={sleepHoursForShare} />
+
+            {/* 肌タイプ入力モーダル */}
+            <SkinTypeInputModal
+                isOpen={showSkinTypeModal}
+                onClose={() => setShowSkinTypeModal(false)}
+                onSelect={(type) => {
+                    setSkinType(type);
+                    setShowSkinTypeModal(false);
+                }}
+                currentSkinType={skinType}
+            />
 
             {/* --- TOP: Past / Premise (突きつける) --- */}
             <div className="flex-none pt-safe px-6 pb-4 flex flex-col items-center relative z-10 w-full mt-4">
@@ -762,10 +791,12 @@ const App = () => {
                     onComplete={() => {
                         setShowTutorial(false);
                         localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                        setShowSkinTypeModal(true); // 肌タイプ入力モーダルを表示
                     }}
                     onSkip={() => {
                         setShowTutorial(false);
                         localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                        setShowSkinTypeModal(true); // スキップでも肌タイプ入力へ
                     }}
                 />
             )}

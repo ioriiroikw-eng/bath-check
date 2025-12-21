@@ -80,6 +80,18 @@ export const STORAGE_KEY_SLEEP_TYPE = 'hq_sleep_type'; // 'normal' or 'skip'
 export const STORAGE_KEY_SLEEP_START = 'hq_sleep_start';
 export const STORAGE_KEY_SAVED_MINUTES = 'hq_saved_minutes';
 export const STORAGE_KEY_TUTORIAL_COMPLETED = 'hq_tutorial_completed';
+export const STORAGE_KEY_SKIN_TYPE = 'hq_skin_type';
+
+// 肌タイプ定義
+export const SKIN_TYPES = [
+    { id: 'dry', name: '乾燥肌', emoji: '🏜️', damageRate: 0.8, description: 'カサカサしやすい' },
+    { id: 'normal', name: '普通肌', emoji: '✨', damageRate: 1.0, description: 'バランスが良い' },
+    { id: 'combination', name: '混合肌', emoji: '🌓', damageRate: 1.0, description: 'Tゾーンはベタつき' },
+    { id: 'oily', name: '脂性肌', emoji: '💧', damageRate: 1.3, description: 'テカリやすい' },
+    { id: 'sensitive', name: '敏感肌', emoji: '🌸', damageRate: 0.9, description: '刺激に弱い' },
+];
+
+export const SKIN_TYPE_DIAGNOSIS_URL = 'https://diagnosis.bath-check.com';
 
 export const SE_POP_URL = "./audio/se_pop.mp3";
 export const SE_KIRA_URL = "./audio/se_kira.mp3";

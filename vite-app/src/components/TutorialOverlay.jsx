@@ -252,7 +252,7 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
                                 onClick={handleNext}
                                 className="flex-1 py-2 px-3 bg-gradient-to-r from-pink-400 to-pink-500 text-white text-sm font-bold rounded-lg shadow-md active:scale-95"
                             >
-                                {isLastStep ? '始める！🎉' : '次へ →'}
+                                {isLastStep ? '肌タイプを入力 🧴' : '次へ →'}
                             </button>
                         </div>
 

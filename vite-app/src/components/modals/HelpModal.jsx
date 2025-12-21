@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icons } from '../Icons';
 
-const HelpModal = ({ isOpen, onClose, onStartTutorial }) => {
+const HelpModal = ({ isOpen, onClose, onStartTutorial, onChangeSkinType }) => {
     if (!isOpen) return null;
 
     return (
@@ -54,11 +54,21 @@ const HelpModal = ({ isOpen, onClose, onStartTutorial }) => {
                     わかった！
                 </button>
 
+                {/* 肌タイプ変更リンク */}
+                {onChangeSkinType && (
+                    <button
+                        onClick={onChangeSkinType}
+                        className="w-full mt-3 py-2 text-xs text-purple-500 font-bold hover:text-purple-600 transition-colors flex items-center justify-center gap-1"
+                    >
+                        🧴 肌タイプを変更する
+                    </button>
+                )}
+
                 {/* チュートリアル再表示リンク */}
                 {onStartTutorial && (
                     <button
                         onClick={onStartTutorial}
-                        className="w-full mt-3 py-2 text-xs text-gray-400 font-bold hover:text-pink-400 transition-colors"
+                        className="w-full mt-2 py-2 text-xs text-gray-400 font-bold hover:text-pink-400 transition-colors"
                     >
                         📖 チュートリアルをもう一度見る
                     </button>
