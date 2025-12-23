@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Icons } from '../Icons';
 import { getLocalDateStr } from '../../utils';
-import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS } from '../../constants';
+import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS, BATH_TYPE_16, BATH_TYPE_ACCURACY_LEVELS } from '../../constants';
 
-const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick }) => {
+const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [activeTab, setActiveTab] = useState('weekly'); // 'calendar', 'weekly', 'monthly', 'all'
 
@@ -196,6 +196,111 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick }) => {
 
         return { maxBathStreak, maxSkipStreak, currentStreak };
     }, [bathEvents, historySet, isOpen]);
+
+    // ===== バスタイプ16診断 =====
+    const bathTypeResult = useMemo(() => {
+        if (!bathEvents || !Array.isArray(bathEvents)) {
+            return { canDiagnose: false, daysNeeded: 7, dataDays: 0 };
+        }
+
+        // ユニークな日数をカウント
+        const uniqueDates = new Set();
+        bathEvents.forEach(evt => {
+            if (typeof evt === 'string') return;
+            const dateStr = evt.dateStr || getLocalDateStr(new Date(evt.time));
+            uniqueDates.add(dateStr);
+        });
+        const dataDays = uniqueDates.size;
+
+        // 精度レベルを取得
+        const accuracyLevel = BATH_TYPE_ACCURACY_LEVELS.find(
+            a => dataDays >= a.minDays && dataDays <= a.maxDays
+        ) || BATH_TYPE_ACCURACY_LEVELS[0];
+
+        if (dataDays < 7) {
+            return {
+                canDiagnose: false,
+                daysNeeded: 7 - dataDays,
+                dataDays,
+                accuracyLevel
+            };
+        }
+
+        // === 4軸を算出 ===
+
+        // 1. 頻度軸 (C/Z): お風呂率 >= 50% → C
+        const bathCount = bathEvents.filter(e => typeof e !== 'string' && e.type === 'bath').length;
+        const skipCount = bathEvents.filter(e => typeof e !== 'string' && e.type === 'sleep').length;
+        const totalActions = bathCount + skipCount;
+        const bathRate = totalActions > 0 ? bathCount / totalActions : 0.5;
+        const axis1 = bathRate >= 0.5 ? 'C' : 'Z';
+
+        // 2. 曜日軸 (H/K): 平日お風呂率 > 休日 → H
+        let weekdayBath = 0, weekdayTotal = 0, weekendBath = 0, weekendTotal = 0;
+        bathEvents.forEach(evt => {
+            if (typeof evt === 'string') return;
+            const day = new Date(evt.time).getDay();
+            const isWeekend = day === 0 || day === 6;
+            if (isWeekend) {
+                weekendTotal++;
+                if (evt.type === 'bath') weekendBath++;
+            } else {
+                weekdayTotal++;
+                if (evt.type === 'bath') weekdayBath++;
+            }
+        });
+        const weekdayRate = weekdayTotal > 0 ? weekdayBath / weekdayTotal : 0.5;
+        const weekendRate = weekendTotal > 0 ? weekendBath / weekendTotal : 0.5;
+        const axis2 = weekdayRate >= weekendRate ? 'H' : 'K';
+
+        // 3. 安定度軸 (R/K): 曜日ごとの分散が小さい → R
+        const dayOfWeekCounts = Array(7).fill(0);
+        bathEvents.forEach(evt => {
+            if (typeof evt === 'string') return;
+            const day = new Date(evt.time).getDay();
+            dayOfWeekCounts[day]++;
+        });
+        const avgCount = dayOfWeekCounts.reduce((a, b) => a + b, 0) / 7;
+        const variance = dayOfWeekCounts.reduce((acc, c) => acc + Math.pow(c - avgCount, 2), 0) / 7;
+        const axis3 = variance <= avgCount ? 'R' : 'K';
+
+        // 4. 季節軸 (N/F): 夏(6-8月)のお風呂率 > 冬(12,1,2月) → N
+        let summerBath = 0, summerTotal = 0, winterBath = 0, winterTotal = 0;
+        bathEvents.forEach(evt => {
+            if (typeof evt === 'string') return;
+            const month = new Date(evt.time).getMonth();
+            const isSummer = month >= 5 && month <= 7; // 6-8月
+            const isWinter = month === 11 || month <= 1; // 12,1,2月
+            if (isSummer) {
+                summerTotal++;
+                if (evt.type === 'bath') summerBath++;
+            } else if (isWinter) {
+                winterTotal++;
+                if (evt.type === 'bath') winterBath++;
+            }
+        });
+        // データ不足の場合はデフォルトでN
+        const summerRate = summerTotal > 0 ? summerBath / summerTotal : 0.5;
+        const winterRate = winterTotal > 0 ? winterBath / winterTotal : 0.5;
+        const axis4 = summerRate >= winterRate ? 'N' : 'F';
+
+        const typeCode = axis1 + axis2 + axis3 + axis4;
+        const typeData = BATH_TYPE_16[typeCode] || BATH_TYPE_16.ZKKN;
+
+        return {
+            canDiagnose: true,
+            dataDays,
+            accuracyLevel,
+            typeCode,
+            typeData,
+            axes: {
+                frequency: { value: axis1, label: axis1 === 'C' ? '清潔寄り' : 'ズボラ寄り', rate: Math.round(bathRate * 100) },
+                dayOfWeek: { value: axis2, label: axis2 === 'H' ? '平日型' : '休日型' },
+                stability: { value: axis3, label: axis3 === 'R' ? '規則的' : '気まぐれ' },
+                season: { value: axis4, label: axis4 === 'N' ? '夏型' : '冬型' },
+            }
+        };
+    }, [bathEvents, isOpen]);
 
     // 評価を取得
     const evaluation = useMemo(() => {
@@ -406,15 +511,15 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick }) => {
                 {/* タブ切り替え */}
                 <div className="flex gap-1 mb-4 flex-shrink-0 bg-gray-100 p-1 rounded-xl">
                     {[
-                        { key: 'calendar', label: '📅', title: 'カレンダー' },
-                        { key: 'weekly', label: '週間', title: '週間' },
-                        { key: 'monthly', label: '月間', title: '月間' },
-                        { key: 'all', label: '全体', title: '全期間' },
+                        { key: 'calendar', label: '📅' },
+                        { key: 'weekly', label: '週間' },
+                        { key: 'monthly', label: '月間' },
+                        { key: 'all', label: '全体' },
                     ].map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`flex-1 py-2 px-2 rounded-lg font-bold text-xs transition-all ${activeTab === tab.key
+                            className={`flex-1 py-2 px-1 rounded-lg font-bold text-xs transition-all ${activeTab === tab.key
                                 ? 'bg-white text-gray-800 shadow-sm'
                                 : 'text-gray-500 hover:bg-gray-50'
                                 }`}

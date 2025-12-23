@@ -20,6 +20,7 @@ import LevelUpShareModal from './components/modals/LevelUpShareModal';
 import SkipShareModal from './components/modals/SkipShareModal';
 import CommunityModal from './components/modals/CommunityModal';
 import SkinTypeInputModal from './components/modals/SkinTypeInputModal';
+import BathTypeDiagnosisModal from './components/modals/BathTypeDiagnosisModal';
 
 import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
@@ -52,6 +53,7 @@ const App = () => {
     const [sleepHoursForShare, setSleepHoursForShare] = useState(0); // シェア用の睡眠時間
     const [pendingSleepAfterFortune, setPendingSleepAfterFortune] = useState(false); // 占い後にスリープに入るフラグ
     const [showCommunityModal, setShowCommunityModal] = useState(false); // コミュニティモーダル
+    const [showBathTypeDiagnosis, setShowBathTypeDiagnosis] = useState(false); // バスタイプ診断モーダル
 
     const [isStatsOpen, setIsStatsOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
@@ -588,9 +590,20 @@ const App = () => {
             {/* --- TOP: Past / Premise (突きつける) --- */}
             <div className="flex-none pt-safe px-6 pb-4 flex flex-col items-center relative z-10 w-full mt-4">
                 {/* Helper ButtonsRow */}
-                <div className="w-full flex justify-between items-center mb-6 px-2">
-                    <button id="stats-button" onClick={() => { playSe('pop'); setIsStatsOpen(true); }} className="text-gray-400 p-2 hover:bg-gray-100 rounded-full transition-colors"><Icons.BarChart2 size={20} /></button>
-                    <button onClick={toggleBgm} className={`p-2 rounded-full transition-colors ${isBgmPlaying ? 'text-pink-500' : 'text-gray-300'}`}><Icons.Music size={20} /></button>
+                <div className="w-full flex justify-between items-center mb-6 px-4">
+                    <button id="stats-button" onClick={() => { playSe('pop'); setIsStatsOpen(true); }} className="flex flex-col items-center gap-1 group">
+                        <div className="p-2 rounded-full bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                            <Icons.BarChart2 size={20} />
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-blue-500 transition-colors">記録・分析</span>
+                    </button>
+
+                    <button onClick={() => { playSe('pop'); setShowBathTypeDiagnosis(true); }} className="flex flex-col items-center gap-1 group">
+                        <div className="p-2 rounded-full bg-purple-50 text-purple-500 group-hover:bg-purple-100 transition-colors">
+                            <Icons.Sparkles size={20} />
+                        </div>
+                        <span className="text-[10px] font-bold text-purple-500 group-hover:text-purple-600 transition-colors">タイプ診断</span>
+                    </button>
                 </div>
 
                 {/* Weather (Minimal) */}
@@ -755,17 +768,46 @@ const App = () => {
                 </button>
 
                 {/* Tools Row */}
-                <div className="flex gap-6 mt-2 mb-4">
+                <div className="flex gap-4 mt-2 mb-4 w-full justify-center px-4">
                     {/* Community Button (掲示板) */}
-                    <button onClick={() => { playSe('pop'); setShowCommunityModal(true); }} className="text-gray-400 hover:text-purple-400 transition-colors">
-                        <Icons.MessageCircle size={20} />
+                    <button onClick={() => { playSe('pop'); setShowCommunityModal(true); }} className="flex flex-col items-center gap-1 group min-w-[3.5rem]">
+                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-purple-50 group-hover:text-purple-500 transition-all group-active:scale-95">
+                            <Icons.MessageCircle size={20} />
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-purple-500 transition-colors">掲示板</span>
                     </button>
+
                     {/* Camera Button (Action) */}
-                    <button onClick={() => generateShareImage()} disabled={isGenerating} className="text-gray-400 hover:text-pink-400 transition-colors disabled:opacity-30">
-                        {isGenerating ? <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div> : <Icons.Camera size={20} />}
+                    <button onClick={() => generateShareImage()} disabled={isGenerating} className="flex flex-col items-center gap-1 group min-w-[3.5rem] disabled:opacity-50">
+                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-all group-active:scale-95 relative">
+                            {isGenerating ? (
+                                <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                                <Icons.Camera size={20} />
+                            )}
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-pink-500 transition-colors">シェア</span>
                     </button>
+
+                    {/* BGM */}
+                    <button onClick={toggleBgm} className="flex flex-col items-center gap-1 group min-w-[3.5rem]">
+                        <div className={`p-3 rounded-2xl transition-all group-active:scale-95 ${isBgmPlaying
+                            ? 'bg-pink-100 text-pink-500 shadow-sm border border-pink-200'
+                            : 'bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500'
+                            }`}>
+                            <Icons.Music size={20} className={isBgmPlaying ? 'animate-pulse' : ''} />
+                        </div>
+                        <span className={`text-[10px] font-bold transition-colors ${isBgmPlaying ? 'text-pink-500' : 'text-gray-400 group-hover:text-pink-500'
+                            }`}>BGM</span>
+                    </button>
+
                     {/* Help */}
-                    <button onClick={() => { playSe('pop'); setIsHelp(true); }} className="text-gray-400 hover:text-pink-400 transition-colors"><Icons.Help size={20} /></button>
+                    <button onClick={() => { playSe('pop'); setIsHelp(true); }} className="flex flex-col items-center gap-1 group min-w-[3.5rem]">
+                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-all group-active:scale-95">
+                            <Icons.Help size={20} />
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">ヘルプ</span>
+                    </button>
                 </div>
             </div>
 
@@ -786,6 +828,13 @@ const App = () => {
                         setShowTutorialStart(false);
                         localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
                     }}
+                />
+            )}
+            {showBathTypeDiagnosis && (
+                <BathTypeDiagnosisModal
+                    isOpen={showBathTypeDiagnosis}
+                    onClose={() => setShowBathTypeDiagnosis(false)}
+                    bathEvents={bathEvents}
                 />
             )}
             {showTutorial && (
