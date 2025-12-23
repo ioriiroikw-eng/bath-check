@@ -9,7 +9,7 @@ import BathConfirmModal from './components/modals/BathConfirmModal';
 import SleepConfirmModal from './components/modals/SleepConfirmModal';
 import HelpModal from './components/modals/HelpModal';
 import DayDetailModal from './components/modals/DayDetailModal';
-import CalendarModal from './components/modals/CalendarModal';
+import StatsModal from './components/modals/StatsModal';
 import FortuneModal from './components/modals/FortuneModal';
 import SavingsModal from './components/modals/SavingsModal';
 import InAppBrowserWarning from './components/modals/InAppBrowserWarning';
@@ -25,6 +25,7 @@ import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
 import ActionButton from './components/ActionButton';
 import CommunityBanner from './components/CommunityBanner';
+import WeeklyReportBanner from './components/WeeklyReportBanner';
 import TutorialOverlay, { TutorialStartModal } from './components/TutorialOverlay';
 
 const App = () => {
@@ -52,7 +53,7 @@ const App = () => {
     const [pendingSleepAfterFortune, setPendingSleepAfterFortune] = useState(false); // 占い後にスリープに入るフラグ
     const [showCommunityModal, setShowCommunityModal] = useState(false); // コミュニティモーダル
 
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isStatsOpen, setIsStatsOpen] = useState(false);
     const [isFortuneOpen, setIsFortuneOpen] = useState(false);
     const [isHelpOpen, setIsHelp] = useState(false);
     const [fortuneResult, setFortuneResult] = useState(null);
@@ -588,7 +589,7 @@ const App = () => {
             <div className="flex-none pt-safe px-6 pb-4 flex flex-col items-center relative z-10 w-full mt-4">
                 {/* Helper ButtonsRow */}
                 <div className="w-full flex justify-between items-center mb-6 px-2">
-                    <button id="calendar-button" onClick={() => { playSe('pop'); setIsCalendarOpen(true); }} className="text-gray-400 p-2 hover:bg-gray-100 rounded-full transition-colors"><Icons.Calendar size={20} /></button>
+                    <button id="stats-button" onClick={() => { playSe('pop'); setIsStatsOpen(true); }} className="text-gray-400 p-2 hover:bg-gray-100 rounded-full transition-colors"><Icons.BarChart2 size={20} /></button>
                     <button onClick={toggleBgm} className={`p-2 rounded-full transition-colors ${isBgmPlaying ? 'text-pink-500' : 'text-gray-300'}`}><Icons.Music size={20} /></button>
                 </div>
 
@@ -769,8 +770,9 @@ const App = () => {
             </div>
 
             <CommunityBanner showInstallGuide={showInstallGuide} showTutorial={showTutorial || showTutorialStart} />
+            <WeeklyReportBanner onOpenReport={() => setIsStatsOpen(true)} bathEvents={bathEvents} />
             <CommunityModal isOpen={showCommunityModal} onClose={() => setShowCommunityModal(false)} />
-            <CalendarModal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)} bathEvents={bathEvents} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsCalendarOpen(false); }} />
+            <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} bathEvents={bathEvents} savedMinutes={savedMinutes} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsStatsOpen(false); }} />
             {generatedImage && (<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}> <div className="bg-transparent w-full max-w-sm relative" onClick={e => e.stopPropagation()}> <img src={generatedImage} alt="Share" className="w-full rounded-xl shadow-2xl" /> <div className="text-center mt-4 text-white font-bold text-sm opacity-80">長押しして保存</div></div> </div>)}
 
             {/* チュートリアル */}

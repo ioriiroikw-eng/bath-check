@@ -81,6 +81,70 @@ export const STORAGE_KEY_SLEEP_START = 'hq_sleep_start';
 export const STORAGE_KEY_SAVED_MINUTES = 'hq_saved_minutes';
 export const STORAGE_KEY_TUTORIAL_COMPLETED = 'hq_tutorial_completed';
 export const STORAGE_KEY_SKIN_TYPE = 'hq_skin_type';
+export const STORAGE_KEY_WEEKLY_BANNER_SHOWN = 'hq_weekly_banner_shown';
+export const STORAGE_KEY_HP_HISTORY = 'hq_hp_history'; // 週間HP履歴
+export const STORAGE_KEY_WEEKLY_REPORTS = 'hq_weekly_reports'; // 過去の週次レポート履歴
+export const STORAGE_KEY_WEEKLY_REPORT_NOTIFIED = 'hq_weekly_report_notified'; // 週次レポート通知済みフラグ
+
+// 週間レポート評価システム（比率ベース: スキップ率 = スキップ回数 / 総アクション数）
+export const WEEKLY_REPORT_EVALUATIONS = [
+    // スキップ率 0% (全部お風呂)
+    {
+        minRatio: 0, maxRatio: 0, title: '清潔の鑑', emoji: '💎', messages: [
+            '完璧な清潔感！尊敬します✨',
+            '毎日お風呂に入れるなんてすごい！',
+            '清潔感の塊、羨ましい！',
+        ]
+    },
+    // スキップ率 1-20%
+    {
+        minRatio: 0.01, maxRatio: 0.20, title: 'ほぼ完璧', emoji: '✨', messages: [
+            'ほとんど毎日入ってて偉い！',
+            'たまにはサボっても大丈夫だよ',
+            '清潔感バッチリ！',
+        ]
+    },
+    // スキップ率 21-40%
+    {
+        minRatio: 0.21, maxRatio: 0.40, title: 'バランス型', emoji: '⚖️', messages: [
+            '程よくサボって良いバランス！',
+            '無理しすぎないのが一番！',
+            '賢い選択ができてるね',
+        ]
+    },
+    // スキップ率 41-60%
+    {
+        minRatio: 0.41, maxRatio: 0.60, title: 'サボり気味', emoji: '😌', messages: [
+            '半分くらいサボれてる！いい感じ',
+            '自分のペースで生きてる証拠',
+            'ちょうどいい塩梅かもね',
+        ]
+    },
+    // スキップ率 61-80%
+    {
+        minRatio: 0.61, maxRatio: 0.80, title: 'サボりの達人', emoji: '🏆', messages: [
+            '効率的な生活、さすがです！',
+            '浮いた時間で自分を甘やかして♪',
+            '時間の使い方が上手！',
+        ]
+    },
+    // スキップ率 81-99%
+    {
+        minRatio: 0.81, maxRatio: 0.99, title: 'ズボラマスター', emoji: '🌟', messages: [
+            'ほぼ毎日サボれてる！才能ある',
+            'ズボラ道を極めつつある...',
+            '誰にも真似できないスタイル',
+        ]
+    },
+    // スキップ率 100% (全部スキップ)
+    {
+        minRatio: 1.0, maxRatio: 1.0, title: 'ズボラ界の神', emoji: '👑', messages: [
+            'もはや伝説レベル...！',
+            '完璧なズボラ、尊い',
+            '究極の境地に到達！',
+        ]
+    },
+];
 
 // 肌タイプ定義
 export const SKIN_TYPES = [

@@ -25,4 +25,6 @@ export const Icons = {
     Gem: (p) => <Icon {...p} path={<path d="M6 3h12l4 6-10 13L2 9z" />} />,
     ArrowRight: (p) => <Icon {...p} path={<><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></>} />,
     MessageCircle: (p) => <Icon {...p} path={<><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></>} />,
+    BarChart2: (p) => <Icon {...p} path={<><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></>} />,
+    Twitter: (p) => <Icon {...p} path={<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />} />,
 };

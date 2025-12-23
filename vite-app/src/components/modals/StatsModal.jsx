@@ -1,0 +1,543 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { Icons } from '../Icons';
+import { getLocalDateStr } from '../../utils';
+import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS } from '../../constants';
+
+const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [activeTab, setActiveTab] = useState('weekly'); // 'calendar', 'weekly', 'monthly', 'all'
+
+    const bathEventMap = new Map();
+    const historySet = new Set();
+    if (bathEvents && Array.isArray(bathEvents)) {
+        bathEvents.forEach(evt => {
+            const dStr = typeof evt === 'string' ? evt : evt.dateStr;
+            historySet.add(dStr);
+            if (typeof evt !== 'string') {
+                if (!bathEventMap.has(dStr)) {
+                    bathEventMap.set(dStr, evt);
+                } else {
+                    const existing = bathEventMap.get(dStr);
+                    if (existing.type === 'sleep' && evt.type === 'bath') {
+                        bathEventMap.set(dStr, evt);
+                    }
+                }
+            }
+        });
+    }
+
+    // ===== 統計計算 =====
+
+    // 週間統計
+    const weeklyStats = useMemo(() => {
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+
+        let bathCount = 0;
+        let skipCount = 0;
+
+        if (bathEvents && Array.isArray(bathEvents)) {
+            bathEvents.forEach(evt => {
+                if (typeof evt === 'string') return;
+                const eventDate = new Date(evt.time);
+                if (eventDate >= weekStart) {
+                    if (evt.type === 'bath') bathCount++;
+                    else if (evt.type === 'sleep') skipCount++;
+                }
+            });
+        }
+
+        const total = bathCount + skipCount;
+        const bathRate = total > 0 ? Math.round((bathCount / total) * 100) : 0;
+        const savedTime = skipCount * 30;
+        const savedMoney = Math.floor(savedTime / 30 * 80);
+
+        return { bathCount, skipCount, total, bathRate, savedTime, savedMoney };
+    }, [bathEvents, isOpen]);
+
+    // 月間統計
+    const monthlyStats = useMemo(() => {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        monthStart.setHours(0, 0, 0, 0);
+
+        let bathCount = 0;
+        let skipCount = 0;
+
+        if (bathEvents && Array.isArray(bathEvents)) {
+            bathEvents.forEach(evt => {
+                if (typeof evt === 'string') return;
+                const eventDate = new Date(evt.time);
+                if (eventDate >= monthStart) {
+                    if (evt.type === 'bath') bathCount++;
+                    else if (evt.type === 'sleep') skipCount++;
+                }
+            });
+        }
+
+        const total = bathCount + skipCount;
+        const bathRate = total > 0 ? Math.round((bathCount / total) * 100) : 0;
+        const savedTime = skipCount * 30;
+        const savedMoney = Math.floor(savedTime / 30 * 80);
+
+        return { bathCount, skipCount, total, bathRate, savedTime, savedMoney };
+    }, [bathEvents, isOpen]);
+
+    // 全期間統計
+    const allTimeStats = useMemo(() => {
+        let bathCount = 0;
+        let skipCount = 0;
+        let firstDate = null;
+
+        if (bathEvents && Array.isArray(bathEvents)) {
+            bathEvents.forEach(evt => {
+                if (typeof evt === 'string') return;
+                if (evt.type === 'bath') bathCount++;
+                else if (evt.type === 'sleep') skipCount++;
+
+                const eventDate = new Date(evt.time);
+                if (!firstDate || eventDate < firstDate) {
+                    firstDate = eventDate;
+                }
+            });
+        }
+
+        const total = bathCount + skipCount;
+        const bathRate = total > 0 ? Math.round((bathCount / total) * 100) : 0;
+        const savedTime = skipCount * 30;
+        const savedMoney = Math.floor(savedTime / 30 * 80);
+
+        // 利用日数
+        const daysSinceStart = firstDate
+            ? Math.ceil((new Date() - firstDate) / (1000 * 60 * 60 * 24)) + 1
+            : 0;
+
+        return { bathCount, skipCount, total, bathRate, savedTime, savedMoney, daysSinceStart, firstDate };
+    }, [bathEvents, isOpen]);
+
+    // 曜日別パターン
+    const dayOfWeekPattern = useMemo(() => {
+        const pattern = Array(7).fill(null).map(() => ({ bath: 0, skip: 0, total: 0 }));
+
+        if (bathEvents && Array.isArray(bathEvents)) {
+            bathEvents.forEach(evt => {
+                if (typeof evt === 'string') return;
+                const eventDate = new Date(evt.time);
+                const dayOfWeek = eventDate.getDay();
+
+                if (evt.type === 'bath') pattern[dayOfWeek].bath++;
+                else if (evt.type === 'sleep') pattern[dayOfWeek].skip++;
+                pattern[dayOfWeek].total++;
+            });
+        }
+
+        return pattern.map((p, i) => ({
+            day: ['日', '月', '火', '水', '木', '金', '土'][i],
+            ...p,
+            bathRate: p.total > 0 ? Math.round((p.bath / p.total) * 100) : null
+        }));
+    }, [bathEvents, isOpen]);
+
+    // 記録・実績
+    const records = useMemo(() => {
+        if (!bathEvents || !Array.isArray(bathEvents)) {
+            return { maxBathStreak: 0, maxSkipStreak: 0, currentStreak: 0 };
+        }
+
+        // 日付ごとにイベントをまとめる
+        const dateEvents = new Map();
+        bathEvents.forEach(evt => {
+            if (typeof evt === 'string') return;
+            const dateStr = evt.dateStr || getLocalDateStr(new Date(evt.time));
+            if (!dateEvents.has(dateStr)) {
+                dateEvents.set(dateStr, evt.type);
+            } else if (evt.type === 'bath') {
+                dateEvents.set(dateStr, 'bath'); // bathを優先
+            }
+        });
+
+        // ソートされた日付リストを作成
+        const sortedDates = Array.from(dateEvents.keys()).sort();
+
+        let maxBathStreak = 0;
+        let maxSkipStreak = 0;
+        let currentBathStreak = 0;
+        let currentSkipStreak = 0;
+
+        sortedDates.forEach(dateStr => {
+            const type = dateEvents.get(dateStr);
+            if (type === 'bath') {
+                currentBathStreak++;
+                currentSkipStreak = 0;
+                maxBathStreak = Math.max(maxBathStreak, currentBathStreak);
+            } else if (type === 'sleep') {
+                currentSkipStreak++;
+                currentBathStreak = 0;
+                maxSkipStreak = Math.max(maxSkipStreak, currentSkipStreak);
+            }
+        });
+
+        // 現在の連続記録
+        const today = getLocalDateStr(new Date());
+        const yesterday = getLocalDateStr(new Date(new Date().setDate(new Date().getDate() - 1)));
+
+        let currentStreak = 0;
+        let checkDate = historySet.has(today) ? today : (historySet.has(yesterday) ? yesterday : null);
+
+        if (checkDate) {
+            let current = new Date(checkDate);
+            while (historySet.has(getLocalDateStr(current))) {
+                currentStreak++;
+                current.setDate(current.getDate() - 1);
+            }
+        }
+
+        return { maxBathStreak, maxSkipStreak, currentStreak };
+    }, [bathEvents, historySet, isOpen]);
+
+    // 評価を取得
+    const evaluation = useMemo(() => {
+        const stats = activeTab === 'weekly' ? weeklyStats
+            : activeTab === 'monthly' ? monthlyStats
+                : allTimeStats;
+        const totalActions = stats.bathCount + stats.skipCount;
+
+        if (totalActions === 0) {
+            return { title: '情報不足', emoji: '📊', message: 'まだ記録がありません' };
+        }
+
+        const skipRatio = stats.skipCount / totalActions;
+        const eval_ = WEEKLY_REPORT_EVALUATIONS.find(
+            e => skipRatio >= e.minRatio && skipRatio <= e.maxRatio
+        ) || WEEKLY_REPORT_EVALUATIONS[0];
+
+        return { ...eval_, message: eval_.messages[0] };
+    }, [activeTab, weeklyStats, monthlyStats, allTimeStats]);
+
+    if (!isOpen) return null;
+
+    // カレンダー関連
+    const getDaysInMonth = (date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+        const firstDayOfWeek = new Date(year, month, 1).getDay();
+        const days = [];
+        for (let i = 0; i < firstDayOfWeek; i++) days.push(null);
+        for (let i = 1; i <= lastDayOfMonth; i++) days.push(new Date(year, month, i));
+        return days;
+    };
+
+    const calculateStreakAtDate = (targetDateStr, hSet) => {
+        if (!hSet.has(targetDateStr)) return 0;
+        let streak = 1;
+        let current = new Date(targetDateStr);
+        while (true) {
+            current.setDate(current.getDate() - 1);
+            const prevDateStr = getLocalDateStr(current);
+            if (hSet.has(prevDateStr)) streak++;
+            else break;
+        }
+        return streak;
+    };
+
+    const days = getDaysInMonth(currentDate);
+    const monthLabel = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`;
+    const getStamp = (s) => s >= 30 ? "🌈" : s >= 7 ? "💎" : s >= 3 ? "👑" : "💮";
+    const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+
+    // Xでシェア
+    const handleShareReport = () => {
+        const stats = activeTab === 'weekly' ? weeklyStats
+            : activeTab === 'monthly' ? monthlyStats
+                : allTimeStats;
+        const periodLabel = activeTab === 'weekly' ? '今週'
+            : activeTab === 'monthly' ? '今月'
+                : '全期間';
+
+        const text = `📊 ${periodLabel}のフロハイッタ統計
+
+🏆 評価: ${evaluation.title}
+🛁 お風呂: ${stats.bathCount}回
+💤 風呂キャン: ${stats.skipCount}回
+📈 お風呂率: ${stats.bathRate}%
+⏰ 節約時間: ${stats.savedTime}分
+💰 節約金額: 約${stats.savedMoney}円
+
+#フロハイッタ`;
+
+        const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent('https://app.bath-check.com/')}`;
+        window.open(tweetUrl, '_blank');
+    };
+
+    // 統計表示コンポーネント
+    const StatsDisplay = ({ stats, showEvaluation = true }) => (
+        <div className="space-y-4">
+            {/* 評価 */}
+            {showEvaluation && stats.total > 0 && (
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 border border-indigo-100 text-center">
+                    <div className="text-4xl mb-1">{evaluation.emoji}</div>
+                    <div className="text-xl font-black text-indigo-600">{evaluation.title}</div>
+                </div>
+            )}
+
+            {/* メイン統計 */}
+            <div className="grid grid-cols-2 gap-2">
+                <div className="bg-pink-50 rounded-xl p-3 border border-pink-100 text-center">
+                    <div className="text-2xl">🛁</div>
+                    <div className="text-2xl font-black text-pink-600">{stats.bathCount}<span className="text-sm font-bold">回</span></div>
+                    <div className="text-xs text-gray-500">お風呂</div>
+                </div>
+                <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 text-center">
+                    <div className="text-2xl">💤</div>
+                    <div className="text-2xl font-black text-indigo-600">{stats.skipCount}<span className="text-sm font-bold">回</span></div>
+                    <div className="text-xs text-gray-500">風呂キャン</div>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100 text-center">
+                    <div className="text-2xl">📈</div>
+                    <div className="text-2xl font-black text-emerald-600">{stats.bathRate}<span className="text-sm font-bold">%</span></div>
+                    <div className="text-xs text-gray-500">お風呂率</div>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-3 border border-amber-100 text-center">
+                    <div className="text-2xl">⏰</div>
+                    <div className="text-2xl font-black text-amber-600">{stats.savedTime}<span className="text-sm font-bold">分</span></div>
+                    <div className="text-xs text-gray-500">節約時間</div>
+                </div>
+            </div>
+
+            {/* 節約金額 */}
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-3 border border-yellow-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <span className="text-2xl">💰</span>
+                    <span className="font-bold text-gray-700">節約金額</span>
+                </div>
+                <span className="text-2xl font-black text-orange-600">約{stats.savedMoney}円</span>
+            </div>
+
+            {/* 節約の使い道 */}
+            {stats.savedTime > 0 && (
+                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <p className="text-xs text-gray-500 mb-2">💡 浮いた時間で...</p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                        {stats.savedTime >= 30 && <span className="bg-white px-2 py-1 rounded-lg">🎬 映画{Math.floor(stats.savedTime / 120)}本</span>}
+                        {stats.savedTime >= 10 && <span className="bg-white px-2 py-1 rounded-lg">📺 動画{Math.floor(stats.savedTime / 10)}本</span>}
+                        {stats.savedTime >= 60 && <span className="bg-white px-2 py-1 rounded-lg">😴 {Math.floor(stats.savedTime / 60)}時間の睡眠</span>}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    // 曜日別パターン表示
+    const DayOfWeekChart = () => (
+        <div className="space-y-2">
+            <h3 className="text-sm font-bold text-gray-700 flex items-center gap-1">
+                📅 曜日別パターン
+            </h3>
+            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 space-y-2">
+                {dayOfWeekPattern.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                        <span className={`w-4 font-bold ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-600'}`}>
+                            {p.day}
+                        </span>
+                        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                            {p.bathRate !== null && (
+                                <div
+                                    className="h-full bg-gradient-to-r from-pink-400 to-pink-500 rounded-full transition-all"
+                                    style={{ width: `${p.bathRate}%` }}
+                                />
+                            )}
+                        </div>
+                        <span className="w-12 text-right font-bold text-gray-600">
+                            {p.bathRate !== null ? `${p.bathRate}%` : '-'}
+                        </span>
+                        <span className="text-xs text-gray-400 w-16">
+                            ({p.bath}/{p.total})
+                        </span>
+                    </div>
+                ))}
+            </div>
+            <p className="text-xs text-gray-400">※ お風呂に入った割合を表示</p>
+        </div>
+    );
+
+    // 記録・実績表示
+    const RecordsSection = () => (
+        <div className="space-y-2">
+            <h3 className="text-sm font-bold text-gray-700 flex items-center gap-1">
+                🏆 記録・実績
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+                <div className="bg-pink-50 rounded-xl p-3 border border-pink-100 text-center">
+                    <div className="text-xs text-gray-500 mb-1">最長連続お風呂</div>
+                    <div className="text-xl font-black text-pink-600">{records.maxBathStreak}<span className="text-sm">日</span></div>
+                </div>
+                <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 text-center">
+                    <div className="text-xs text-gray-500 mb-1">最長連続風呂キャン</div>
+                    <div className="text-xl font-black text-indigo-600">{records.maxSkipStreak}<span className="text-sm">日</span></div>
+                </div>
+                <div className="bg-orange-50 rounded-xl p-3 border border-orange-100 text-center">
+                    <div className="text-xs text-gray-500 mb-1">現在の連続記録</div>
+                    <div className="text-xl font-black text-orange-600">{records.currentStreak}<span className="text-sm">日</span></div>
+                </div>
+                <div className="bg-green-50 rounded-xl p-3 border border-green-100 text-center">
+                    <div className="text-xs text-gray-500 mb-1">利用日数</div>
+                    <div className="text-xl font-black text-green-600">{allTimeStats.daysSinceStart}<span className="text-sm">日</span></div>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white rounded-3xl p-5 w-full max-w-md modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 z-10"><Icons.X /></button>
+
+                {/* ヘッダー */}
+                <div className="text-center mb-3 flex-shrink-0">
+                    <h2 className="text-lg font-black text-gray-800">📊 詳細・統計</h2>
+                    <div className="text-sm text-gray-500">
+                        🔥 {records.currentStreak}日連続記録中
+                    </div>
+                </div>
+
+                {/* タブ切り替え */}
+                <div className="flex gap-1 mb-4 flex-shrink-0 bg-gray-100 p-1 rounded-xl">
+                    {[
+                        { key: 'calendar', label: '📅', title: 'カレンダー' },
+                        { key: 'weekly', label: '週間', title: '週間' },
+                        { key: 'monthly', label: '月間', title: '月間' },
+                        { key: 'all', label: '全体', title: '全期間' },
+                    ].map(tab => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`flex-1 py-2 px-2 rounded-lg font-bold text-xs transition-all ${activeTab === tab.key
+                                ? 'bg-white text-gray-800 shadow-sm'
+                                : 'text-gray-500 hover:bg-gray-50'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* カレンダータブ */}
+                {activeTab === 'calendar' && (
+                    <div className="flex-grow overflow-y-auto">
+                        <div className="flex justify-between items-center mb-3 px-2">
+                            <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="p-2 text-pink-400">
+                                <Icons.ChevronLeft size={20} />
+                            </button>
+                            <span className="font-bold text-gray-800">{monthLabel}</span>
+                            <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="p-2 text-pink-400">
+                                <Icons.ChevronRight size={20} />
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-7 gap-1 mb-2 text-center text-xs font-bold text-gray-400 border-b border-gray-100 pb-2">
+                            {weekDays.map((day, i) => (
+                                <div key={i} className={i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : ''}>
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-7 gap-1">
+                            {days.map((date, i) => {
+                                if (!date) return <div key={i} className="h-11"></div>;
+                                const dateStr = getLocalDateStr(date);
+                                const s = calculateStreakAtDate(dateStr, historySet);
+                                const isToday = date.toDateString() === new Date().toDateString();
+                                const eventDetails = bathEventMap.get(dateStr);
+                                const hasStamp = s > 0 || eventDetails;
+
+                                let stampEmoji = null;
+                                if (s > 0) stampEmoji = getStamp(s);
+                                else if (eventDetails) stampEmoji = eventDetails.type === 'sleep' ? '💤' : '✨';
+
+                                return (
+                                    <div
+                                        key={i}
+                                        onClick={eventDetails ? () => onDayClick(eventDetails) : null}
+                                        className={`h-11 flex flex-col items-center justify-start pt-1 rounded-lg ${isToday ? 'border-2 border-pink-300 bg-pink-50' : ''} ${eventDetails ? 'cursor-pointer active:scale-95 transition-transform' : ''}`}
+                                    >
+                                        <span className={`text-xs leading-none ${isToday ? 'text-pink-600 font-bold' : hasStamp ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            {date.getDate()}
+                                        </span>
+                                        <span className="text-[10px] leading-none mt-1">{stampEmoji || ''}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <p className="text-[10px] text-gray-400 text-center mt-3">マークをタップで詳細確認</p>
+                    </div>
+                )}
+
+                {/* 週間タブ */}
+                {activeTab === 'weekly' && (
+                    <div className="flex-grow overflow-y-auto space-y-4">
+                        <div className="text-center text-xs text-gray-500 mb-2">
+                            今週（日曜日〜）の統計
+                        </div>
+                        <StatsDisplay stats={weeklyStats} />
+
+                        <button
+                            onClick={handleShareReport}
+                            className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl py-3 font-bold flex items-center justify-center gap-2 hover:shadow-lg transition-all active:scale-95"
+                        >
+                            <Icons.XLogo size={18} />
+                            Xでシェアする
+                        </button>
+                    </div>
+                )}
+
+                {/* 月間タブ */}
+                {activeTab === 'monthly' && (
+                    <div className="flex-grow overflow-y-auto space-y-4">
+                        <div className="text-center text-xs text-gray-500 mb-2">
+                            今月（{new Date().getMonth() + 1}月）の統計
+                        </div>
+                        <StatsDisplay stats={monthlyStats} />
+                        <DayOfWeekChart />
+
+                        <button
+                            onClick={handleShareReport}
+                            className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl py-3 font-bold flex items-center justify-center gap-2 hover:shadow-lg transition-all active:scale-95"
+                        >
+                            <Icons.XLogo size={18} />
+                            Xでシェアする
+                        </button>
+                    </div>
+                )}
+
+                {/* 全期間タブ */}
+                {activeTab === 'all' && (
+                    <div className="flex-grow overflow-y-auto space-y-4">
+                        <div className="text-center text-xs text-gray-500 mb-2">
+                            {allTimeStats.firstDate
+                                ? `${allTimeStats.firstDate.getFullYear()}/${allTimeStats.firstDate.getMonth() + 1}/${allTimeStats.firstDate.getDate()}〜 の累計`
+                                : '全期間の統計'
+                            }
+                        </div>
+                        <StatsDisplay stats={allTimeStats} />
+                        <RecordsSection />
+                        <DayOfWeekChart />
+
+                        <button
+                            onClick={handleShareReport}
+                            className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl py-3 font-bold flex items-center justify-center gap-2 hover:shadow-lg transition-all active:scale-95"
+                        >
+                            <Icons.XLogo size={18} />
+                            Xでシェアする
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default StatsModal;
