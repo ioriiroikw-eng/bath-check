@@ -1,5 +1,56 @@
 import React from 'react';
+import { Icons } from '../Icons';
 
-const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => { if (!isOpen) return null; return (<div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}> <div className="bg-white rounded-3xl p-6 w-full max-w-sm modal-enter text-center shadow-2xl border-4 border-pink-100" onClick={e => e.stopPropagation()}> <div className="text-5xl mb-4">🛁</div> <h3 className="text-xl font-black text-gray-800 mb-2 font-pop">お風呂タイム？</h3> <p className="text-gray-600 font-bold mb-6 text-sm">お風呂に入ってリセットしますか？<br />(HP全回復 & 今日の占い！)</p> <div className="flex gap-3"> <button onClick={onConfirm} className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-xl shadow-md active:scale-95">入った！✨</button> <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-500 font-bold py-3 rounded-xl shadow-md active:scale-95">まだ</button> </div> </div> </div>); };
+const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay"
+            onClick={onClose}
+        >
+            <div
+                className="glass-card-strong rounded-3xl p-8 w-full max-w-sm text-center animate-bounce-in"
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Icon with glow */}
+                <div className="relative w-24 h-24 mx-auto mb-4">
+                    <div className="absolute inset-0 bg-pink-300 rounded-full blur-xl opacity-50 animate-pulse" />
+                    <div className="relative text-6xl flex items-center justify-center h-full">
+                        🛁
+                    </div>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-2xl font-black text-gray-800 mb-2 text-display">
+                    お風呂タイム？
+                </h3>
+
+                {/* Description */}
+                <p className="text-gray-500 font-medium mb-6 text-sm leading-relaxed">
+                    お風呂に入ってリセットしますか？<br />
+                    <span className="text-pink-500 font-bold">HP全回復</span> & <span className="text-purple-500 font-bold">今日の占い！</span>
+                </p>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                    <button
+                        onClick={onConfirm}
+                        className="flex-1 btn-primary py-4 text-lg flex items-center justify-center gap-2"
+                    >
+                        <span>入った！</span>
+                        <span className="text-xl">✨</span>
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold py-4 rounded-full transition-all active:scale-95"
+                    >
+                        まだ
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default BathConfirmModal;
