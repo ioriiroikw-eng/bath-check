@@ -29,14 +29,14 @@ const BathConfirmModal = ({ isOpen, onClose, onConfirm }) => {
                 {/* Description */}
                 <p className="text-gray-500 font-medium mb-6 text-sm leading-relaxed">
                     お風呂に入ってリセットしますか？<br />
-                    <span className="text-pink-500 font-bold">HP全回復</span> & <span className="text-purple-500 font-bold">今日の占い！</span>
+                    <span className="text-pink-500 font-bold">HP全回復</span> & <span className="text-purple-500 font-bold">今日の記録！</span>
                 </p>
 
                 {/* Buttons */}
                 <div className="flex gap-3">
                     <button
                         onClick={onConfirm}
-                        className="flex-1 btn-primary py-4 text-lg flex items-center justify-center gap-2"
+                        className="flex-1 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold py-4 text-lg rounded-full shadow-lg shadow-pink-300/50 active:scale-95 transition-transform flex items-center justify-center gap-2"
                     >
                         <span>入った！</span>
                         <span className="text-xl">✨</span>

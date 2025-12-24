@@ -10,7 +10,7 @@ import SleepConfirmModal from './components/modals/SleepConfirmModal';
 import HelpModal from './components/modals/HelpModal';
 import DayDetailModal from './components/modals/DayDetailModal';
 import StatsModal from './components/modals/StatsModal';
-import FortuneModal from './components/modals/FortuneModal';
+import BathRatingModal from './components/modals/BathRatingModal';
 import SavingsModal from './components/modals/SavingsModal';
 import InAppBrowserWarning from './components/modals/InAppBrowserWarning';
 import InstallGuide from './components/modals/InstallGuide';
@@ -56,9 +56,9 @@ const App = () => {
     const [showBathTypeDiagnosis, setShowBathTypeDiagnosis] = useState(false); // バスタイプ診断モーダル
 
     const [isStatsOpen, setIsStatsOpen] = useState(false);
-    const [isFortuneOpen, setIsFortuneOpen] = useState(false);
+    const [showBathRatingModal, setShowBathRatingModal] = useState(false); // お風呂評価モーダル
+    const [pendingBathEvent, setPendingBathEvent] = useState(null); // 評価待ちのお風呂イベント
     const [isHelpOpen, setIsHelp] = useState(false);
-    const [fortuneResult, setFortuneResult] = useState(null);
 
     const [selectedDateDetails, setSelectedDateDetails] = useState(null);
 
@@ -391,17 +391,31 @@ const App = () => {
         const now = new Date();
         const diffMs = now - lastBathTime;
         const hoursSince = (diffMs / (1000 * 60 * 60));
-        const fortune = generateFortune();
-        // 履歴に追加 (type: 'bath')
-        const newEvent = { dateStr: getLocalDateStr(now), time: now.toISOString(), hoursSince: hoursSince.toFixed(1), preBathHp: Math.floor(hp), fortune: fortune, type: 'bath' };
-        setBathEvents(prev => [newEvent, ...prev]);
+        // 占いを削除し、評価モーダルを表示
+        const newEvent = { dateStr: getLocalDateStr(now), time: now.toISOString(), hoursSince: hoursSince.toFixed(1), preBathHp: Math.floor(hp), type: 'bath', rating: 0, memo: '' };
+        setPendingBathEvent(newEvent);
         setLastBathTime(now);
         setEventDamageTotal(0);
         setHp(100);
         addLog("お風呂入って復活！今日も私が一番カワイイ💖", "🛁", 'action');
-        setFortuneResult(fortune);
-        setTimeout(() => { playSe('kira'); setIsFortuneOpen(true); }, 500);
+        playSe('kira');
+        setTimeout(() => { setShowBathRatingModal(true); }, 500);
         if (navigator.vibrate) navigator.vibrate([0, 100, 50, 100]);
+    };
+
+    // お風呂評価を保存
+    const handleBathRatingSubmit = ({ rating, memo }) => {
+        if (pendingBathEvent) {
+            const eventWithRating = { ...pendingBathEvent, rating, memo };
+            setBathEvents(prev => [eventWithRating, ...prev]);
+            setPendingBathEvent(null);
+        }
+        setShowBathRatingModal(false);
+        // 記録忘れフローの場合、評価後にスリープに入る
+        if (pendingSleepAfterFortune) {
+            setPendingSleepAfterFortune(false);
+            startSleep('normal');
+        }
     };
 
     const drawRoundedRect = (ctx, x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
@@ -562,15 +576,12 @@ const App = () => {
                 }}
             />
             <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelp(false)} onStartTutorial={() => { setIsHelp(false); setShowTutorial(true); }} onChangeSkinType={() => { setIsHelp(false); setShowSkinTypeModal(true); }} />
-            <FortuneModal isOpen={isFortuneOpen} onClose={() => {
-                setIsFortuneOpen(false);
-                // 記録忘れフローの場合、占い後にスリープに入る
-                if (pendingSleepAfterFortune) {
-                    setPendingSleepAfterFortune(false);
-                    startSleep('normal');
-                }
-            }} result={fortuneResult} hoursSince={hoursSince} />
-            <DayDetailModal isOpen={!!selectedDateDetails} onClose={() => setSelectedDateDetails(null)} details={selectedDateDetails} logs={logs} onOpenFortune={(result) => { setFortuneResult(result); setIsFortuneOpen(true); }} />
+            <BathRatingModal
+                isOpen={showBathRatingModal}
+                onClose={() => setShowBathRatingModal(false)}
+                onSubmit={handleBathRatingSubmit}
+            />
+            <DayDetailModal isOpen={!!selectedDateDetails} onClose={() => setSelectedDateDetails(null)} details={selectedDateDetails} logs={logs} />
 
             <SavingsModal isOpen={isSavingsModalOpen} onClose={() => setIsSavingsModalOpen(false)} savedMinutes={savedMinutes} />
             <LevelUpShareModal isOpen={showLevelUpModal} onClose={() => setShowLevelUpModal(false)} newLevel={newLevel} savedMinutes={savedMinutes} />
@@ -842,12 +853,24 @@ const App = () => {
                     onComplete={() => {
                         setShowTutorial(false);
                         localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                        setShowSkinTypeModal(true); // 肌タイプ入力モーダルを表示
+                        setShowSkinTypeModal(true);
                     }}
                     onSkip={() => {
                         setShowTutorial(false);
                         localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                        setShowSkinTypeModal(true); // スキップでも肌タイプ入力へ
+                        setShowSkinTypeModal(true);
+                    }}
+                    onTutorialBath={() => {
+                        // チュートリアル用の簡易お風呂処理
+                        setHp(100);
+                        setLastBathTime(new Date());
+                        setEventDamageTotal(0);
+                        playSe('kira');
+                    }}
+                    onTutorialSleep={() => {
+                        // チュートリアル用の簡易ズボラ貯金
+                        setSavedMinutes(prev => prev + 30);
+                        playSe('pop');
                     }}
                 />
             )}

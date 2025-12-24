@@ -1,59 +1,56 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-// 各ステップでキャラクターの画像と表情を変化させる
+// インタラクティブな成功体験を重視したオンボーディング
 const TUTORIAL_STEPS = [
     {
         id: 'intro',
-        title: 'ようこそ！',
-        description: '「毎日お風呂入らなきゃ...」そんなプレッシャーから解放！HPが減ったら入る、新しい入浴スタイル✨',
-        target: null,
+        type: 'intro',
+        title: 'お風呂、めんどくさい？',
+        description: 'わかる。その気持ち、全人類の本音だよ。\nここなら「サボっても」大丈夫！',
         character: './char_80.png',
+        characterMessage: 'やっほー！一緒にサボろ〜',
     },
     {
-        id: 'hp',
-        title: 'HP（清潔度）',
-        description: '時間経過でHPが減少。気温が高いと速くなるよ🥵',
-        target: 'hp-bar',
-        character: './char_50.png',
-    },
-    {
-        id: 'bath',
-        title: 'お風呂に入る',
-        description: 'タップでHP全回復！お風呂占いで運勢もわかる🔮',
+        id: 'bath-action',
+        type: 'action',
+        title: 'まず試してみて！',
+        description: 'お風呂ボタンを押すと\nHP（清潔度）が全回復するよ✨',
         target: 'bath-button',
-        character: './char_80.png',
+        character: './char_50.png',
+        characterMessage: 'ボタン押してみて！',
+        actionLabel: 'HPが回復！',
+        successMessage: '🎉 やったね！これがこのアプリの基本！',
     },
     {
-        id: 'sleep',
-        title: '今日はもう寝る...',
-        description: '入浴スキップでもOK！ズボラ貯金で30分貯まる💰',
+        id: 'sleep-action',
+        type: 'action',
+        title: 'サボっても大丈夫！',
+        description: '疲れた日は「寝る」を押すと\nズボラ貯金が30分貯まる💰',
         target: 'sleep-button',
         character: './char_20.png',
+        characterMessage: '今日は寝ちゃお〜',
+        actionLabel: 'ズボラ貯金+30分！',
+        successMessage: '💰 サボった時間が貯金に！これ最高でしょ？',
     },
     {
-        id: 'savings',
-        title: 'ズボラ貯金',
-        description: 'サボった時間が貯まってレベルアップ💎',
-        target: 'savings-button',
-        character: './char_50.png',
-    },
-    {
-        id: 'calendar',
-        title: 'カレンダー',
-        description: '入浴・スキップ履歴を確認📅',
-        target: 'calendar-button',
+        id: 'complete',
+        type: 'complete',
+        title: '準備完了！',
+        description: '毎日入らなくていい。\nHPが減ったら入る、新しいスタイル！',
         character: './char_80.png',
+        characterMessage: '一緒にがんばろ〜！',
     },
 ];
 
-const TutorialOverlay = ({ onComplete, onSkip }) => {
+const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [targetRect, setTargetRect] = useState(null);
     const [showContent, setShowContent] = useState(false);
     const [characterKey, setCharacterKey] = useState(0);
+    const [actionCompleted, setActionCompleted] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const step = TUTORIAL_STEPS[currentStep];
-    const isFirstStep = currentStep === 0;
     const isLastStep = currentStep === TUTORIAL_STEPS.length - 1;
 
     // ターゲット要素の位置を更新
@@ -77,28 +74,26 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
         }
     }, [step.target]);
 
-    // チュートリアル中はユーザーのスクロールを無効化
+    // チュートリアル中はスクロール無効
     useEffect(() => {
         const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
-
         return () => {
             document.body.style.overflow = originalOverflow;
         };
     }, []);
 
-    // ステップ変更時にターゲットにスクロール＆位置取得
+    // ステップ変更時の処理
     useEffect(() => {
         setShowContent(false);
+        setActionCompleted(false);
+        setShowSuccess(false);
 
         const timer = setTimeout(() => {
             if (step.target) {
                 const el = document.getElementById(step.target);
                 if (el) {
-                    // ターゲット要素を画面中央付近にスクロール
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                    // スクロール完了後に位置を取得（少し遅延）
                     setTimeout(() => {
                         updateTargetRect();
                         setShowContent(true);
@@ -119,6 +114,27 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
         return () => clearTimeout(timer);
     }, [currentStep, step.target, updateTargetRect]);
 
+    // アクションボタンのクリックハンドラ
+    const handleActionClick = useCallback(() => {
+        if (step.type !== 'action' || actionCompleted) return;
+
+        // 実際のアクションを実行
+        if (step.id === 'bath-action' && onTutorialBath) {
+            onTutorialBath();
+        } else if (step.id === 'sleep-action' && onTutorialSleep) {
+            onTutorialSleep();
+        }
+
+        // 成功エフェクトを表示
+        setActionCompleted(true);
+        setShowSuccess(true);
+
+        // 少し待ってから次へ進める状態に
+        setTimeout(() => {
+            setShowSuccess(false);
+        }, 2000);
+    }, [step, actionCompleted, onTutorialBath, onTutorialSleep]);
+
     const handleNext = () => {
         if (isLastStep) {
             onComplete();
@@ -127,140 +143,141 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
         }
     };
 
-    const handlePrev = () => {
-        if (!isFirstStep) {
-            setCurrentStep(prev => prev - 1);
-        }
-    };
-
-    // 画面の中央よりターゲットが上にあればカードを下に、下にあれば上に配置
-    const isTargetInUpperHalf = targetRect ? targetRect.centerY < window.innerHeight / 2 : false;
-
-    // カード位置のスタイルを計算
+    // カード位置 - ボタンが下にある場合はカードを上に配置
     const getCardPositionClass = () => {
-        if (!targetRect) {
-            return 'top-[35%] -translate-y-1/2';
-        }
-        if (isTargetInUpperHalf) {
-            // ターゲットが上部にある場合、カードは下部に
-            return 'bottom-[10%]';
-        } else {
-            // ターゲットが下部にある場合、カードは上部に
-            return 'top-[15%]';
-        }
+        if (!targetRect) return 'top-[30%]';
+        // ターゲットが画面の下半分にある場合はカードを上に表示
+        return 'top-[8%]';
     };
 
     return (
         <div className="fixed inset-0 z-[100] pointer-events-none">
-            {/* オーバーレイ背景 - 4つの長方形で穴を開ける */}
+            {/* オーバーレイ背景 */}
             {targetRect ? (
                 <>
-                    {/* 上の暗い部分 */}
-                    <div
-                        className="fixed left-0 right-0 top-0 bg-black/60 pointer-events-auto"
-                        style={{ height: Math.max(0, targetRect.top - 8) }}
-                    />
-                    {/* 左の暗い部分 */}
-                    <div
-                        className="fixed bg-black/60 pointer-events-auto"
-                        style={{
-                            top: targetRect.top - 8,
-                            left: 0,
-                            width: Math.max(0, targetRect.left - 8),
-                            height: targetRect.height + 16,
-                        }}
-                    />
-                    {/* 右の暗い部分 */}
-                    <div
-                        className="fixed bg-black/60 pointer-events-auto"
-                        style={{
-                            top: targetRect.top - 8,
-                            left: targetRect.left + targetRect.width + 8,
-                            right: 0,
-                            height: targetRect.height + 16,
-                        }}
-                    />
-                    {/* 下の暗い部分 */}
-                    <div
-                        className="fixed left-0 right-0 bottom-0 bg-black/60 pointer-events-auto"
-                        style={{ top: targetRect.top + targetRect.height + 8 }}
-                    />
+                    <div className="fixed left-0 right-0 top-0 bg-black/70 pointer-events-auto" style={{ height: Math.max(0, targetRect.top - 12) }} />
+                    <div className="fixed bg-black/70 pointer-events-auto" style={{ top: targetRect.top - 12, left: 0, width: Math.max(0, targetRect.left - 12), height: targetRect.height + 24 }} />
+                    <div className="fixed bg-black/70 pointer-events-auto" style={{ top: targetRect.top - 12, left: targetRect.left + targetRect.width + 12, right: 0, height: targetRect.height + 24 }} />
+                    <div className="fixed left-0 right-0 bottom-0 bg-black/70 pointer-events-auto" style={{ top: targetRect.top + targetRect.height + 12 }} />
 
-                    {/* ハイライト枠 */}
+                    {/* ハイライト枠 - クリック可能 */}
                     <div
-                        className="fixed rounded-xl"
+                        onClick={handleActionClick}
+                        className={`fixed rounded-2xl cursor-pointer transition-all ${actionCompleted ? 'pointer-events-none' : 'pointer-events-auto animate-pulse'
+                            }`}
                         style={{
-                            top: targetRect.top - 8,
-                            left: targetRect.left - 8,
-                            width: targetRect.width + 16,
-                            height: targetRect.height + 16,
-                            border: '3px solid #ec4899',
-                            boxShadow: '0 0 15px rgba(236, 72, 153, 0.7)',
+                            top: targetRect.top - 12,
+                            left: targetRect.left - 12,
+                            width: targetRect.width + 24,
+                            height: targetRect.height + 24,
+                            border: actionCompleted ? '4px solid #22c55e' : '4px solid #ec4899',
+                            boxShadow: actionCompleted
+                                ? '0 0 30px rgba(34, 197, 94, 0.8)'
+                                : '0 0 30px rgba(236, 72, 153, 0.8)',
                         }}
                     />
                 </>
             ) : (
-                <div className="fixed inset-0 bg-black/60 pointer-events-auto" />
+                <div className="fixed inset-0 bg-black/70 pointer-events-auto" />
+            )}
+
+            {/* 成功メッセージ */}
+            {showSuccess && (
+                <div className="fixed inset-0 flex items-center justify-center z-[110] pointer-events-none">
+                    <div className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl animate-bounce-in text-center">
+                        <p className="text-lg font-black">{step.successMessage}</p>
+                    </div>
+                </div>
             )}
 
             {/* 説明カード */}
             {showContent && (
-                <div
-                    className={`fixed left-1/2 -translate-x-1/2 w-[92%] max-w-sm animate-fade-in pointer-events-auto ${getCardPositionClass()}`}
-                >
-                    <div className="bg-white rounded-2xl p-4 shadow-2xl relative">
+                <div className={`fixed left-4 right-4 mx-auto max-w-sm pointer-events-auto ${getCardPositionClass()}`}>
+                    <div className="bg-white rounded-3xl p-5 shadow-2xl relative">
                         {/* キャラクター */}
-                        <img
-                            key={characterKey}
-                            src={step.character}
-                            alt=""
-                            className="absolute -top-10 left-2 w-14 h-14 object-contain animate-bounce-in drop-shadow-lg"
-                        />
+                        <div className="absolute -top-14 left-4 flex items-end gap-2">
+                            <img
+                                key={characterKey}
+                                src={step.character}
+                                alt=""
+                                className="w-16 h-16 object-contain animate-bounce-in drop-shadow-lg"
+                            />
+                            {/* 吹き出し */}
+                            <div className="bg-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-full mb-4 animate-bounce">
+                                {step.characterMessage}
+                            </div>
+                        </div>
 
                         {/* ステップインジケーター */}
-                        <div className="flex justify-center gap-1 mb-2 pt-1">
+                        <div className="flex justify-center gap-2 mb-3 pt-2">
                             {TUTORIAL_STEPS.map((_, idx) => (
                                 <div
                                     key={idx}
-                                    className={`w-1.5 h-1.5 rounded-full ${idx === currentStep ? 'bg-pink-500' : 'bg-gray-200'
+                                    className={`w-2 h-2 rounded-full transition-all ${idx === currentStep
+                                        ? 'bg-pink-500 w-6'
+                                        : idx < currentStep
+                                            ? 'bg-green-400'
+                                            : 'bg-gray-200'
                                         }`}
                                 />
                             ))}
                         </div>
 
                         {/* タイトル */}
-                        <h3 className="text-base font-black text-gray-800 mb-1 font-pop text-center">
+                        <h3 className="text-lg font-black text-gray-800 mb-2 text-center">
                             {step.title}
                         </h3>
 
                         {/* 説明 */}
-                        <p className="text-xs text-gray-600 text-center leading-relaxed mb-3 font-bold">
+                        <p className="text-sm text-gray-600 text-center leading-relaxed mb-4 whitespace-pre-line">
                             {step.description}
                         </p>
 
+                        {/* アクションタイプの場合 */}
+                        {step.type === 'action' && (
+                            <div className="mb-4">
+                                {!actionCompleted ? (
+                                    <div className="bg-pink-50 border-2 border-pink-200 rounded-xl p-3 text-center">
+                                        <p className="text-sm font-bold text-pink-600">
+                                            👇 下のピンクのボタンをタップ！
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 text-center">
+                                        <p className="text-sm font-bold text-green-600">
+                                            ✅ {step.actionLabel}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* ボタン */}
-                        <div className="flex gap-2">
-                            {!isFirstStep && (
-                                <button
-                                    onClick={handlePrev}
-                                    className="flex-1 py-2 px-3 bg-gray-100 text-gray-600 text-sm font-bold rounded-lg active:scale-95"
-                                >
-                                    ← 戻る
-                                </button>
-                            )}
+                        {step.type === 'action' ? (
                             <button
                                 onClick={handleNext}
-                                className="flex-1 py-2 px-3 bg-gradient-to-r from-pink-400 to-pink-500 text-white text-sm font-bold rounded-lg shadow-md active:scale-95"
+                                disabled={!actionCompleted}
+                                className={`w-full py-3 px-4 text-white font-bold rounded-xl shadow-md transition-all ${actionCompleted
+                                    ? 'bg-gradient-to-r from-pink-400 to-pink-500 active:scale-95'
+                                    : 'bg-gray-300 cursor-not-allowed'
+                                    }`}
                             >
                                 {isLastStep ? '肌タイプを入力 🧴' : '次へ →'}
                             </button>
-                        </div>
+                        ) : (
+                            <button
+                                onClick={handleNext}
+                                className="w-full py-3 px-4 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-xl shadow-md active:scale-95"
+                            >
+                                {isLastStep ? '肌タイプを入力 🧴' : '次へ →'}
+                            </button>
+                        )}
 
                         {/* スキップ */}
                         {!isLastStep && (
                             <button
                                 onClick={onSkip}
-                                className="w-full mt-2 py-1 text-[10px] text-gray-400 font-bold"
+                                className="w-full mt-2 py-1 text-xs text-gray-400 font-bold"
                             >
                                 スキップ
                             </button>
@@ -275,32 +292,32 @@ const TutorialOverlay = ({ onComplete, onSkip }) => {
 // チュートリアル開始前の選択画面
 export const TutorialStartModal = ({ onStart, onSkip }) => {
     return (
-        <div className="fixed inset-0 z-[100] bg-gradient-to-b from-pink-100 to-white flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] bg-gradient-to-b from-pink-50 via-white to-indigo-50 flex items-center justify-center p-6">
             <div className="w-full max-w-sm text-center animate-fade-in">
                 {/* キャラクター */}
-                <div className="relative">
+                <div className="relative mb-6">
                     <img
                         src="./char_80.png"
                         alt="キャラクター"
-                        className="w-32 h-32 mx-auto mb-4 object-contain animate-float-breathe drop-shadow-lg"
+                        className="w-36 h-36 mx-auto object-contain animate-float-breathe drop-shadow-xl"
                     />
-                    <div className="absolute top-0 right-4 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce">
+                    <div className="absolute top-2 right-2 bg-pink-500 text-white text-sm font-bold px-4 py-2 rounded-full animate-bounce shadow-lg">
                         やっほー！
                     </div>
                 </div>
 
                 {/* タイトル */}
-                <h2 className="text-xl font-black text-gray-800 mb-2 font-pop">
-                    「お風呂めんどくさい…」
+                <h2 className="text-2xl font-black text-gray-800 mb-3">
+                    お風呂、めんどくさい？
                 </h2>
 
                 {/* 説明 */}
-                <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                    それ、全人類の本音です🛁<br />
-                    一緒にサボろ？
+                <p className="text-base text-gray-600 leading-relaxed mb-8">
+                    わかる、その気持ち。<br />
+                    <span className="font-bold text-pink-500">一緒にサボろ？</span>
                 </p>
 
-                {/* 使い方を見るボタン */}
+                {/* ボタン */}
                 <button
                     onClick={onStart}
                     className="w-full py-4 px-6 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-300/50 active:scale-95 transition-transform mb-4"
@@ -308,7 +325,6 @@ export const TutorialStartModal = ({ onStart, onSkip }) => {
                     使い方を見る 👀
                 </button>
 
-                {/* スキップ */}
                 <button
                     onClick={onSkip}
                     className="py-2 text-sm text-gray-400 font-bold"

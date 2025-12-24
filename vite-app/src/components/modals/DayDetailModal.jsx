@@ -2,14 +2,29 @@ import React from 'react';
 import { Icons } from '../Icons';
 import { getLocalDateStr } from '../../utils';
 
-const DayDetailModal = ({ isOpen, onClose, details, logs, onOpenFortune }) => {
+const DayDetailModal = ({ isOpen, onClose, details, logs }) => {
     if (!isOpen || !details) return null;
-    const { dateStr, time, hoursSince, preBathHp, fortune, type } = details;
+    const { dateStr, time, hoursSince, preBathHp, type, rating, memo } = details;
     const d = new Date(time);
     const displayDate = !isNaN(d) ? d.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' }) : dateStr;
-    const displayTime = !isNaN(d) ? d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }) : '--:--';
 
     const dayLogs = logs.filter(log => { if (!log.timestamp) return false; return getLocalDateStr(new Date(log.timestamp)) === dateStr && log.type === 'action'; });
+
+    // 星評価を表示するヘルパー
+    const renderStars = (r) => {
+        if (!r || r === 0) return null;
+        return (
+            <div className="flex gap-1 justify-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <Icons.Star
+                        key={star}
+                        size={20}
+                        className={star <= r ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
+                    />
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -36,7 +51,7 @@ const DayDetailModal = ({ isOpen, onClose, details, logs, onOpenFortune }) => {
                     )}
 
                     {/* 入浴記録がある場合の詳細 */}
-                    {(type === 'bath' || (!type && fortune)) && (
+                    {(type === 'bath' || !type) && (
                         <>
                             <div className="flex gap-3">
                                 <div className="flex-1 bg-pink-50 p-3 rounded-xl text-center">
@@ -48,15 +63,15 @@ const DayDetailModal = ({ isOpen, onClose, details, logs, onOpenFortune }) => {
                                     <p className="text-2xl font-black text-blue-600 font-pop">{hoursSince !== undefined ? hoursSince : '?'}H</p>
                                 </div>
                             </div>
-                            {fortune && (
-                                <div onClick={(e) => { e.stopPropagation(); onOpenFortune(fortune); }} className={`mt-2 p-4 rounded-xl border-2 border-dashed border-gray-300 bg-white hover:bg-gray-50 active:scale-95 transition-all cursor-pointer text-center relative overflow-hidden group`}>
-                                    <div className={`absolute top-0 left-0 w-2 h-full ${fortune.bg.replace('bg-', 'bg-')}`}></div>
-                                    <p className="text-xs font-bold text-gray-400 mb-2">この日の運勢</p>
-                                    <div className="flex items-center justify-center gap-3 mb-2">
-                                        <span className="text-3xl">🔮</span>
-                                        <span className={`text-3xl font-black ${fortune.color} font-pop`}>{fortune.rank}</span>
-                                    </div>
-                                    <div className="text-[10px] text-white bg-gray-400 inline-block px-3 py-1 rounded-full group-hover:bg-pink-400 transition-colors font-bold">タップしてカードを表示</div>
+
+                            {/* 星評価表示 */}
+                            {rating > 0 && (
+                                <div className="mt-2 p-4 rounded-xl bg-yellow-50 border-2 border-yellow-200 text-center">
+                                    <p className="text-xs font-bold text-gray-500 mb-2">この日の評価</p>
+                                    {renderStars(rating)}
+                                    {memo && (
+                                        <p className="mt-2 text-sm text-gray-600 italic">「{memo}」</p>
+                                    )}
                                 </div>
                             )}
                         </>
