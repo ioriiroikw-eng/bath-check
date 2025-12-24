@@ -7,40 +7,40 @@
    ======================================== */
 
 :root {
-    /* Primary Colors - Soft & Premium */
-    --color-pink-50: #fdf2f8;
-    --color-pink-100: #fce7f3;
-    --color-pink-200: #fbcfe8;
-    --color-pink-300: #f9a8d4;
-    --color-pink-400: #f472b6;
-    --color-pink-500: #ec4899;
-    --color-pink-600: #db2777;
+    /* Primary Colors - Soft Rose (より落ち着いた大人っぽいピンク) */
+    --color-pink-50: #fffbf7;
+    --color-pink-100: #fef1ea;
+    --color-pink-200: #fce4d8;
+    --color-pink-300: #f9c4b4;
+    --color-pink-400: #e8a0a0;
+    --color-pink-500: #d88a8a;
+    --color-pink-600: #c27070;
 
-    /* Accent Colors */
-    --color-orange-400: #fb923c;
-    --color-orange-500: #f97316;
-    --color-yellow-400: #facc15;
+    /* Accent Colors (温かみのあるオレンジ系) */
+    --color-orange-400: #f5a573;
+    --color-orange-500: #e89460;
+    --color-yellow-400: #f7d87a;
 
-    /* Indigo (Sleep/Night theme) */
+    /* Indigo (Sleep/Night theme - そのまま) */
     --color-indigo-400: #818cf8;
     --color-indigo-500: #6366f1;
     --color-indigo-600: #4f46e5;
 
-    /* Neutrals */
-    --color-gray-50: #f9fafb;
-    --color-gray-100: #f3f4f6;
-    --color-gray-200: #e5e7eb;
-    --color-gray-400: #9ca3af;
-    --color-gray-500: #6b7280;
-    --color-gray-600: #4b5563;
-    --color-gray-800: #1f2937;
-    --color-gray-900: #111827;
+    /* Neutrals (温かみのあるグレー) */
+    --color-gray-50: #faf9f7;
+    --color-gray-100: #f5f3f0;
+    --color-gray-200: #e8e5e0;
+    --color-gray-400: #a8a29e;
+    --color-gray-500: #78716c;
+    --color-gray-600: #57534e;
+    --color-gray-800: #292524;
+    --color-gray-900: #1c1917;
 
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -2px rgba(236, 72, 153, 0.15);
-    --shadow-glow-pink: 0 0 30px rgba(236, 72, 153, 0.25);
+    /* Shadows (柔らかいシャドウ) */
+    --shadow-soft: 0 4px 20px -2px rgba(216, 138, 138, 0.15);
+    --shadow-glow-pink: 0 0 30px rgba(216, 138, 138, 0.20);
     --shadow-glow-indigo: 0 0 30px rgba(99, 102, 241, 0.25);
-    --shadow-card: 0 8px 32px -4px rgba(0, 0, 0, 0.08);
+    --shadow-card: 0 8px 32px -4px rgba(0, 0, 0, 0.06);
 
     /* Animation Timing */
     --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
