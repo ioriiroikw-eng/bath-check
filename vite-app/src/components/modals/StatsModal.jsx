@@ -443,42 +443,35 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
             {/* 評価 */}
             {showEvaluation && stats.total > 0 && (
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 border border-indigo-100 text-center">
-                    <div className="text-4xl mb-1">{evaluation.emoji}</div>
                     <div className="text-xl font-black text-indigo-600">{evaluation.title}</div>
                 </div>
             )}
 
             {/* メイン統計 */}
-            <div className="grid grid-cols-2 gap-2">
-                <div className="bg-pink-50 rounded-xl p-3 border border-pink-100 text-center">
-                    <div className="text-2xl">🛁</div>
-                    <div className="text-2xl font-black text-pink-600">{stats.bathCount}<span className="text-sm font-bold">回</span></div>
-                    <div className="text-xs text-gray-500">お風呂</div>
+            {/* メイン統計 */}
+            <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                    <div className="text-3xl font-black text-rose-500 font-mono tracking-tighter">{stats.bathCount}<span className="text-sm font-bold ml-1 text-rose-300">回</span></div>
+                    <div className="text-[10px] text-slate-400 font-bold tracking-widest mt-1">お風呂回数</div>
                 </div>
-                <div className="bg-indigo-50 rounded-xl p-3 border border-indigo-100 text-center">
-                    <div className="text-2xl">💤</div>
-                    <div className="text-2xl font-black text-indigo-600">{stats.skipCount}<span className="text-sm font-bold">回</span></div>
-                    <div className="text-xs text-gray-500">風呂キャン</div>
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                    <div className="text-3xl font-black text-indigo-500 font-mono tracking-tighter">{stats.skipCount}<span className="text-sm font-bold ml-1 text-indigo-300">回</span></div>
+                    <div className="text-[10px] text-slate-400 font-bold tracking-widest mt-1">風呂キャン</div>
                 </div>
-                <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100 text-center">
-                    <div className="text-2xl">📈</div>
-                    <div className="text-2xl font-black text-emerald-600">{stats.bathRate}<span className="text-sm font-bold">%</span></div>
-                    <div className="text-xs text-gray-500">お風呂率</div>
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                    <div className="text-3xl font-black text-emerald-500 font-mono tracking-tighter">{stats.bathRate}<span className="text-sm font-bold ml-1 text-emerald-300">%</span></div>
+                    <div className="text-[10px] text-slate-400 font-bold tracking-widest mt-1">お風呂率</div>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-3 border border-amber-100 text-center">
-                    <div className="text-2xl">⏰</div>
-                    <div className="text-2xl font-black text-amber-600">{stats.savedTime}<span className="text-sm font-bold">分</span></div>
-                    <div className="text-xs text-gray-500">節約時間</div>
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
+                    <div className="text-3xl font-black text-amber-500 font-mono tracking-tighter">{stats.savedTime}<span className="text-sm font-bold ml-1 text-amber-300">分</span></div>
+                    <div className="text-[10px] text-slate-400 font-bold tracking-widest mt-1">節約時間</div>
                 </div>
             </div>
 
             {/* 節約金額 */}
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-3 border border-yellow-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <span className="text-2xl">💰</span>
-                    <span className="font-bold text-gray-700">節約金額</span>
-                </div>
-                <span className="text-2xl font-black text-orange-600">約{stats.savedMoney}円</span>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 tracking-widest">節約金額</span>
+                <span className="text-2xl font-black text-slate-700 font-mono tracking-tighter">¥{stats.savedMoney.toLocaleString()}</span>
             </div>
 
             {/* アフィリエイト広告 */}
@@ -528,34 +521,44 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
 
     // 曜日別パターン表示
     const DayOfWeekChart = () => (
-        <div className="space-y-2">
-            <h3 className="text-sm font-bold text-gray-700 flex items-center gap-1">
-                📅 曜日別パターン
+        <div className="space-y-3">
+            <h3 className="text-xs font-bold text-slate-400 tracking-widest ml-1">
+                曜日別パターン
             </h3>
-            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 space-y-2">
+            <div className="bg-white rounded-2xl p-4 border border-slate-100 space-y-3 shadow-sm">
                 {dayOfWeekPattern.map((p, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm">
-                        <span className={`w-4 font-bold ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-600'}`}>
-                            {p.day}
+                    <div key={i} className="flex items-center gap-3">
+                        <span className={`w-8 text-xs font-bold ${i === 0 ? 'text-rose-400' : i === 6 ? 'text-blue-400' : 'text-slate-400'}`}>
+                            {['日', '月', '火', '水', '木', '金', '土'][i]}
                         </span>
-                        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
-                            {p.bathRate !== null && (
+
+                        <div className="flex-1 h-2 bg-slate-50 rounded-full overflow-hidden relative">
+                            {/* 背景グリッド的なライン */}
+                            <div className="absolute inset-0 w-full h-full border-l border-white/50"></div>
+
+                            {p.bathRate !== null && p.bathRate > 0 && (
                                 <div
-                                    className="h-full bg-gradient-to-r from-pink-400 to-pink-500 rounded-full transition-all"
+                                    className={`h-full rounded-full ${p.bathRate >= 80 ? 'bg-emerald-400' :
+                                        p.bathRate >= 50 ? 'bg-blue-400' :
+                                            'bg-rose-400'
+                                        }`}
                                     style={{ width: `${p.bathRate}%` }}
                                 />
                             )}
                         </div>
-                        <span className="w-12 text-right font-bold text-gray-600">
-                            {p.bathRate !== null ? `${p.bathRate}%` : '-'}
-                        </span>
-                        <span className="text-xs text-gray-400 w-16">
-                            ({p.bath}/{p.total})
-                        </span>
+
+                        <div className="w-12 text-right">
+                            {p.bathRate !== null ? (
+                                <span className="text-sm font-black text-slate-700 font-mono">
+                                    {p.bathRate}<span className="text-[10px] text-slate-300 ml-0.5">%</span>
+                                </span>
+                            ) : (
+                                <span className="text-xs text-slate-300">-</span>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
-            <p className="text-xs text-gray-400">※ お風呂に入った割合を表示</p>
         </div>
     );
 
@@ -564,9 +567,9 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
         if (insights.length === 0) return null;
 
         return (
-            <div className="space-y-2">
-                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-1">
-                    💡 あなたのパターン分析
+            <div className="space-y-3">
+                <h3 className="text-xs font-bold text-slate-400 tracking-widest ml-1">
+                    パターン分析
                 </h3>
                 <div className="space-y-2">
                     {insights.map((insight, i) => (
@@ -579,7 +582,6 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                                     : 'bg-blue-50 border-blue-100'
                                 }`}
                         >
-                            <span className="text-lg">{insight.icon}</span>
                             <span className={`text-sm font-bold ${insight.type === 'warning'
                                 ? 'text-amber-700'
                                 : insight.type === 'success'
