@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Icons } from '../Icons';
 import { getLocalDateStr } from '../../utils';
-import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS, BATH_TYPE_16, BATH_TYPE_ACCURACY_LEVELS } from '../../constants';
+import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS, BATH_TYPE_16, BATH_TYPE_ACCURACY_LEVELS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD } from '../../constants';
 
 const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -481,16 +481,47 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                 <span className="text-2xl font-black text-orange-600">約{stats.savedMoney}円</span>
             </div>
 
-            {/* 節約の使い道 */}
-            {stats.savedTime > 0 && (
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                    <p className="text-xs text-gray-500 mb-2">💡 浮いた時間で...</p>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                        {stats.savedTime >= 30 && <span className="bg-white px-2 py-1 rounded-lg">🎬 映画{Math.floor(stats.savedTime / 120)}本</span>}
-                        {stats.savedTime >= 10 && <span className="bg-white px-2 py-1 rounded-lg">📺 動画{Math.floor(stats.savedTime / 10)}本</span>}
-                        {stats.savedTime >= 60 && <span className="bg-white px-2 py-1 rounded-lg">😴 {Math.floor(stats.savedTime / 60)}時間の睡眠</span>}
+            {/* アフィリエイト広告 */}
+            {stats.savedTime >= 30 && (() => {
+                const randomAffiliate = AFFILIATE_SUGGESTIONS[Math.floor(Math.random() * AFFILIATE_SUGGESTIONS.length)];
+                return randomAffiliate ? (
+                    <a
+                        href={randomAffiliate.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-3 border border-orange-200 hover:shadow-md transition-shadow"
+                    >
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl">{randomAffiliate.icon}</span>
+                            <div className="flex-1">
+                                <p className="font-bold text-gray-800 text-sm">{randomAffiliate.title}</p>
+                                <p className="text-xs text-gray-500">{randomAffiliate.description}</p>
+                            </div>
+                            <Icons.ChevronRight size={16} className="text-orange-400" />
+                        </div>
+                    </a>
+                ) : null;
+            })()}
+
+            {/* ギフトカード広告 */}
+            {stats.savedMoney >= 100 && (
+                <a
+                    href={GIFT_CARD_AD.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-3 border border-yellow-200 hover:shadow-md transition-shadow"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl">🎁</span>
+                        <div className="flex-1">
+                            <p className="font-bold text-gray-800 text-sm">Amazonギフトカード</p>
+                            <p className="text-xs text-gray-500">
+                                {GIFT_CARD_AD.messages[Math.floor(Math.random() * GIFT_CARD_AD.messages.length)]}
+                            </p>
+                        </div>
+                        <Icons.ChevronRight size={16} className="text-yellow-500" />
                     </div>
-                </div>
+                </a>
             )}
         </div>
     );

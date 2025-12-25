@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Icons } from '../Icons';
+import { AFFILIATE_SUGGESTIONS } from '../../constants';
 
 const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
     const [rating, setRating] = useState(0);
@@ -64,8 +65,8 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
                                 <Icons.Star
                                     size={36}
                                     className={`transition-colors ${star <= displayRating
-                                            ? 'text-yellow-400 fill-yellow-400'
-                                            : 'text-gray-300'
+                                        ? 'text-yellow-400 fill-yellow-400'
+                                        : 'text-gray-300'
                                         }`}
                                 />
                             </button>
@@ -77,7 +78,7 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
                 </div>
 
                 {/* メモ入力 */}
-                <div className="mb-6">
+                <div className="mb-4">
                     <textarea
                         value={memo}
                         onChange={(e) => setMemo(e.target.value)}
@@ -87,6 +88,29 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
                         maxLength={100}
                     />
                 </div>
+
+                {/* ご褒美広告 */}
+                {(() => {
+                    const randomAffiliate = AFFILIATE_SUGGESTIONS[Math.floor(Math.random() * AFFILIATE_SUGGESTIONS.length)];
+                    return randomAffiliate ? (
+                        <a
+                            href={randomAffiliate.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block mb-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-3 border border-pink-200 hover:shadow-md transition-shadow"
+                        >
+                            <p className="text-xs text-pink-500 font-bold mb-1">🎁 お風呂入れたご褒美に</p>
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">{randomAffiliate.icon}</span>
+                                <div className="flex-1">
+                                    <p className="font-bold text-gray-800 text-sm">{randomAffiliate.title}</p>
+                                    <p className="text-xs text-gray-500">{randomAffiliate.subtext}</p>
+                                </div>
+                                <Icons.ChevronRight size={16} className="text-pink-400" />
+                            </div>
+                        </a>
+                    ) : null;
+                })()}
 
                 {/* ボタン */}
                 <div className="flex gap-3">
