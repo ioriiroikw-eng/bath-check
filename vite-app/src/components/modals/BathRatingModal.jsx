@@ -1,22 +1,53 @@
 import React, { useState, useMemo } from 'react';
 import { Icons } from '../Icons';
-import { AFFILIATE_SUGGESTIONS } from '../../constants';
+import { AFFILIATE_SUGGESTIONS, STORAGE_KEY_BATH_AD_INDEX } from '../../constants';
 
 const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
     const [rating, setRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
     const [memo, setMemo] = useState('');
 
+    // 有効な広告リスト（bath/skincareカテゴリ優先）
+    const validAds = useMemo(() => {
+        const bathAds = AFFILIATE_SUGGESTIONS.filter(
+            item => (item.category === 'bath' || item.category === 'skincare') && item.isA8 && item.a8Code
+        );
+        const allA8Ads = AFFILIATE_SUGGESTIONS.filter(
+            item => item.isA8 && item.a8Code
+        );
+        return bathAds.length > 0 ? bathAds : allA8Ads;
+    }, []);
+
+    // 現在の広告インデックスを取得
+    const currentIndex = useMemo(() => {
+        if (validAds.length === 0) return 0;
+        const savedIndex = localStorage.getItem(STORAGE_KEY_BATH_AD_INDEX);
+        return savedIndex ? parseInt(savedIndex, 10) % validAds.length : 0;
+    }, [isOpen, validAds.length]);
+
+    // 現在表示する広告
+    const currentAffiliate = validAds[currentIndex] || null;
+
+    // 次の広告へ進める関数
+    const advanceAdIndex = () => {
+        if (validAds.length > 0) {
+            const nextIndex = (currentIndex + 1) % validAds.length;
+            localStorage.setItem(STORAGE_KEY_BATH_AD_INDEX, nextIndex.toString());
+        }
+    };
+
     if (!isOpen) return null;
 
     const handleSubmit = () => {
+        advanceAdIndex();
         onSubmit({ rating: rating || 3, memo: memo.trim() });
         setRating(0);
         setMemo('');
     };
 
     const handleSkip = () => {
-        onSubmit({ rating: 0, memo: '' }); // 0 = 評価なし
+        advanceAdIndex();
+        onSubmit({ rating: 0, memo: '' });
         setRating(0);
         setMemo('');
     };
@@ -89,28 +120,38 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
                     />
                 </div>
 
-                {/* ご褒美広告 */}
-                {(() => {
-                    const randomAffiliate = AFFILIATE_SUGGESTIONS[Math.floor(Math.random() * AFFILIATE_SUGGESTIONS.length)];
-                    return randomAffiliate ? (
+                {/* ご褒美広告（A8広告バナー） */}
+                {currentAffiliate && currentAffiliate.isA8 && currentAffiliate.a8Code && (
+                    <div className="mb-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-3 border border-pink-200">
+                        <p className="text-xs text-pink-500 font-bold mb-2 text-center">🎁 お風呂入れたご褒美に</p>
                         <a
-                            href={randomAffiliate.url}
+                            href={currentAffiliate.a8Code.linkUrl}
                             target="_blank"
-                            rel="noopener noreferrer"
-                            className="block mb-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-3 border border-pink-200 hover:shadow-md transition-shadow"
+                            rel="nofollow noopener noreferrer"
+                            className="block rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            <p className="text-xs text-pink-500 font-bold mb-1">🎁 お風呂入れたご褒美に</p>
-                            <div className="flex items-center gap-3">
-                                <span className="text-2xl">{randomAffiliate.icon}</span>
-                                <div className="flex-1">
-                                    <p className="font-bold text-gray-800 text-sm">{randomAffiliate.title}</p>
-                                    <p className="text-xs text-gray-500">{randomAffiliate.subtext}</p>
-                                </div>
-                                <Icons.ChevronRight size={16} className="text-pink-400" />
-                            </div>
+                            <img
+                                border="0"
+                                width={currentAffiliate.a8Code.width}
+                                height={currentAffiliate.a8Code.height}
+                                src={currentAffiliate.a8Code.imgUrl}
+                                alt={currentAffiliate.title}
+                                className="w-full h-auto"
+                            />
                         </a>
-                    ) : null;
-                })()}
+                        {/* A8トラッキングピクセル */}
+                        <img
+                            border="0"
+                            width="1"
+                            height="1"
+                            src={currentAffiliate.a8Code.trackingUrl}
+                            alt=""
+                            style={{ position: 'absolute', visibility: 'hidden' }}
+                        />
+                        <p className="text-[9px] text-gray-400 text-center mt-2">PR</p>
+                    </div>
+                )}
 
                 {/* ボタン */}
                 <div className="flex gap-3">
@@ -133,3 +174,4 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
 };
 
 export default BathRatingModal;
+

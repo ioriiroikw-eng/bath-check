@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Icons } from '../Icons';
-import { MONEY_CONVERSIONS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD } from '../../constants';
+import { MONEY_CONVERSIONS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD, STORAGE_KEY_SAVINGS_AD_INDEX, STORAGE_KEY_SAVINGS_EXP_AD_INDEX } from '../../constants';
 import { calculateLevel, getRankInfo } from '../../utils';
 
 const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
@@ -18,41 +18,88 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
         return Math.min(100, Math.max(0, (current / range) * 100));
     }, [savedMinutes, rankInfo]);
 
-    // お金換算提案
-    const moneySuggestions = useMemo(() => {
-        const affordable = MONEY_CONVERSIONS.filter(item => item.minYen <= savedYen);
-        if (affordable.length === 0) return [];
-        const shuffled = [...affordable].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, 3);
-    }, [savedYen, isOpen]);
-
-    // アフィリエイト提案
-    const affiliateSuggestions = useMemo(() => {
+    // Amazon広告（自己投資タブ用）
+    const amazonAds = useMemo(() => {
         return AFFILIATE_SUGGESTIONS
-            .filter(item => savedYen >= item.minYen && savedYen < item.maxYen)
-            .sort((a, b) => a.priority - b.priority)
-            .slice(0, 2);
-    }, [savedYen, isOpen]);
+            .filter(item => item.category === 'amazon' && !item.isA8);
+    }, []);
 
-    // ギフトカードメッセージ
-    const giftCardMessage = useMemo(() => {
-        const randomIndex = Math.floor(Math.random() * GIFT_CARD_AD.messages.length);
-        return GIFT_CARD_AD.messages[randomIndex];
-    }, [isOpen]);
+    // 体験用A8広告（320x50）
+    const experienceAds = useMemo(() => {
+        return AFFILIATE_SUGGESTIONS.filter(item => item.category === 'experience' && item.isA8 && item.a8Code);
+    }, []);
+
+    // Amazon + A8を合わせた体験用広告リスト
+    const allExperienceAds = useMemo(() => {
+        return [...amazonAds, ...experienceAds];
+    }, [amazonAds, experienceAds]);
+
+    // 体験タブ用広告インデックス
+    const currentExpIndex = useMemo(() => {
+        if (allExperienceAds.length === 0) return 0;
+        const savedIndex = localStorage.getItem(STORAGE_KEY_SAVINGS_EXP_AD_INDEX);
+        return savedIndex ? parseInt(savedIndex, 10) % allExperienceAds.length : 0;
+    }, [isOpen, allExperienceAds.length]);
+
+    // 表示する体験用広告（2つ）- Amazon + A8をローテーション
+    const displayExpAds = useMemo(() => {
+        if (allExperienceAds.length === 0) return [];
+        const ads = [];
+        for (let i = 0; i < Math.min(2, allExperienceAds.length); i++) {
+            ads.push(allExperienceAds[(currentExpIndex + i) % allExperienceAds.length]);
+        }
+        return ads;
+    }, [allExperienceAds, currentExpIndex]);
+
+    // A8広告（ご褒美タブ用 300x250）- ローテーション
+    const a8Ads = useMemo(() => {
+        return AFFILIATE_SUGGESTIONS.filter(item => item.isA8 && item.a8Code && item.category !== 'experience');
+    }, []);
+
+    // 現在のA8広告インデックスを取得
+    const currentA8Index = useMemo(() => {
+        if (a8Ads.length === 0) return 0;
+        const savedIndex = localStorage.getItem(STORAGE_KEY_SAVINGS_AD_INDEX);
+        return savedIndex ? parseInt(savedIndex, 10) % a8Ads.length : 0;
+    }, [isOpen, a8Ads.length]);
+
+    // 表示するA8広告（3つまで）
+    const displayA8Ads = useMemo(() => {
+        if (a8Ads.length === 0) return [];
+        const ads = [];
+        for (let i = 0; i < Math.min(3, a8Ads.length); i++) {
+            ads.push(a8Ads[(currentA8Index + i) % a8Ads.length]);
+        }
+        return ads;
+    }, [a8Ads, currentA8Index]);
+
+    // モーダルを閉じる時に広告インデックスを進める
+    const handleClose = () => {
+        // 体験タブの場合
+        if (activeTab === 'experience' && allExperienceAds.length > 0) {
+            const nextExpIndex = (currentExpIndex + displayExpAds.length) % allExperienceAds.length;
+            localStorage.setItem(STORAGE_KEY_SAVINGS_EXP_AD_INDEX, nextExpIndex.toString());
+        }
+        // ご褒美タブの場合
+        if (activeTab === 'time' && a8Ads.length > 0) {
+            const nextIndex = (currentA8Index + displayA8Ads.length) % a8Ads.length;
+            localStorage.setItem(STORAGE_KEY_SAVINGS_AD_INDEX, nextIndex.toString());
+        }
+        onClose();
+    };
 
     if (!isOpen) return null;
 
 
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={handleClose}>
             <div
                 className="glass-card-strong rounded-3xl p-6 w-full max-w-sm animate-slide-up max-h-[90vh] overflow-y-auto relative"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Close button */}
                 <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                     <Icons.X size={20} />
@@ -133,37 +180,69 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                     </button>
                 </div>
 
-                {/* Experience Tab */}
+                {/* Experience Tab - Amazon + A8 Ads 混合ローテーション（合計2つ） */}
                 {activeTab === 'experience' && (
                     <div className="mb-4 animate-fade-in">
                         <h3 className="text-xs font-bold text-slate-400 mb-3 flex items-center gap-2 tracking-wider">
                             おすすめのアクション
                         </h3>
-                        {affiliateSuggestions.length > 0 ? (
+                        {displayExpAds.length > 0 ? (
                             <div className="space-y-3">
-                                {affiliateSuggestions.map((item, i) => (
-                                    <a
-                                        key={i}
-                                        href={item.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        {item.bannerImage ? (
-                                            <img src={item.bannerImage} alt={item.title} className="w-full h-auto" />
+                                {displayExpAds.map((item, i) => (
+                                    <div key={i}>
+                                        {/* A8広告の場合 */}
+                                        {item.isA8 && item.a8Code ? (
+                                            <>
+                                                <a
+                                                    href={item.a8Code.linkUrl}
+                                                    target="_blank"
+                                                    rel="nofollow noopener noreferrer"
+                                                    className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <img
+                                                        border="0"
+                                                        width={item.a8Code.width}
+                                                        height={item.a8Code.height}
+                                                        src={item.a8Code.imgUrl}
+                                                        alt={item.title}
+                                                        className="w-full h-auto"
+                                                    />
+                                                </a>
+                                                <img
+                                                    border="0"
+                                                    width="1"
+                                                    height="1"
+                                                    src={item.a8Code.trackingUrl}
+                                                    alt=""
+                                                    style={{ position: 'absolute', visibility: 'hidden' }}
+                                                />
+                                            </>
                                         ) : (
-                                            <div className="flex items-center gap-3 p-4">
-                                                <div className="text-3xl opacity-80">{item.icon}</div>
-                                                <div className="flex-1">
-                                                    <div className="text-sm font-bold text-slate-700">{item.title}</div>
-                                                    <div className="text-xs text-slate-500">{item.description}</div>
-                                                    <div className="text-xs text-emerald-500 font-bold mt-1">{item.subtext}</div>
-                                                </div>
-                                                <Icons.ArrowRight size={16} className="text-slate-300" />
-                                            </div>
+                                            /* Amazon広告の場合 */
+                                            <a
+                                                href={item.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {item.bannerImage ? (
+                                                    <img src={item.bannerImage} alt={item.title} className="w-full h-auto" />
+                                                ) : (
+                                                    <div className="flex items-center gap-3 p-4">
+                                                        <div className="text-3xl opacity-80">{item.icon}</div>
+                                                        <div className="flex-1">
+                                                            <div className="text-sm font-bold text-slate-700">{item.title}</div>
+                                                            <div className="text-xs text-slate-500">{item.description}</div>
+                                                            <div className="text-xs text-emerald-500 font-bold mt-1">{item.subtext}</div>
+                                                        </div>
+                                                        <Icons.ArrowRight size={16} className="text-slate-300" />
+                                                    </div>
+                                                )}
+                                            </a>
                                         )}
-                                    </a>
+                                    </div>
                                 ))}
                             </div>
                         ) : (
@@ -178,21 +257,41 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                     </div>
                 )}
 
-                {/* Money Tab */}
+                {/* Reward Tab - A8 Ads */}
                 {activeTab === 'time' && (
                     <div className="mb-4 animate-fade-in">
                         <h3 className="text-xs font-bold text-slate-400 mb-3 flex items-center gap-2 tracking-wider">
                             あなたへのご褒美
                         </h3>
-                        {moneySuggestions.length > 0 ? (
-                            <div className="space-y-2">
-                                {moneySuggestions.map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3 bg-white border border-slate-100 p-4 rounded-xl">
-                                        <div className="text-2xl opacity-80">{item.icon}</div>
-                                        <div className="flex-1">
-                                            <div className="text-sm font-bold text-slate-700">{item.text}</div>
-                                            <div className="text-xs text-emerald-500 font-bold">¥{item.minYen.toLocaleString()}〜</div>
-                                        </div>
+                        {displayA8Ads.length > 0 ? (
+                            <div className="space-y-3">
+                                {displayA8Ads.map((item, i) => (
+                                    <div key={i}>
+                                        <a
+                                            href={item.a8Code.linkUrl}
+                                            target="_blank"
+                                            rel="nofollow noopener noreferrer"
+                                            className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <img
+                                                border="0"
+                                                width={item.a8Code.width}
+                                                height={item.a8Code.height}
+                                                src={item.a8Code.imgUrl}
+                                                alt={item.title}
+                                                className="w-full h-auto"
+                                            />
+                                        </a>
+                                        {/* A8トラッキングピクセル */}
+                                        <img
+                                            border="0"
+                                            width="1"
+                                            height="1"
+                                            src={item.a8Code.trackingUrl}
+                                            alt=""
+                                            style={{ position: 'absolute', visibility: 'hidden' }}
+                                        />
                                     </div>
                                 ))}
                             </div>
@@ -204,23 +303,7 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                                 </div>
                             </div>
                         )}
-
-                        {/* Gift Card Ad */}
-                        <div className="mt-4">
-                            <p className="text-xs font-bold text-amber-600 text-center mb-2">
-                                {giftCardMessage}
-                            </p>
-                            <a
-                                href={GIFT_CARD_AD.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block rounded-xl overflow-hidden hover:shadow-lg transition-all active:scale-[0.98]"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <img src={GIFT_CARD_AD.bannerImage} alt="Amazonギフトカード" className="w-full h-auto" />
-                            </a>
-                            <p className="text-[9px] text-slate-300 text-center mt-2">PR</p>
-                        </div>
+                        <p className="text-[9px] text-slate-300 text-center mt-3">PR</p>
                     </div>
                 )}
 

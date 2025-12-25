@@ -1,11 +1,53 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Icons } from '../Icons';
 import { getLocalDateStr } from '../../utils';
-import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS, BATH_TYPE_16, BATH_TYPE_ACCURACY_LEVELS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD } from '../../constants';
+import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS, BATH_TYPE_16, BATH_TYPE_ACCURACY_LEVELS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD, STORAGE_KEY_STATS_WEEKLY_AD_INDEX, STORAGE_KEY_STATS_MONTHLY_AD_INDEX, STORAGE_KEY_STATS_ALL_AD_INDEX } from '../../constants';
 
 const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [activeTab, setActiveTab] = useState('weekly'); // 'calendar', 'weekly', 'monthly', 'all'
+
+    // ===== 広告ローテーション用（タブごと） =====
+    const allAds = useMemo(() => {
+        return AFFILIATE_SUGGESTIONS.filter(item => item.isA8 && item.a8Code);
+    }, []);
+
+    // タブごとのストレージキーを取得
+    const getStorageKeyForTab = (tab) => {
+        switch (tab) {
+            case 'weekly': return STORAGE_KEY_STATS_WEEKLY_AD_INDEX;
+            case 'monthly': return STORAGE_KEY_STATS_MONTHLY_AD_INDEX;
+            case 'all': return STORAGE_KEY_STATS_ALL_AD_INDEX;
+            default: return STORAGE_KEY_STATS_WEEKLY_AD_INDEX;
+        }
+    };
+
+    // タブごとの広告インデックスを取得
+    const getAdIndexForTab = (tab) => {
+        if (allAds.length === 0) return 0;
+        const storageKey = getStorageKeyForTab(tab);
+        const savedIndex = localStorage.getItem(storageKey);
+        return savedIndex ? parseInt(savedIndex, 10) % allAds.length : 0;
+    };
+
+    const weeklyAdIndex = useMemo(() => getAdIndexForTab('weekly'), [isOpen, allAds.length]);
+    const monthlyAdIndex = useMemo(() => getAdIndexForTab('monthly'), [isOpen, allAds.length]);
+    const allAdIndex = useMemo(() => getAdIndexForTab('all'), [isOpen, allAds.length]);
+
+    const weeklyAd = allAds[weeklyAdIndex] || null;
+    const monthlyAd = allAds[monthlyAdIndex] || null;
+    const allAd = allAds[allAdIndex] || null;
+
+    // モーダルを閉じる時に現在のタブの広告インデックスを進める
+    const handleClose = () => {
+        if (allAds.length > 0 && activeTab !== 'calendar') {
+            const storageKey = getStorageKeyForTab(activeTab);
+            const currentIndex = getAdIndexForTab(activeTab);
+            const nextIndex = (currentIndex + 1) % allAds.length;
+            localStorage.setItem(storageKey, nextIndex.toString());
+        }
+        onClose();
+    };
 
     const bathEventMap = new Map();
     const historySet = new Set();
@@ -438,7 +480,7 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
     };
 
     // 統計表示コンポーネント
-    const StatsDisplay = ({ stats, showEvaluation = true }) => (
+    const StatsDisplay = ({ stats, showEvaluation = true, ad = null }) => (
         <div className="space-y-4">
             {/* 評価 */}
             {showEvaluation && stats.total > 0 && (
@@ -474,47 +516,34 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                 <span className="text-2xl font-black text-slate-700 font-mono tracking-tighter">¥{stats.savedMoney.toLocaleString()}</span>
             </div>
 
-            {/* アフィリエイト広告 */}
-            {stats.savedTime >= 30 && (() => {
-                const randomAffiliate = AFFILIATE_SUGGESTIONS[Math.floor(Math.random() * AFFILIATE_SUGGESTIONS.length)];
-                return randomAffiliate ? (
+            {/* アフィリエイト広告（A8広告ローテーション・タブごと） */}
+            {stats.savedTime >= 30 && ad && ad.a8Code && (
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-3 border border-orange-200">
                     <a
-                        href={randomAffiliate.url}
+                        href={ad.a8Code.linkUrl}
                         target="_blank"
-                        rel="noopener noreferrer"
-                        className="block bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-3 border border-orange-200 hover:shadow-md transition-shadow"
+                        rel="nofollow noopener noreferrer"
+                        className="block rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                     >
-                        <div className="flex items-center gap-3">
-                            <span className="text-2xl">{randomAffiliate.icon}</span>
-                            <div className="flex-1">
-                                <p className="font-bold text-gray-800 text-sm">{randomAffiliate.title}</p>
-                                <p className="text-xs text-gray-500">{randomAffiliate.description}</p>
-                            </div>
-                            <Icons.ChevronRight size={16} className="text-orange-400" />
-                        </div>
+                        <img
+                            border="0"
+                            width={ad.a8Code.width}
+                            height={ad.a8Code.height}
+                            src={ad.a8Code.imgUrl}
+                            alt={ad.title}
+                            className="w-full h-auto"
+                        />
                     </a>
-                ) : null;
-            })()}
-
-            {/* ギフトカード広告 */}
-            {stats.savedMoney >= 100 && (
-                <a
-                    href={GIFT_CARD_AD.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-3 border border-yellow-200 hover:shadow-md transition-shadow"
-                >
-                    <div className="flex items-center gap-3">
-                        <span className="text-2xl">🎁</span>
-                        <div className="flex-1">
-                            <p className="font-bold text-gray-800 text-sm">Amazonギフトカード</p>
-                            <p className="text-xs text-gray-500">
-                                {GIFT_CARD_AD.messages[Math.floor(Math.random() * GIFT_CARD_AD.messages.length)]}
-                            </p>
-                        </div>
-                        <Icons.ChevronRight size={16} className="text-yellow-500" />
-                    </div>
-                </a>
+                    <img
+                        border="0"
+                        width="1"
+                        height="1"
+                        src={ad.a8Code.trackingUrl}
+                        alt=""
+                        style={{ position: 'absolute', visibility: 'hidden' }}
+                    />
+                    <p className="text-[9px] text-gray-400 text-center mt-2">PR</p>
+                </div>
             )}
         </div>
     );
@@ -625,9 +654,9 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
     );
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={handleClose}>
             <div className="bg-white rounded-3xl p-5 w-full max-w-md modal-enter shadow-2xl relative border-4 border-pink-100 max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 z-10"><Icons.X /></button>
+                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 z-10"><Icons.X /></button>
 
                 {/* ヘッダー */}
                 <div className="text-center mb-3 flex-shrink-0">
@@ -716,7 +745,7 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                         <div className="text-center text-xs text-gray-500 mb-2">
                             今週（日曜日〜）の統計
                         </div>
-                        <StatsDisplay stats={weeklyStats} />
+                        <StatsDisplay stats={weeklyStats} ad={weeklyAd} />
 
                         <button
                             onClick={handleShareReport}
@@ -734,7 +763,7 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                         <div className="text-center text-xs text-gray-500 mb-2">
                             今月（{new Date().getMonth() + 1}月）の統計
                         </div>
-                        <StatsDisplay stats={monthlyStats} />
+                        <StatsDisplay stats={monthlyStats} ad={monthlyAd} />
                         <DayOfWeekChart />
 
                         <button
@@ -756,7 +785,7 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                                 : '全期間の統計'
                             }
                         </div>
-                        <StatsDisplay stats={allTimeStats} />
+                        <StatsDisplay stats={allTimeStats} ad={allAd} />
                         <RecordsSection />
                         <DayOfWeekChart />
                         <InsightsSection />
