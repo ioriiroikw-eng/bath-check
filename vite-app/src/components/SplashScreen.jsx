@@ -60,8 +60,18 @@ const SplashScreen = ({ onFinish }) => {
                 <div className={`absolute inset-0 bg-white/30 transition-opacity duration-500 pointer-events-none ${isFinished ? 'opacity-100' : 'opacity-0'}`}></div>
             </div>
 
-            <div className="absolute bottom-16 text-rose-400 font-bold tracking-widest text-sm animate-pulse font-pop">
-                お湯はり中...
+            <div className="absolute bottom-16 flex flex-col items-center gap-2">
+                <div className="text-slate-400 font-medium tracking-[0.2em] text-xs uppercase mb-1">
+                    Precision Bathing
+                </div>
+                <div className="text-slate-700 text-sm font-medium tracking-wider opacity-90">
+                    あなただけの最適な入浴時間を、データで導き出す。
+                </div>
+                <div className="mt-4 flex gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
             </div>
 
             <style>{`
