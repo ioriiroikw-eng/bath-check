@@ -239,7 +239,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }
                                 {!actionCompleted ? (
                                     <div className="bg-pink-50 border-2 border-pink-200 rounded-xl p-3 text-center">
                                         <p className="text-sm font-bold text-pink-600">
-                                            👇 下のピンクのボタンをタップ！
+                                            👆 ボタンを押してね！
                                         </p>
                                     </div>
                                 ) : (

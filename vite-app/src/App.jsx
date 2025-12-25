@@ -861,15 +861,11 @@ const App = () => {
                         setShowSkinTypeModal(true);
                     }}
                     onTutorialBath={() => {
-                        // チュートリアル用の簡易お風呂処理
-                        setHp(100);
-                        setLastBathTime(new Date());
-                        setEventDamageTotal(0);
+                        // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
                         playSe('kira');
                     }}
                     onTutorialSleep={() => {
-                        // チュートリアル用の簡易ズボラ貯金
-                        setSavedMinutes(prev => prev + 30);
+                        // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
                         playSe('pop');
                     }}
                 />
