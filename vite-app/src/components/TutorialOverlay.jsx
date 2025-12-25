@@ -33,6 +33,15 @@ const TUTORIAL_STEPS = [
         successMessage: '💰 サボった時間が貯金に！これ最高でしょ？',
     },
     {
+        id: 'forecast',
+        type: 'intro',
+        title: '今日の予報機能 📅',
+        description: '過去のパターンと天気から\n「今日お風呂入りそう度」を予測！',
+        target: 'forecast-badge',
+        character: './char_80.png',
+        characterMessage: '毎日チェックしてね〜',
+    },
+    {
         id: 'complete',
         type: 'complete',
         title: '準備完了！',
@@ -262,14 +271,14 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }
                                     : 'bg-gray-300 cursor-not-allowed'
                                     }`}
                             >
-                                {isLastStep ? '肌タイプを入力 🧴' : '次へ →'}
+                                {isLastStep ? '始める！ ✨' : '次へ →'}
                             </button>
                         ) : (
                             <button
                                 onClick={handleNext}
                                 className="w-full py-3 px-4 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-xl shadow-md active:scale-95"
                             >
-                                {isLastStep ? '肌タイプを入力 🧴' : '次へ →'}
+                                {isLastStep ? '始める！ ✨' : '次へ →'}
                             </button>
                         )}
 

@@ -29,6 +29,8 @@ import CommunityBanner from './components/CommunityBanner';
 import WeeklyReportBanner from './components/WeeklyReportBanner';
 import TutorialOverlay, { TutorialStartModal } from './components/TutorialOverlay';
 import HamburgerMenu from './components/HamburgerMenu';
+import { TodayForecastBadge, WeeklyForecastModal } from './components/WeeklyForecast';
+import PersonalizationModal, { STORAGE_KEY_PERSONALIZATION } from './components/modals/PersonalizationModal';
 
 const App = () => {
     const [hp, setHp] = useState(100);
@@ -94,6 +96,14 @@ const App = () => {
 
     // ハンバーガーメニュー
     const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
+
+    // パーソナライズ
+    const [showPersonalizationModal, setShowPersonalizationModal] = useState(false);
+    const [personalization, setPersonalization] = useState(null);
+
+    // 週間予報モーダル
+    const [showWeeklyForecastModal, setShowWeeklyForecastModal] = useState(false);
+    const [weeklyForecastData, setWeeklyForecastData] = useState(null);
 
     // BGM処理
     useEffect(() => {
@@ -614,7 +624,7 @@ const App = () => {
                         <span className="text-[10px] font-bold text-gray-400 group-hover:text-blue-500 transition-colors">記録・分析</span>
                     </button>
 
-                    {/* Weather moved here */}
+                    {/* Weather */}
                     {!weatherData ? (
                         <button onClick={handleWeatherButtonPress} disabled={isFetchingWeather} className="flex flex-col items-center gap-1 group">
                             <div className="p-2 rounded-full bg-blue-50 text-blue-400 group-hover:bg-blue-100 transition-colors">
@@ -633,6 +643,19 @@ const App = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* 今日の予報バッジ */}
+                    <div id="forecast-badge">
+                        <TodayForecastBadge
+                            bathEvents={bathEvents}
+                            personalization={personalization}
+                            onClick={(forecast) => {
+                                playSe('pop');
+                                setWeeklyForecastData(forecast);
+                                setShowWeeklyForecastModal(true);
+                            }}
+                        />
+                    </div>
 
                     <button onClick={() => { playSe('pop'); setShowHamburgerMenu(true); }} className="flex flex-col items-center gap-1 group">
                         <div className="p-2 rounded-full bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-colors">
@@ -656,7 +679,6 @@ const App = () => {
                     </div>
                     <Icons.ChevronRight size={20} />
                 </button>
-
 
                 {/* Status Avatar (The "Subject") & Tap-to-Speak (Plan C) */}
                 <div className="relative w-40 h-40 flex items-center justify-center mb-2 z-30">
@@ -835,6 +857,16 @@ const App = () => {
                 onOpenHelp={() => setIsHelp(true)}
             />
             <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} bathEvents={bathEvents} savedMinutes={savedMinutes} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsStatsOpen(false); }} />
+
+            {/* 週間予報モーダル */}
+            {weeklyForecastData && (
+                <WeeklyForecastModal
+                    isOpen={showWeeklyForecastModal}
+                    onClose={() => setShowWeeklyForecastModal(false)}
+                    forecast={weeklyForecastData}
+                />
+            )}
+
             {generatedImage && (<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}> <div className="bg-transparent w-full max-w-sm relative" onClick={e => e.stopPropagation()}> <img src={generatedImage} alt="Share" className="w-full rounded-xl shadow-2xl" /> <div className="text-center mt-4 text-white font-bold text-sm opacity-80">長押しして保存</div></div> </div>)}
 
             {/* チュートリアル */}
@@ -867,12 +899,24 @@ const App = () => {
                         onComplete={() => {
                             setShowTutorial(false);
                             localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                            setShowSkinTypeModal(true);
+                            // パーソナライズ済みかチェック
+                            const savedPersonalization = localStorage.getItem(STORAGE_KEY_PERSONALIZATION);
+                            if (savedPersonalization) {
+                                setShowSkinTypeModal(true); // 済みなら肌タイプへ
+                            } else {
+                                setShowPersonalizationModal(true); // 未実施ならパーソナライズへ
+                            }
                         }}
                         onSkip={() => {
                             setShowTutorial(false);
                             localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                            setShowSkinTypeModal(true);
+                            // パーソナライズ済みかチェック
+                            const savedPersonalization = localStorage.getItem(STORAGE_KEY_PERSONALIZATION);
+                            if (savedPersonalization) {
+                                setShowSkinTypeModal(true);
+                            } else {
+                                setShowPersonalizationModal(true);
+                            }
                         }}
                         onTutorialBath={() => {
                             // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
@@ -885,6 +929,15 @@ const App = () => {
                     />
                 )
             }
+            {/* パーソナライズ質問モーダル */}
+            <PersonalizationModal
+                isOpen={showPersonalizationModal}
+                onComplete={(result) => {
+                    setPersonalization(result);
+                    setShowPersonalizationModal(false);
+                    setShowSkinTypeModal(true); // パーソナライズ後に肌タイプへ
+                }}
+            />
         </div >
     );
 };

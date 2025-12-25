@@ -140,6 +140,66 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
         }));
     }, [bathEvents, isOpen]);
 
+    // 洞察コメント生成
+    const insights = useMemo(() => {
+        const comments = [];
+
+        if (!dayOfWeekPattern || dayOfWeekPattern.every(p => p.total === 0)) {
+            return comments;
+        }
+
+        // スキップしやすい曜日を見つける
+        const worstDay = dayOfWeekPattern
+            .filter(p => p.bathRate !== null && p.total >= 2)
+            .sort((a, b) => (a.bathRate ?? 100) - (b.bathRate ?? 100))[0];
+
+        if (worstDay && worstDay.bathRate !== null && worstDay.bathRate < 50) {
+            comments.push({
+                icon: '⚠️',
+                text: `${worstDay.day}曜日は${100 - worstDay.bathRate}%の確率でスキップ傾向`,
+                type: 'warning'
+            });
+        }
+
+        // 入浴しやすい曜日を見つける
+        const bestDay = dayOfWeekPattern
+            .filter(p => p.bathRate !== null && p.total >= 2)
+            .sort((a, b) => (b.bathRate ?? 0) - (a.bathRate ?? 0))[0];
+
+        if (bestDay && bestDay.bathRate !== null && bestDay.bathRate >= 80) {
+            comments.push({
+                icon: '🛁',
+                text: `${bestDay.day}曜日は${bestDay.bathRate}%入浴！お風呂デー`,
+                type: 'success'
+            });
+        }
+
+        // 平日vs休日の比較
+        const weekdayPattern = dayOfWeekPattern.slice(1, 6);
+        const weekendPattern = [dayOfWeekPattern[0], dayOfWeekPattern[6]];
+
+        const weekdayAvg = weekdayPattern.filter(p => p.bathRate !== null).reduce((sum, p) => sum + (p.bathRate ?? 0), 0) / weekdayPattern.filter(p => p.bathRate !== null).length || 0;
+        const weekendAvg = weekendPattern.filter(p => p.bathRate !== null).reduce((sum, p) => sum + (p.bathRate ?? 0), 0) / weekendPattern.filter(p => p.bathRate !== null).length || 0;
+
+        if (Math.abs(weekdayAvg - weekendAvg) >= 20) {
+            if (weekdayAvg > weekendAvg) {
+                comments.push({
+                    icon: '📊',
+                    text: `平日型タイプ：休日より平日の方が入浴率が高い`,
+                    type: 'info'
+                });
+            } else {
+                comments.push({
+                    icon: '📊',
+                    text: `休日型タイプ：平日より休日の方が入浴率が高い`,
+                    type: 'info'
+                });
+            }
+        }
+
+        return comments;
+    }, [dayOfWeekPattern]);
+
     // 記録・実績
     const records = useMemo(() => {
         if (!bathEvents || !Array.isArray(bathEvents)) {
@@ -468,6 +528,42 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
         </div>
     );
 
+    // 洞察コメント表示
+    const InsightsSection = () => {
+        if (insights.length === 0) return null;
+
+        return (
+            <div className="space-y-2">
+                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-1">
+                    💡 あなたのパターン分析
+                </h3>
+                <div className="space-y-2">
+                    {insights.map((insight, i) => (
+                        <div
+                            key={i}
+                            className={`rounded-xl p-3 border flex items-center gap-2 ${insight.type === 'warning'
+                                ? 'bg-amber-50 border-amber-100'
+                                : insight.type === 'success'
+                                    ? 'bg-green-50 border-green-100'
+                                    : 'bg-blue-50 border-blue-100'
+                                }`}
+                        >
+                            <span className="text-lg">{insight.icon}</span>
+                            <span className={`text-sm font-bold ${insight.type === 'warning'
+                                ? 'text-amber-700'
+                                : insight.type === 'success'
+                                    ? 'text-green-700'
+                                    : 'text-blue-700'
+                                }`}>
+                                {insight.text}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
     // 記録・実績表示
     const RecordsSection = () => (
         <div className="space-y-2">
@@ -630,6 +726,7 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                         <StatsDisplay stats={allTimeStats} />
                         <RecordsSection />
                         <DayOfWeekChart />
+                        <InsightsSection />
 
                         <button
                             onClick={handleShareReport}
