@@ -36,7 +36,7 @@ const HelpModal = ({ isOpen, onClose, onStartTutorial, onChangeSkinType }) => {
                     <div className="bg-indigo-50 p-3 rounded-xl flex items-start gap-3">
                         <div className="text-2xl">💎</div>
                         <div>
-                            <h4 className="text-indigo-600 font-black mb-1">ズボラ貯金</h4>
+                            <h4 className="text-emerald-600 font-black mb-1">オフタイム貯金</h4>
                             <p className="text-xs leading-relaxed">入浴をスキップして「寝る」と、30分が貯金されます。サボることも立派な戦略！</p>
                         </div>
                     </div>

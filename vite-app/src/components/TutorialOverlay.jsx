@@ -24,13 +24,13 @@ const TUTORIAL_STEPS = [
     {
         id: 'sleep-action',
         type: 'action',
-        title: 'サボっても大丈夫！',
-        description: '疲れた日は「寝る」を押すと\nズボラ貯金が30分貯まる💰',
+        title: 'オフタイム貯金を活用！',
+        description: '疲れた日は「寝る」を選択。\nオフタイム貯金が30分貯まる💎',
         target: 'sleep-button',
         character: './char_20.png',
         characterMessage: '今日は寝ちゃお〜',
-        actionLabel: 'ズボラ貯金+30分！',
-        successMessage: '💰 サボった時間が貯金に！これ最高でしょ？',
+        actionLabel: 'オフタイム貯金+30分！',
+        successMessage: '💎 つくった時間が貯金に！自分をアップデート✨',
     },
     {
         id: 'forecast',

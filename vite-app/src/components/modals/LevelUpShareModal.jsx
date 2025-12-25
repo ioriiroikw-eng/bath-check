@@ -1,24 +1,13 @@
 import React from 'react';
 import { Icons } from '../Icons';
-import { RANK_TITLES } from '../../constants';
+import { getRankInfo } from '../../utils';
 
-const LevelUpShareModal = ({ isOpen, onClose, newLevel, savedMinutes }) => {
-    if (!isOpen) return null;
-
+const LevelUpShareModal = ({ isOpen, onClose, savedMinutes }) => {
     // 貯金額を円に換算
     const savedYen = Math.floor(savedMinutes / 30 * 80);
+    const rankInfo = getRankInfo(savedMinutes);
 
-    // ランク称号を取得
-    const getRankTitle = () => {
-        for (let i = RANK_TITLES.length - 1; i >= 0; i--) {
-            if (newLevel >= RANK_TITLES[i].lv) {
-                return RANK_TITLES[i].title;
-            }
-        }
-        return RANK_TITLES[0].title;
-    };
-
-    const rankTitle = getRankTitle();
+    if (!isOpen) return null;
 
     // シェアメッセージを生成
     const generateShareMessage = () => {
@@ -28,7 +17,7 @@ const LevelUpShareModal = ({ isOpen, onClose, newLevel, savedMinutes }) => {
             ? `${hours}時間${mins > 0 ? mins + '分' : ''}`
             : `${mins}分`;
 
-        return `🎉 ズボラ貯金 Lv.${newLevel} に到達！\n\n称号: 「${rankTitle}」\n⏰ ${timeText}（約${savedYen}円）貯まった！\n\nお風呂サボって自分を甘やかし中...\n\n#フロハイッタ #ズボラ貯金`;
+        return `🎉 オフタイム貯金「${rankInfo.label}」に昇格！\n\nランク: ${rankInfo.tier} ${rankInfo.rank}\n⏰ ${timeText}（約${savedYen}円相当）を確保！\n\n時間を賢く使って、自分をアップデート中✨\n\n#フロハイッタ #オフタイム貯金`;
     };
 
     const handleShare = () => {
@@ -64,22 +53,23 @@ const LevelUpShareModal = ({ isOpen, onClose, newLevel, savedMinutes }) => {
                     {/* タイトル */}
                     <div className="mb-4">
                         <h2 className="text-3xl font-black font-pop bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                            LEVEL UP!!
+                            RANK UP!!
                         </h2>
-                        <p className="text-sm font-bold text-gray-500 mt-1">ズボラ貯金がレベルアップ！</p>
+                        <p className="text-sm font-bold text-emerald-600 mt-1">オフタイム貯金がランクアップ！</p>
                     </div>
 
                     {/* レベル表示カード */}
-                    <div className="bg-gradient-to-br from-pink-400 via-pink-500 to-purple-500 rounded-2xl p-5 mb-4 shadow-lg relative overflow-hidden">
+                    <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-5 mb-4 shadow-lg relative overflow-hidden">
                         {/* カード内キラキラ */}
                         <div className="absolute top-2 right-3 text-white/50 text-sm">✦</div>
                         <div className="absolute bottom-3 left-4 text-white/50 text-xs">✦</div>
 
-                        <div className="text-6xl font-black font-pop text-white drop-shadow-md mb-2">
-                            Lv.{newLevel}
+                        <div className="text-4xl font-black font-pop text-white drop-shadow-md mb-2 flex flex-col items-center">
+                            <img src={rankInfo.icon} alt={rankInfo.tier} className="w-24 h-24 object-contain drop-shadow-2xl mb-2" />
+                            <span className="text-2xl">{rankInfo.tier}</span>
                         </div>
-                        <div className="inline-block bg-white/90 text-pink-600 text-sm font-black px-5 py-1.5 rounded-full shadow-sm">
-                            「{rankTitle}」
+                        <div className="inline-block bg-white/90 text-indigo-600 text-sm font-black px-5 py-1.5 rounded-full shadow-sm mt-1">
+                            {rankInfo.rank}
                         </div>
                     </div>
 

@@ -33,15 +33,29 @@ export const ZUBORA_CONVERSIONS = [
     { type: 'time', min: 30, text: 'ペットを吸う時間', icon: '🐈' },
 ];
 
-export const RANK_TITLES = [
-    { lv: 1, title: '見習いサボり魔' },
-    { lv: 5, title: '省エネの達人' },
-    { lv: 10, title: 'ズボラ界のルーキー' },
-    { lv: 20, title: '入浴拒否のプロ' },
-    { lv: 30, title: '虚無の支配者' },
-    { lv: 50, title: 'お風呂？何それ' },
-    { lv: 80, title: '伝説のドライ人間' },
-    { lv: 100, title: '入浴の概念を忘れた神' },
+// オフタイム貯金ランク定義 (5 Tier x 3 Sub-ranks)
+// オフタイム貯金ランク定義 (5 Tier x 3 Sub-ranks)
+export const SAVINGS_RANKS = [
+    // Bronze: 深みのあるブロンズと温かみのある背景
+    { threshold: 0, tier: 'Bronze', rank: 'III', label: 'ブロンズ III', color: 'text-amber-800', bg: 'bg-gradient-to-br from-orange-50 to-amber-100', border: 'border-amber-200', progressClass: 'from-amber-400 to-orange-500', icon: '/assets/ranks/rank-bronze.png' },
+    { threshold: 90, tier: 'Bronze', rank: 'II', label: 'ブロンズ II', color: 'text-amber-800', bg: 'bg-gradient-to-br from-orange-50 to-amber-100', border: 'border-amber-200', progressClass: 'from-amber-400 to-orange-500', icon: '/assets/ranks/rank-bronze.png' },
+    { threshold: 180, tier: 'Bronze', rank: 'I', label: 'ブロンズ I', color: 'text-amber-800', bg: 'bg-gradient-to-br from-orange-50 to-amber-100', border: 'border-amber-200', progressClass: 'from-amber-400 to-orange-500', icon: '/assets/ranks/rank-bronze.png' },
+    // Silver: クールで知的なシルバーグレー
+    { threshold: 300, tier: 'Silver', rank: 'III', label: 'シルバー III', color: 'text-slate-600', bg: 'bg-gradient-to-br from-slate-50 to-gray-200', border: 'border-slate-300', progressClass: 'from-slate-300 to-slate-500', icon: '/assets/ranks/rank-silver.png' },
+    { threshold: 600, tier: 'Silver', rank: 'II', label: 'シルバー II', color: 'text-slate-600', bg: 'bg-gradient-to-br from-slate-50 to-gray-200', border: 'border-slate-300', progressClass: 'from-slate-300 to-slate-500', icon: '/assets/ranks/rank-silver.png' },
+    { threshold: 900, tier: 'Silver', rank: 'I', label: 'シルバー I', color: 'text-slate-600', bg: 'bg-gradient-to-br from-slate-50 to-gray-200', border: 'border-slate-300', progressClass: 'from-slate-300 to-slate-500', icon: '/assets/ranks/rank-silver.png' },
+    // Gold: リッチで華やかなゴールド
+    { threshold: 1500, tier: 'Gold', rank: 'III', label: 'ゴールド III', color: 'text-yellow-700', bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', border: 'border-yellow-300', progressClass: 'from-yellow-400 to-amber-500', icon: '/assets/ranks/rank-gold.png' },
+    { threshold: 2100, tier: 'Gold', rank: 'II', label: 'ゴールド II', color: 'text-yellow-700', bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', border: 'border-yellow-300', progressClass: 'from-yellow-400 to-amber-500', icon: '/assets/ranks/rank-gold.png' },
+    { threshold: 3000, tier: 'Gold', rank: 'I', label: 'ゴールド I', color: 'text-yellow-700', bg: 'bg-gradient-to-br from-yellow-50 to-amber-100', border: 'border-yellow-300', progressClass: 'from-yellow-400 to-amber-500', icon: '/assets/ranks/rank-gold.png' },
+    // Diamond: 透明感のあるクリスタルブルー
+    { threshold: 4500, tier: 'Diamond', rank: 'III', label: 'ダイヤモンド III', color: 'text-cyan-700', bg: 'bg-gradient-to-br from-cyan-50 to-sky-100', border: 'border-cyan-200', progressClass: 'from-cyan-400 to-sky-500', icon: '/assets/ranks/rank-diamond.png' },
+    { threshold: 6000, tier: 'Diamond', rank: 'II', label: 'ダイヤモンド II', color: 'text-cyan-700', bg: 'bg-gradient-to-br from-cyan-50 to-sky-100', border: 'border-cyan-200', progressClass: 'from-cyan-400 to-sky-500', icon: '/assets/ranks/rank-diamond.png' },
+    { threshold: 9000, tier: 'Diamond', rank: 'I', label: 'ダイヤモンド I', color: 'text-cyan-700', bg: 'bg-gradient-to-br from-cyan-50 to-sky-100', border: 'border-cyan-200', progressClass: 'from-cyan-400 to-sky-500', icon: '/assets/ranks/rank-diamond.png' },
+    // Blue Diamond: 深く神秘的なロイヤルブルー
+    { threshold: 12000, tier: 'Blue Diamond', rank: 'III', label: 'ブルーダイヤ III', color: 'text-blue-800', bg: 'bg-gradient-to-br from-indigo-50 to-blue-100', border: 'border-indigo-300', progressClass: 'from-indigo-400 to-blue-600', icon: '/assets/ranks/rank-blue-diamond.png' },
+    { threshold: 15000, tier: 'Blue Diamond', rank: 'II', label: 'ブルーダイヤ II', color: 'text-blue-800', bg: 'bg-gradient-to-br from-indigo-50 to-blue-100', border: 'border-indigo-300', progressClass: 'from-indigo-400 to-blue-600', icon: '/assets/ranks/rank-blue-diamond.png' },
+    { threshold: 30000, tier: 'Blue Diamond', rank: 'I', label: 'ブルーダイヤ I', color: 'text-blue-800', bg: 'bg-gradient-to-br from-indigo-50 to-blue-100', border: 'border-indigo-300', progressClass: 'from-indigo-400 to-blue-600', icon: '/assets/ranks/rank-blue-diamond.png' },
 ];
 
 export const FORTUNE_RANKS = [

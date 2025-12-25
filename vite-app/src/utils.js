@@ -1,4 +1,4 @@
-import { FORTUNE_RANKS, FORTUNE_MESSAGES, FORTUNE_ACTIONS } from './constants';
+import { FORTUNE_RANKS, FORTUNE_MESSAGES, FORTUNE_ACTIONS, SAVINGS_RANKS } from './constants';
 
 export const generateFortune = () => {
     const rand = Math.random();
@@ -35,6 +35,27 @@ export const calculateLevel = (savedMinutes) => {
     if (savedMinutes <= 0) return 1;
     let lv = Math.floor((25 + Math.sqrt(625 + 100 * savedMinutes)) / 50);
     return Math.min(100, Math.max(1, lv));
+};
+
+// ランク情報の取得
+export const getRankInfo = (savedMinutes) => {
+    // 安全のため数値を保証
+    const safeMinutes = typeof savedMinutes === 'number' ? savedMinutes : 0;
+
+    // 降順にソートして、閾値を超えている最初のランクを見つける
+    // (SAVINGS_RANKSは昇順定義されている前提だが、念のためreverseしてfind)
+    const reversedRanks = [...SAVINGS_RANKS].reverse();
+    const currentRank = reversedRanks.find(r => safeMinutes >= r.threshold) || SAVINGS_RANKS[0];
+
+    // 次のランクを探す
+    const currentIndex = SAVINGS_RANKS.indexOf(currentRank);
+    const nextRank = SAVINGS_RANKS[currentIndex + 1];
+
+    return {
+        ...currentRank,
+        nextThreshold: nextRank ? nextRank.threshold : null,
+        isMax: !nextRank
+    };
 };
 
 export const getNextLevelMinutes = (currentLevel) => {

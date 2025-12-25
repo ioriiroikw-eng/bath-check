@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Icons } from './components/Icons';
 import { STATUS_MESSAGES, DAILY_GREETINGS, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, STORAGE_KEY_SKIN_TYPE, SKIN_TYPES, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
-import { generateFortune, getLocalDateStr, calculateLevel } from './utils';
+import { generateFortune, getLocalDateStr, calculateLevel, getRankInfo } from './utils';
 
 
 import OutingActionModal from './components/modals/OutingActionModal';
@@ -26,6 +26,8 @@ import SleepModeView from './components/SleepModeView';
 import SplashScreen from './components/SplashScreen';
 import ActionButton from './components/ActionButton';
 import CommunityBanner from './components/CommunityBanner';
+import SavingsButton from './components/home/SavingsButton';
+import FooterTools from './components/home/FooterTools';
 import WeeklyReportBanner from './components/WeeklyReportBanner';
 import TutorialOverlay, { TutorialStartModal } from './components/TutorialOverlay';
 import HamburgerMenu from './components/HamburgerMenu';
@@ -343,10 +345,10 @@ const App = () => {
         setShowSleepConfirmModal(false);
 
         if (type === 'skip') {
-            // レベルアップ検知のため、事前にレベルを計算
-            const oldLevel = calculateLevel(savedMinutes);
+            // ランクアップ検知のため、事前にランクを取得
+            const oldRank = getRankInfo(savedMinutes);
             const newMinutes = savedMinutes + 30;
-            const newLevelValue = calculateLevel(newMinutes);
+            const newRank = getRankInfo(newMinutes);
 
             setSavedMinutes(newMinutes); // 30分貯金
             // 履歴に追加 (type: 'sleep')
@@ -354,9 +356,8 @@ const App = () => {
             setBathEvents(prev => [newEvent, ...prev]);
             addLog("今日は寝る！（スキップ）30分貯金しました💰", "💤", 'action');
 
-            // レベルアップしたらモーダル表示
-            if (newLevelValue > oldLevel) {
-                setNewLevel(newLevelValue);
+            // ランクアップしたらモーダル表示
+            if (oldRank.label !== newRank.label) {
                 setTimeout(() => setShowLevelUpModal(true), 500);
             }
         } else {
@@ -826,22 +827,19 @@ const App = () => {
 
             {/* --- BOTTOM: Future / Exit (繋げる) --- */}
             <div className="flex-none px-6 pt-2 pb-4 flex flex-col items-center gap-3 w-full">
-                {/* Zubora Savings */}
-                <button
-                    id="savings-button"
+                {/* Zubora Savings -> Off-time Savings */}
+                {/* Zubora Savings -> Off-time Savings (Rich Button) */}
+                {/* Zubora Savings -> Off-time Savings (Rich Button) */}
+                <SavingsButton
+                    savedMinutes={savedMinutes}
                     onClick={() => { playSe('pop'); setIsSavingsModalOpen(true); }}
-                    className="flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-50 text-indigo-500 hover:bg-indigo-100 transition-colors"
-                >
-                    <Icons.Gem size={16} />
-                    <span className="text-xs font-bold">ズボラ貯金 Lv.{calculateLevel(savedMinutes)}</span>
-                    <span className="text-sm font-black font-pop">{savedMinutes}分</span>
-                </button>
+                />
 
-                {/* Tools Row */}
-                <div className="flex gap-4 mt-2 mb-4 w-full justify-center px-4">
-                    {/* Camera Button (Action) */}
+                {/* Tools Row (Share & BGM only) */}
+                <div className="flex gap-4 mt-4 mb-6 w-full justify-center px-4">
+                    {/* Share */}
                     <button onClick={() => generateShareImage()} disabled={isGenerating} className="flex flex-col items-center gap-1 group min-w-[3.5rem] disabled:opacity-50">
-                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-all group-active:scale-95 relative">
+                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-all group-active:scale-95 relative shadow-sm border border-transparent hover:border-pink-200">
                             {isGenerating ? (
                                 <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                             ) : (
@@ -853,9 +851,9 @@ const App = () => {
 
                     {/* BGM */}
                     <button onClick={toggleBgm} className="flex flex-col items-center gap-1 group min-w-[3.5rem]">
-                        <div className={`p-3 rounded-2xl transition-all group-active:scale-95 ${isBgmPlaying
-                            ? 'bg-pink-100 text-pink-500 shadow-sm border border-pink-200'
-                            : 'bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500'
+                        <div className={`p-3 rounded-2xl transition-all group-active:scale-95 shadow-sm border ${isBgmPlaying
+                            ? 'bg-pink-100 text-pink-500 border-pink-200'
+                            : 'bg-gray-50 text-gray-400 border-transparent group-hover:bg-pink-50 group-hover:text-pink-500 hover:border-pink-200'
                             }`}>
                             <Icons.Music size={20} className={isBgmPlaying ? 'animate-pulse' : ''} />
                         </div>
@@ -863,6 +861,8 @@ const App = () => {
                             }`}>BGM</span>
                     </button>
                 </div>
+
+
             </div>
 
             <CommunityBanner showInstallGuide={showInstallGuide} showTutorial={showTutorial || showTutorialStart} />
@@ -888,6 +888,7 @@ const App = () => {
             )}
 
             {generatedImage && (<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}> <div className="bg-transparent w-full max-w-sm relative" onClick={e => e.stopPropagation()}> <img src={generatedImage} alt="Share" className="w-full rounded-xl shadow-2xl" /> <div className="text-center mt-4 text-white font-bold text-sm opacity-80">長押しして保存</div></div> </div>)}
+
 
             {/* チュートリアル */}
             {

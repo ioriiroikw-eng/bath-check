@@ -45,7 +45,7 @@ const DayDetailModal = ({ isOpen, onClose, details, logs }) => {
                                 <span className="font-black text-indigo-600 font-pop">戦略的撤退</span>
                             </div>
                             <div className="text-xs font-bold text-indigo-400">
-                                ズボラ貯金 +30分 獲得✨
+                                オフタイム貯金 +30分 獲得✨
                             </div>
                         </div>
                     )}
