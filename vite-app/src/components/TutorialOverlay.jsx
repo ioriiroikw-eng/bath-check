@@ -201,24 +201,24 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }
 
             {/* 説明カード */}
             {showContent && (
-                <div className={`fixed left-4 right-4 mx-auto max-w-sm pointer-events-auto ${getCardPositionClass()}`}>
-                    <div className="bg-white rounded-3xl p-5 shadow-2xl relative">
+                <div className={`fixed left-3 right-3 mx-auto max-w-sm pointer-events-auto ${getCardPositionClass()}`}>
+                    <div className="bg-white rounded-2xl p-4 shadow-2xl relative">
                         {/* キャラクター */}
-                        <div className="absolute -top-14 left-4 flex items-end gap-2">
+                        <div className="absolute -top-12 left-3 flex items-end gap-2">
                             <img
                                 key={characterKey}
                                 src={step.character}
                                 alt=""
-                                className="w-16 h-16 object-contain animate-bounce-in drop-shadow-lg"
+                                className="w-14 h-14 object-contain animate-bounce-in drop-shadow-lg"
                             />
                             {/* 吹き出し */}
-                            <div className="bg-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-full mb-4 animate-bounce">
+                            <div className="bg-pink-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full mb-3 animate-bounce">
                                 {step.characterMessage}
                             </div>
                         </div>
 
                         {/* ステップインジケーター */}
-                        <div className="flex justify-center gap-2 mb-3 pt-2">
+                        <div className="flex justify-center gap-1.5 mb-2 pt-1">
                             {TUTORIAL_STEPS.map((_, idx) => (
                                 <div
                                     key={idx}
@@ -233,26 +233,26 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }
                         </div>
 
                         {/* タイトル */}
-                        <h3 className="text-lg font-black text-gray-800 mb-2 text-center">
+                        <h3 className="text-base font-black text-gray-800 mb-1.5 text-center">
                             {step.title}
                         </h3>
 
                         {/* 説明 */}
-                        <p className="text-sm text-gray-600 text-center leading-relaxed mb-4 whitespace-pre-line">
+                        <p className="text-sm text-gray-600 text-center leading-snug mb-3 whitespace-pre-line">
                             {step.description}
                         </p>
 
                         {/* アクションタイプの場合 */}
                         {step.type === 'action' && (
-                            <div className="mb-4">
+                            <div className="mb-3">
                                 {!actionCompleted ? (
-                                    <div className="bg-pink-50 border-2 border-pink-200 rounded-xl p-3 text-center">
+                                    <div className="bg-pink-50 border-2 border-pink-200 rounded-lg p-2 text-center">
                                         <p className="text-sm font-bold text-pink-600">
                                             👆 ボタンを押してね！
                                         </p>
                                     </div>
                                 ) : (
-                                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-3 text-center">
+                                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-2 text-center">
                                         <p className="text-sm font-bold text-green-600">
                                             ✅ {step.actionLabel}
                                         </p>
@@ -266,7 +266,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }
                             <button
                                 onClick={handleNext}
                                 disabled={!actionCompleted}
-                                className={`w-full py-3 px-4 text-white font-bold rounded-xl shadow-md transition-all ${actionCompleted
+                                className={`w-full py-2.5 px-4 text-white font-bold rounded-xl shadow-md transition-all ${actionCompleted
                                     ? 'bg-gradient-to-r from-pink-400 to-pink-500 active:scale-95'
                                     : 'bg-gray-300 cursor-not-allowed'
                                     }`}
@@ -276,7 +276,7 @@ const TutorialOverlay = ({ onComplete, onSkip, onTutorialBath, onTutorialSleep }
                         ) : (
                             <button
                                 onClick={handleNext}
-                                className="w-full py-3 px-4 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-xl shadow-md active:scale-95"
+                                className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-400 to-pink-500 text-white font-bold rounded-xl shadow-md active:scale-95"
                             >
                                 {isLastStep ? '始める！ ✨' : '次へ →'}
                             </button>

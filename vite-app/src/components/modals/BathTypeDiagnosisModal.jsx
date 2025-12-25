@@ -113,7 +113,7 @@ const QUIZ_QUESTIONS = [
     },
 ];
 
-const BathTypeDiagnosisModal = ({ isOpen, onClose, bathEvents }) => {
+const BathTypeDiagnosisModal = ({ isOpen, onClose, bathEvents, onResult }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [answers, setAnswers] = useState({});
     const [showQuiz, setShowQuiz] = useState(false);
@@ -232,6 +232,7 @@ const BathTypeDiagnosisModal = ({ isOpen, onClose, bathEvents }) => {
             const result = { typeCode, typeData, completedAt: new Date().toISOString() };
             setQuizResult(result);
             localStorage.setItem(STORAGE_KEY_QUIZ_RESULT, JSON.stringify(result));
+            if (onResult) onResult(result);
             setShowQuiz(false);
         }
     };

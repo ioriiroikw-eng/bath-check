@@ -105,6 +105,9 @@ const App = () => {
     const [showWeeklyForecastModal, setShowWeeklyForecastModal] = useState(false);
     const [weeklyForecastData, setWeeklyForecastData] = useState(null);
 
+    // タイプ診断結果
+    const [savedBathTypeResult, setSavedBathTypeResult] = useState(null);
+
     // BGM処理
     useEffect(() => {
         isBgmPlayingRef.current = isBgmPlaying;
@@ -266,6 +269,14 @@ const App = () => {
 
         }
         localStorage.setItem('hq_last_login', now.toISOString());
+
+        // タイプ診断結果を読み込み
+        const savedTypeResult = localStorage.getItem('bath_type_quiz_result');
+        if (savedTypeResult) {
+            try {
+                setSavedBathTypeResult(JSON.parse(savedTypeResult));
+            } catch (e) { }
+        }
 
         // 初回起動時のチュートリアル表示チェック（アプリ内ブラウザ警告がない場合のみ）
         if (!tutorialCompleted && !isInAppBrowser) {
@@ -671,10 +682,19 @@ const App = () => {
                     className="w-full max-w-xs mb-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg shadow-purple-200 active:scale-95 transition-transform"
                 >
                     <div className="flex items-center gap-2">
-                        <span className="text-xl">✨</span>
+                        <span className="text-xl">{savedBathTypeResult ? savedBathTypeResult.typeData?.emoji || '✨' : '✨'}</span>
                         <div className="text-left">
-                            <p className="font-bold text-sm">タイプ診断</p>
-                            <p className="text-[10px] opacity-80">あなたの風呂キャンタイプは？</p>
+                            {savedBathTypeResult ? (
+                                <>
+                                    <p className="font-bold text-sm">{savedBathTypeResult.typeData?.name || 'あなたのタイプ'}</p>
+                                    <p className="text-[10px] opacity-80">タップして詳細を見る →</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="font-bold text-sm">タイプ診断</p>
+                                    <p className="text-[10px] opacity-80">あなたの風呂キャンタイプは？</p>
+                                </>
+                            )}
                         </div>
                     </div>
                     <Icons.ChevronRight size={20} />
@@ -890,6 +910,7 @@ const App = () => {
                         isOpen={showBathTypeDiagnosis}
                         onClose={() => setShowBathTypeDiagnosis(false)}
                         bathEvents={bathEvents}
+                        onResult={(result) => setSavedBathTypeResult(result)}
                     />
                 )
             }
