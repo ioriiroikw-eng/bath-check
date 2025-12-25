@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icons } from '../Icons';
 
-const SleepConfirmModal = ({ isOpen, onClose, onConfirm, onForgot }) => {
+const SleepConfirmModal = ({ isOpen, onClose, onConfirm, onForgot, saboriCount }) => {
     if (!isOpen) return null;
 
     return (
@@ -27,10 +27,20 @@ const SleepConfirmModal = ({ isOpen, onClose, onConfirm, onForgot }) => {
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-500 font-medium mb-6 text-sm leading-relaxed">
+                <p className="text-gray-500 font-medium mb-4 text-sm leading-relaxed">
                     記録を忘れてるだけ？<br />
                     それとも今日はスキップ？
                 </p>
+
+                {/* 風呂キャン推定人数 */}
+                {saboriCount && (
+                    <div className="bg-indigo-50 rounded-xl p-3 mb-4 border border-indigo-100">
+                        <div className="flex items-center justify-center gap-2 text-sm text-indigo-600 font-bold">
+                            <span>👥</span>
+                            <span>昨日のスキップ仲間: {saboriCount.toLocaleString()}人</span>
+                        </div>
+                    </div>
+                )}
 
                 {/* Buttons */}
                 <div className="flex flex-col gap-3">

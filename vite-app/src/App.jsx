@@ -28,6 +28,7 @@ import ActionButton from './components/ActionButton';
 import CommunityBanner from './components/CommunityBanner';
 import WeeklyReportBanner from './components/WeeklyReportBanner';
 import TutorialOverlay, { TutorialStartModal } from './components/TutorialOverlay';
+import HamburgerMenu from './components/HamburgerMenu';
 
 const App = () => {
     const [hp, setHp] = useState(100);
@@ -90,6 +91,9 @@ const App = () => {
     const [showBubble, setShowBubble] = useState(false);
     const [bubbleText, setBubbleText] = useState("");
     const bubbleTimeoutRef = useRef(null);
+
+    // ハンバーガーメニュー
+    const [showHamburgerMenu, setShowHamburgerMenu] = useState(false);
 
     // BGM処理
     useEffect(() => {
@@ -567,6 +571,7 @@ const App = () => {
                     setPendingSleepAfterFortune(true); // 占い後にスリープに入るフラグをセット
                     handleBath(); // 入浴処理を実行（占いモーダルが開く）
                 }}
+                saboriCount={saboriCount}
             />
             <AffiliateAdModal
                 isOpen={showAffiliateAdModal}
@@ -609,36 +614,48 @@ const App = () => {
                         <span className="text-[10px] font-bold text-gray-400 group-hover:text-blue-500 transition-colors">記録・分析</span>
                     </button>
 
-                    <button onClick={() => { playSe('pop'); setShowBathTypeDiagnosis(true); }} className="flex flex-col items-center gap-1 group">
-                        <div className="p-2 rounded-full bg-purple-50 text-purple-500 group-hover:bg-purple-100 transition-colors">
-                            <Icons.Sparkles size={20} />
+                    {/* Weather moved here */}
+                    {!weatherData ? (
+                        <button onClick={handleWeatherButtonPress} disabled={isFetchingWeather} className="flex flex-col items-center gap-1 group">
+                            <div className="p-2 rounded-full bg-blue-50 text-blue-400 group-hover:bg-blue-100 transition-colors">
+                                <Icons.Cloud size={20} />
+                            </div>
+                            <span className="text-[10px] font-bold text-blue-400">{isFetchingWeather ? "..." : "天気取得"}</span>
+                        </button>
+                    ) : (
+                        <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1">
+                                <span className="text-xl">{weatherData.temperature >= 25 ? '🥵' : weatherData.temperature <= 10 ? '🥶' : '🌤️'}</span>
+                                <span className="text-sm font-black font-pop text-gray-600">{weatherData.temperature}°C</span>
+                                <span className={`text-[10px] font-bold px-1 py-0.5 rounded ${weatherRate > 1.0 ? 'bg-red-100 text-red-500' : weatherRate < 1.0 ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}`}>
+                                    x{weatherRate}
+                                </span>
+                            </div>
                         </div>
-                        <span className="text-[10px] font-bold text-purple-500 group-hover:text-purple-600 transition-colors">タイプ診断</span>
+                    )}
+
+                    <button onClick={() => { playSe('pop'); setShowHamburgerMenu(true); }} className="flex flex-col items-center gap-1 group">
+                        <div className="p-2 rounded-full bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-colors">
+                            <Icons.Menu size={20} />
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-pink-500 transition-colors">メニュー</span>
                     </button>
                 </div>
 
-                {/* Weather (Minimal) */}
-                {!weatherData ? (
-                    <button onClick={handleWeatherButtonPress} disabled={isFetchingWeather} className="text-xs font-bold text-blue-400 bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1 mb-2">
-                        {isFetchingWeather ? "..." : <><Icons.Cloud size={12} /> 天気を取得</>}
-                    </button>
-                ) : (
-                    <div className="flex items-center gap-2 mb-2 animate-fade-in">
-                        <span className="text-2xl">{weatherData.temperature >= 25 ? '🥵' : weatherData.temperature <= 10 ? '🥶' : '🌤️'}</span>
-                        <span className="text-lg font-black font-pop text-gray-600">{weatherData.temperature}°C</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${weatherRate > 1.0 ? 'bg-red-100 text-red-500' : weatherRate < 1.0 ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}`}>
-                            x{weatherRate}
-                        </span>
+                {/* タイプ診断バナー - 目立つように配置 */}
+                <button
+                    onClick={() => { playSe('pop'); setShowBathTypeDiagnosis(true); }}
+                    className="w-full max-w-xs mb-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg shadow-purple-200 active:scale-95 transition-transform"
+                >
+                    <div className="flex items-center gap-2">
+                        <span className="text-xl">✨</span>
+                        <div className="text-left">
+                            <p className="font-bold text-sm">タイプ診断</p>
+                            <p className="text-[10px] opacity-80">あなたの風呂キャンタイプは？</p>
+                        </div>
                     </div>
-                )}
-
-                {/* 昨日の風呂キャン人数 */}
-                <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                    <span>👥</span>
-                    <span className="font-bold">
-                        昨日の風呂キャン推定人数: {saboriCount.toLocaleString()}人
-                    </span>
-                </div>
+                    <Icons.ChevronRight size={20} />
+                </button>
 
 
                 {/* Status Avatar (The "Subject") & Tap-to-Speak (Plan C) */}
@@ -780,14 +797,6 @@ const App = () => {
 
                 {/* Tools Row */}
                 <div className="flex gap-4 mt-2 mb-4 w-full justify-center px-4">
-                    {/* Community Button (掲示板) */}
-                    <button onClick={() => { playSe('pop'); setShowCommunityModal(true); }} className="flex flex-col items-center gap-1 group min-w-[3.5rem]">
-                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-purple-50 group-hover:text-purple-500 transition-all group-active:scale-95">
-                            <Icons.MessageCircle size={20} />
-                        </div>
-                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-purple-500 transition-colors">掲示板</span>
-                    </button>
-
                     {/* Camera Button (Action) */}
                     <button onClick={() => generateShareImage()} disabled={isGenerating} className="flex flex-col items-center gap-1 group min-w-[3.5rem] disabled:opacity-50">
                         <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-all group-active:scale-95 relative">
@@ -811,66 +820,72 @@ const App = () => {
                         <span className={`text-[10px] font-bold transition-colors ${isBgmPlaying ? 'text-pink-500' : 'text-gray-400 group-hover:text-pink-500'
                             }`}>BGM</span>
                     </button>
-
-                    {/* Help */}
-                    <button onClick={() => { playSe('pop'); setIsHelp(true); }} className="flex flex-col items-center gap-1 group min-w-[3.5rem]">
-                        <div className="p-3 rounded-2xl bg-gray-50 text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-all group-active:scale-95">
-                            <Icons.Help size={20} />
-                        </div>
-                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-indigo-500 transition-colors">ヘルプ</span>
-                    </button>
                 </div>
             </div>
 
             <CommunityBanner showInstallGuide={showInstallGuide} showTutorial={showTutorial || showTutorialStart} />
             <WeeklyReportBanner onOpenReport={() => setIsStatsOpen(true)} bathEvents={bathEvents} />
             <CommunityModal isOpen={showCommunityModal} onClose={() => setShowCommunityModal(false)} />
+            <HamburgerMenu
+                isOpen={showHamburgerMenu}
+                onClose={() => setShowHamburgerMenu(false)}
+                onOpenBlog={() => window.open('https://bath-check.com/blog/', '_blank')}
+                onOpenCommunity={() => setShowCommunityModal(true)}
+                onOpenSkinType={() => setShowSkinTypeModal(true)}
+                onOpenHelp={() => setIsHelp(true)}
+            />
             <StatsModal isOpen={isStatsOpen} onClose={() => setIsStatsOpen(false)} bathEvents={bathEvents} savedMinutes={savedMinutes} onDayClick={(details) => { playSe('pop'); setSelectedDateDetails(details); setIsStatsOpen(false); }} />
             {generatedImage && (<div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-6" onClick={() => setGeneratedImage(null)}> <div className="bg-transparent w-full max-w-sm relative" onClick={e => e.stopPropagation()}> <img src={generatedImage} alt="Share" className="w-full rounded-xl shadow-2xl" /> <div className="text-center mt-4 text-white font-bold text-sm opacity-80">長押しして保存</div></div> </div>)}
 
             {/* チュートリアル */}
-            {showTutorialStart && (
-                <TutorialStartModal
-                    onStart={() => {
-                        setShowTutorialStart(false);
-                        setShowTutorial(true);
-                    }}
-                    onSkip={() => {
-                        setShowTutorialStart(false);
-                        localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                    }}
-                />
-            )}
-            {showBathTypeDiagnosis && (
-                <BathTypeDiagnosisModal
-                    isOpen={showBathTypeDiagnosis}
-                    onClose={() => setShowBathTypeDiagnosis(false)}
-                    bathEvents={bathEvents}
-                />
-            )}
-            {showTutorial && (
-                <TutorialOverlay
-                    onComplete={() => {
-                        setShowTutorial(false);
-                        localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                        setShowSkinTypeModal(true);
-                    }}
-                    onSkip={() => {
-                        setShowTutorial(false);
-                        localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
-                        setShowSkinTypeModal(true);
-                    }}
-                    onTutorialBath={() => {
-                        // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
-                        playSe('kira');
-                    }}
-                    onTutorialSleep={() => {
-                        // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
-                        playSe('pop');
-                    }}
-                />
-            )}
-        </div>
+            {
+                showTutorialStart && (
+                    <TutorialStartModal
+                        onStart={() => {
+                            setShowTutorialStart(false);
+                            setShowTutorial(true);
+                        }}
+                        onSkip={() => {
+                            setShowTutorialStart(false);
+                            localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                        }}
+                    />
+                )
+            }
+            {
+                showBathTypeDiagnosis && (
+                    <BathTypeDiagnosisModal
+                        isOpen={showBathTypeDiagnosis}
+                        onClose={() => setShowBathTypeDiagnosis(false)}
+                        bathEvents={bathEvents}
+                    />
+                )
+            }
+            {
+                showTutorial && (
+                    <TutorialOverlay
+                        onComplete={() => {
+                            setShowTutorial(false);
+                            localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                            setShowSkinTypeModal(true);
+                        }}
+                        onSkip={() => {
+                            setShowTutorial(false);
+                            localStorage.setItem(STORAGE_KEY_TUTORIAL_COMPLETED, 'true');
+                            setShowSkinTypeModal(true);
+                        }}
+                        onTutorialBath={() => {
+                            // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
+                            playSe('kira');
+                        }}
+                        onTutorialSleep={() => {
+                            // チュートリアル用 - 音だけ鳴らす（実データは変更しない）
+                            playSe('pop');
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 };
 
