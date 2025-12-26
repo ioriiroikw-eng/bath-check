@@ -23,29 +23,40 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
         }
     };
 
-    // タブごとの広告インデックスを取得
-    const getAdIndexForTab = (tab) => {
-        if (allAds.length === 0) return 0;
-        const storageKey = getStorageKeyForTab(tab);
-        const savedIndex = localStorage.getItem(storageKey);
-        return savedIndex ? parseInt(savedIndex, 10) % allAds.length : 0;
-    };
+    // 広告オブジェクトをRefで保持（モーダルを開いた時に設定、以降は変化しない）
+    const adsRef = React.useRef({ weekly: null, monthly: null, all: null });
+    const wasOpenRef = React.useRef(false);
 
-    const weeklyAdIndex = useMemo(() => getAdIndexForTab('weekly'), [isOpen, allAds.length]);
-    const monthlyAdIndex = useMemo(() => getAdIndexForTab('monthly'), [isOpen, allAds.length]);
-    const allAdIndex = useMemo(() => getAdIndexForTab('all'), [isOpen, allAds.length]);
+    // モーダルが開いた時のみ広告を選択
+    if (isOpen && !wasOpenRef.current && allAds.length > 0) {
+        const weeklyIdx = parseInt(localStorage.getItem(STORAGE_KEY_STATS_WEEKLY_AD_INDEX) || '0', 10) % allAds.length;
+        const monthlyIdx = parseInt(localStorage.getItem(STORAGE_KEY_STATS_MONTHLY_AD_INDEX) || '0', 10) % allAds.length;
+        const allIdx = parseInt(localStorage.getItem(STORAGE_KEY_STATS_ALL_AD_INDEX) || '0', 10) % allAds.length;
+        adsRef.current = {
+            weekly: allAds[weeklyIdx],
+            monthly: allAds[monthlyIdx],
+            all: allAds[allIdx],
+        };
+        wasOpenRef.current = true;
+    }
+    if (!isOpen && wasOpenRef.current) {
+        wasOpenRef.current = false;
+    }
 
-    const weeklyAd = allAds[weeklyAdIndex] || null;
-    const monthlyAd = allAds[monthlyAdIndex] || null;
-    const allAd = allAds[allAdIndex] || null;
+    const weeklyAd = adsRef.current.weekly;
+    const monthlyAd = adsRef.current.monthly;
+    const allAd = adsRef.current.all;
 
     // モーダルを閉じる時に現在のタブの広告インデックスを進める
     const handleClose = () => {
         if (allAds.length > 0 && activeTab !== 'calendar') {
             const storageKey = getStorageKeyForTab(activeTab);
-            const currentIndex = getAdIndexForTab(activeTab);
-            const nextIndex = (currentIndex + 1) % allAds.length;
-            localStorage.setItem(storageKey, nextIndex.toString());
+            const currentAd = adsRef.current[activeTab];
+            if (currentAd) {
+                const currentIndex = allAds.findIndex(ad => ad === currentAd);
+                const nextIndex = (currentIndex + 1) % allAds.length;
+                localStorage.setItem(storageKey, nextIndex.toString());
+            }
         }
         onClose();
     };
