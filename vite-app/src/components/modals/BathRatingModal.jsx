@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Icons } from '../Icons';
 import { AFFILIATE_SUGGESTIONS, STORAGE_KEY_BATH_AD_INDEX } from '../../constants';
+import AdImage from '../AdImage';
 
 const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
     const [rating, setRating] = useState(0);
@@ -120,7 +121,6 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
                     />
                 </div>
 
-                {/* ご褒美広告（A8広告バナー） */}
                 {currentAffiliate && currentAffiliate.isA8 && currentAffiliate.a8Code && (
                     <div className="mb-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-3 border border-pink-200">
                         <p className="text-xs text-pink-500 font-bold mb-2 text-center">🎁 お風呂入れたご褒美に</p>
@@ -131,24 +131,15 @@ const BathRatingModal = ({ isOpen, onClose, onSubmit }) => {
                             className="block rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <img
-                                border="0"
-                                width={currentAffiliate.a8Code.width}
-                                height={currentAffiliate.a8Code.height}
+                            <AdImage
                                 src={currentAffiliate.a8Code.imgUrl}
                                 alt={currentAffiliate.title}
+                                width={currentAffiliate.a8Code.width}
+                                height={currentAffiliate.a8Code.height}
+                                trackingUrl={currentAffiliate.a8Code.trackingUrl}
                                 className="w-full h-auto"
                             />
                         </a>
-                        {/* A8トラッキングピクセル */}
-                        <img
-                            border="0"
-                            width="1"
-                            height="1"
-                            src={currentAffiliate.a8Code.trackingUrl}
-                            alt=""
-                            style={{ position: 'absolute', visibility: 'hidden' }}
-                        />
                         <p className="text-[9px] text-gray-400 text-center mt-2">PR</p>
                     </div>
                 )}

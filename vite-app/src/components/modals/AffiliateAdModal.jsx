@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { AFFILIATE_SUGGESTIONS, STORAGE_KEY_SLEEP_AD_INDEX } from '../../constants';
+import AdImage from '../AdImage';
 
 const AffiliateAdModal = ({ isOpen, onClose }) => {
     // 有効な広告リスト（sleepカテゴリ優先、次にA8広告全般）
@@ -61,34 +62,23 @@ const AffiliateAdModal = ({ isOpen, onClose }) => {
                     {message}
                 </p>
 
-                {/* バナー画像（A8広告 or Amazon広告） */}
+                {/* バナー画像（A8広告 or Amazon広告）with AdImage */}
                 {isA8 ? (
-                    <>
-                        <a
-                            href={affiliate.a8Code.linkUrl}
-                            target="_blank"
-                            rel="nofollow noopener noreferrer"
-                            className="block rounded-xl overflow-hidden shadow-lg hover:scale-[1.02] transition-transform active:scale-[0.98] mb-4 bg-white/10 p-2"
-                        >
-                            <img
-                                border="0"
-                                width={affiliate.a8Code.width}
-                                height={affiliate.a8Code.height}
-                                alt={affiliate.title}
-                                src={affiliate.a8Code.imgUrl}
-                                className="w-full h-auto rounded-lg"
-                            />
-                        </a>
-                        {/* A8トラッキングピクセル */}
-                        <img
-                            border="0"
-                            width="1"
-                            height="1"
-                            src={affiliate.a8Code.trackingUrl}
-                            alt=""
-                            style={{ position: 'absolute', visibility: 'hidden' }}
+                    <a
+                        href={affiliate.a8Code.linkUrl}
+                        target="_blank"
+                        rel="nofollow noopener noreferrer"
+                        className="block rounded-xl overflow-hidden shadow-lg hover:scale-[1.02] transition-transform active:scale-[0.98] mb-4 bg-white/10 p-2"
+                    >
+                        <AdImage
+                            src={affiliate.a8Code.imgUrl}
+                            alt={affiliate.title}
+                            width={affiliate.a8Code.width}
+                            height={affiliate.a8Code.height}
+                            trackingUrl={affiliate.a8Code.trackingUrl}
+                            className="w-full h-auto rounded-lg"
                         />
-                    </>
+                    </a>
                 ) : (
                     <a
                         href={affiliate.url}
@@ -96,7 +86,7 @@ const AffiliateAdModal = ({ isOpen, onClose }) => {
                         rel="noopener noreferrer"
                         className="block rounded-xl overflow-hidden shadow-lg hover:scale-[1.02] transition-transform active:scale-[0.98] mb-4"
                     >
-                        <img
+                        <AdImage
                             src={affiliate.bannerImage}
                             alt={affiliate.title}
                             className="w-full h-auto"
@@ -120,4 +110,3 @@ const AffiliateAdModal = ({ isOpen, onClose }) => {
 };
 
 export default AffiliateAdModal;
-

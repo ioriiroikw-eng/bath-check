@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Icons } from '../Icons';
 import { getLocalDateStr } from '../../utils';
 import { WEEKLY_REPORT_EVALUATIONS, STORAGE_KEY_WEEKLY_REPORTS, BATH_TYPE_16, BATH_TYPE_ACCURACY_LEVELS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD, STORAGE_KEY_STATS_WEEKLY_AD_INDEX, STORAGE_KEY_STATS_MONTHLY_AD_INDEX, STORAGE_KEY_STATS_ALL_AD_INDEX } from '../../constants';
+import AdImage from '../AdImage';
 
 const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -525,23 +526,15 @@ const StatsModal = ({ isOpen, onClose, bathEvents, onDayClick, onOpenDiagnosis }
                         rel="nofollow noopener noreferrer"
                         className="block rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                     >
-                        <img
-                            border="0"
-                            width={ad.a8Code.width}
-                            height={ad.a8Code.height}
+                        <AdImage
                             src={ad.a8Code.imgUrl}
                             alt={ad.title}
+                            width={ad.a8Code.width}
+                            height={ad.a8Code.height}
+                            trackingUrl={ad.a8Code.trackingUrl}
                             className="w-full h-auto"
                         />
                     </a>
-                    <img
-                        border="0"
-                        width="1"
-                        height="1"
-                        src={ad.a8Code.trackingUrl}
-                        alt=""
-                        style={{ position: 'absolute', visibility: 'hidden' }}
-                    />
                     <p className="text-[9px] text-gray-400 text-center mt-2">PR</p>
                 </div>
             )}

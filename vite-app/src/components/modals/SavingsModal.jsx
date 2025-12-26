@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Icons } from '../Icons';
 import { MONEY_CONVERSIONS, AFFILIATE_SUGGESTIONS, GIFT_CARD_AD, STORAGE_KEY_SAVINGS_AD_INDEX, STORAGE_KEY_SAVINGS_EXP_AD_INDEX } from '../../constants';
 import { calculateLevel, getRankInfo } from '../../utils';
+import AdImage from '../AdImage';
 
 const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
     const [activeTab, setActiveTab] = useState('experience');
@@ -192,32 +193,22 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                                     <div key={i}>
                                         {/* A8広告の場合 */}
                                         {item.isA8 && item.a8Code ? (
-                                            <>
-                                                <a
-                                                    href={item.a8Code.linkUrl}
-                                                    target="_blank"
-                                                    rel="nofollow noopener noreferrer"
-                                                    className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <img
-                                                        border="0"
-                                                        width={item.a8Code.width}
-                                                        height={item.a8Code.height}
-                                                        src={item.a8Code.imgUrl}
-                                                        alt={item.title}
-                                                        className="w-full h-auto"
-                                                    />
-                                                </a>
-                                                <img
-                                                    border="0"
-                                                    width="1"
-                                                    height="1"
-                                                    src={item.a8Code.trackingUrl}
-                                                    alt=""
-                                                    style={{ position: 'absolute', visibility: 'hidden' }}
+                                            <a
+                                                href={item.a8Code.linkUrl}
+                                                target="_blank"
+                                                rel="nofollow noopener noreferrer"
+                                                className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <AdImage
+                                                    src={item.a8Code.imgUrl}
+                                                    alt={item.title}
+                                                    width={item.a8Code.width}
+                                                    height={item.a8Code.height}
+                                                    trackingUrl={item.a8Code.trackingUrl}
+                                                    className="w-full h-auto"
                                                 />
-                                            </>
+                                            </a>
                                         ) : (
                                             /* Amazon広告の場合 */
                                             <a
@@ -228,7 +219,7 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 {item.bannerImage ? (
-                                                    <img src={item.bannerImage} alt={item.title} className="w-full h-auto" />
+                                                    <AdImage src={item.bannerImage} alt={item.title} className="w-full h-auto" />
                                                 ) : (
                                                     <div className="flex items-center gap-3 p-4">
                                                         <div className="text-3xl opacity-80">{item.icon}</div>
@@ -274,24 +265,15 @@ const SavingsModal = ({ isOpen, onClose, savedMinutes }) => {
                                             className="block bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md transition-all active:scale-[0.98]"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            <img
-                                                border="0"
-                                                width={item.a8Code.width}
-                                                height={item.a8Code.height}
+                                            <AdImage
                                                 src={item.a8Code.imgUrl}
                                                 alt={item.title}
+                                                width={item.a8Code.width}
+                                                height={item.a8Code.height}
+                                                trackingUrl={item.a8Code.trackingUrl}
                                                 className="w-full h-auto"
                                             />
                                         </a>
-                                        {/* A8トラッキングピクセル */}
-                                        <img
-                                            border="0"
-                                            width="1"
-                                            height="1"
-                                            src={item.a8Code.trackingUrl}
-                                            alt=""
-                                            style={{ position: 'absolute', visibility: 'hidden' }}
-                                        />
                                     </div>
                                 ))}
                             </div>

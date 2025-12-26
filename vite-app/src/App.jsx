@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Icons } from './components/Icons';
 import { STATUS_MESSAGES, DAILY_GREETINGS, BASE_RATE_PER_HOUR, BASE_SLEEP_DAMAGE, STORAGE_KEY_HP, STORAGE_KEY_LAST_BATH, STORAGE_KEY_DAMAGE, STORAGE_KEY_LOGS, STORAGE_KEY_HISTORY, STORAGE_KEY_WEATHER, STORAGE_KEY_IS_SLEEPING, STORAGE_KEY_SLEEP_TYPE, STORAGE_KEY_SLEEP_START, STORAGE_KEY_SAVED_MINUTES, STORAGE_KEY_TUTORIAL_COMPLETED, STORAGE_KEY_SKIN_TYPE, SKIN_TYPES, SE_POP_URL, SE_KIRA_URL, BGM_URL } from './constants';
 import { generateFortune, getLocalDateStr, calculateLevel, getRankInfo } from './utils';
-
+import { preloadAdImages } from './adPreloader';
 
 import OutingActionModal from './components/modals/OutingActionModal';
 import BathConfirmModal from './components/modals/BathConfirmModal';
@@ -157,6 +157,11 @@ const App = () => {
             document.removeEventListener('touchstart', startBgmOnInteraction);
             if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
         };
+    }, []);
+
+    // 広告画像のプリロード（起動時にバックグラウンドで実行）
+    useEffect(() => {
+        preloadAdImages();
     }, []);
 
     const toggleBgm = () => { setIsBgmPlaying(prev => !prev); };
